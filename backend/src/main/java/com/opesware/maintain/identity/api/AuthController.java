@@ -43,6 +43,8 @@ public class AuthController {
     private jakarta.persistence.EntityManager em;
     private final MfaPolicy mfaPolicy;
     @org.springframework.beans.factory.annotation.Autowired
+    private com.opesware.maintain.identity.application.PasswordResetService passwordReset;
+    @org.springframework.beans.factory.annotation.Autowired
     private com.opesware.maintain.platform.security.ScopeResolver scopes;
     private final com.opesware.maintain.identity.application.PersonalDataService personalData;
 
@@ -119,6 +121,19 @@ public class AuthController {
         } finally {
             if (prev == null) CurrentUser.clear(); else CurrentUser.set(prev);
         }
+    }
+
+    // ---------------------------------------------------------------- self-service password reset
+    @PostMapping("/auth/forgot-password")
+    public Map<String, Object> forgotPassword(@RequestBody Map<String, String> body) {
+        passwordReset.request(body.get("email"));
+        return Map.of("ok", true, "message", "If an account exists for this address, a reset link has been sent.");
+    }
+
+    @PostMapping("/auth/reset-password")
+    public Map<String, Object> resetPassword(@RequestBody Map<String, String> body) {
+        passwordReset.reset(body.get("token"), body.get("password"));
+        return Map.of("ok", true);
     }
 
     // ---------------------------------------------------------------- MFA enrolment

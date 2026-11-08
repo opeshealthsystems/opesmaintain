@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { Alert } from "@/components/ui";
@@ -70,6 +71,7 @@ function LoginForm() {
             )}
             <button className="btn btn-primary big-btn" disabled={busy}><Icon name="Lock" size={16} />{busy ? "Signing in…" : "Sign in"}</button>
           </form>
+          <Link href="/forgot-password" className="small" style={{ alignSelf: "flex-start" }}>Forgot password?</Link>
           <div className="card">
             <div className="card-head"><h3>Demo accounts</h3><span className="small muted">Password: OpesDemo2026</span></div>
             <div className="card-body demo-users">

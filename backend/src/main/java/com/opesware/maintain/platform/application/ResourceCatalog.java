@@ -99,7 +99,9 @@ public final class ResourceCatalog {
                 new FieldDef("failedLogins", "Failed Logins", "int", null, List.of(), false, false, false, true, false, false),
                 new FieldDef("lockedUntil", "Locked Until", "datetime", null, List.of(), false, false, true, false, false, false),
                 new FieldDef("tokensValidAfter", "Tokens Valid After", "datetime", null, List.of(), false, false, false, true, false, false),
-                new FieldDef("emailNotifications", "Email Notifications", "bool", null, List.of(), false, false, false, false, false, false))));
+                new FieldDef("emailNotifications", "Email Notifications", "bool", null, List.of(), false, false, false, false, false, false),
+                new FieldDef("resetTokenHash", "Reset Token Hash", "str", null, List.of(), false, false, false, true, false, false),
+                new FieldDef("resetTokenExpires", "Reset Token Expires", "datetime", null, List.of(), false, false, false, true, false, false))));
         add(new ResourceDef("delegations", com.opesware.maintain.identity.domain.Delegation.class, "identity", "M02", "Delegations", "Delegation", null, "permission", false, Set.of("ADMIN"), List.of(
                 new FieldDef("delegatorId", "Delegator", "ref", "users", List.of(), true, true, false, false, false, false),
                 new FieldDef("delegateId", "Delegate", "ref", "users", List.of(), true, true, false, false, false, false),

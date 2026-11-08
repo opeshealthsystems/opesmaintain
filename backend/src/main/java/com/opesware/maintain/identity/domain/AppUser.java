@@ -49,4 +49,8 @@ public class AppUser extends TenantEntity {
     public Instant tokensValidAfter;
 
     public Boolean emailNotifications;
+
+    public String resetTokenHash;
+
+    public Instant resetTokenExpires;
 }

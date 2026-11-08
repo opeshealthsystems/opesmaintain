@@ -112,6 +112,7 @@ res("users", "AppUser", "identity", "M02", "Users", "User", "UserRound", [
     "mfaEnabled:bool*", "status:enum(ACTIVE|SUSPENDED|OFFBOARDED)*", "lastLoginAt:datetime~", "passwordHash:str#",
     "mfaEnrolledAt:datetime~@3", "mfaSecret:str#@3", "failedLogins:int#@3", "lockedUntil:datetime~@3",
     "tokensValidAfter:datetime#@3", "emailNotifications:bool@3",
+    "resetTokenHash:str#@4", "resetTokenExpires:datetime#@4",
 ], display="fullName", unique=["email"], desc="Memberships, roles and site scope.")
 
 res("delegations", "Delegation", "identity", "M02", "Delegations", "Delegation", "UserCheck", [

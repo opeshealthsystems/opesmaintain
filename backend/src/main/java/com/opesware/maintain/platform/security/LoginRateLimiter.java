@@ -29,13 +29,13 @@ public class LoginRateLimiter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest req) {
-        return !("POST".equals(req.getMethod()) && "/api/v1/auth/login".equals(req.getRequestURI()));
+        return !("POST".equals(req.getMethod()) && req.getRequestURI().startsWith("/api/v1/auth/"));
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws ServletException, IOException {
         long minute = System.currentTimeMillis() / 60000;
-        long[] w = windows.compute(req.getRemoteAddr(), (k, v) -> v == null || v[0] != minute ? new long[]{minute, 1} : new long[]{minute, v[1] + 1});
+        long[] w = windows.compute(req.getRemoteAddr() + "|" + req.getRequestURI(), (k, v) -> v == null || v[0] != minute ? new long[]{minute, 1} : new long[]{minute, v[1] + 1});
         if (windows.size() > 50_000) windows.entrySet().removeIf(e -> e.getValue()[0] != minute);
         if (w[1] > perMinute) {
             res.setStatus(429);

@@ -37,9 +37,14 @@ check in `backend/src/test/java/com/opesware/maintain/AuditRegressionTest.java`,
 - Role sweep: every sidebar link, the first record of every list, and every tab on that record, for
   12 roles including the new `contractor@opes.demo`. Results are below.
 
-## Open decisions for OPES
-- **Site scope for internal staff:** users have a home site, but internal staff are not restricted
-  to it (only contractors are scoped). Confirm whether, for example, technicians should see only
-  their site.
-- **Self-service password reset by e-mail** is not offered; administrators reset passwords. Add it
-  once SMTP is configured in production, if wanted.
+## Decisions taken (approved by OPES)
+- **Home-site scope for technicians:** technicians see only records at their home site (assets, work,
+  PM, permits, stores, meters and their child records). The roles are configurable with
+  `OPES_SITE_SCOPED_ROLES` (default `TECHNICIAN`; empty disables). Managers, planners and other
+  supervisory roles keep the full view. Verified: the demo technician sees 11 of 18 assets, with 0 UI
+  problems across 197 views and tabs.
+- **Self-service password reset:** "Forgot password?" on the sign-in page sends a link valid for 30
+  minutes. Tokens are 256-bit, stored only as a SHA-256 hash, and single-use. The response never
+  reveals whether an account exists, requests are rate-limited per address, and a reset clears
+  lockout and signs the user out everywhere. Without SMTP in development, the link is written to the
+  server log (never in production). Covered by tests and a browser end-to-end check.

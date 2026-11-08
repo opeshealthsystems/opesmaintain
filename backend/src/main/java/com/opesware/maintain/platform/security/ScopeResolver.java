@@ -31,11 +31,14 @@ public class ScopeResolver {
         this.em = em;
     }
 
+    @org.springframework.beans.factory.annotation.Value("${opes.security.site-scoped-roles:TECHNICIAN}")
+    private String siteScopedRoles = "TECHNICIAN";
+
     @Transactional(readOnly = true)
     public AccessScope resolve(AppUser user) {
-        if (user.organizationId == null || "ADMIN".equals(user.role)) return null;
-        Organization org = em.find(Organization.class, user.organizationId);
-        if (org == null || !"SERVICE_PROVIDER".equals(org.kind)) return null;
+        if ("ADMIN".equals(user.role)) return null;
+        Organization org = user.organizationId == null ? null : em.find(Organization.class, user.organizationId);
+        if (org == null || !"SERVICE_PROVIDER".equals(org.kind)) return homeSite(user);
         LocalDate today = LocalDate.now();
         List<ServiceGrant> grants = em.createQuery("select g from ServiceGrant g where g.tenantId = :t and g.providerOrgId = :o", ServiceGrant.class)
                 .setParameter("t", user.tenantId).setParameter("o", org.id).getResultList().stream()
@@ -62,6 +65,16 @@ public class ScopeResolver {
         }
         for (Asset a : assets) if (a.siteId != null && siteIds.contains(a.siteId)) assetIds.add(a.id);
         return new AccessScope(Set.copyOf(siteIds), Set.copyOf(assetIds));
+    }
+
+    /** Internal staff in site-scoped roles (default: technicians) see only their home site. */
+    private AccessScope homeSite(AppUser user) {
+        if (user.siteId == null) return null;
+        boolean scoped = Arrays.stream(siteScopedRoles.split(",")).map(String::trim).anyMatch(r -> r.equals(user.role));
+        if (!scoped) return null;
+        Set<UUID> assets = em.createQuery("select a.id from Asset a where a.tenantId = :t and a.siteId = :s", UUID.class)
+                .setParameter("t", user.tenantId).setParameter("s", user.siteId).getResultList().stream().collect(Collectors.toSet());
+        return new AccessScope(Set.of(user.siteId), Set.copyOf(assets));
     }
 
     private static Set<String> tokens(String text) {

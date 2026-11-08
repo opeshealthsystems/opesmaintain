@@ -45,6 +45,9 @@ Or run the backend against PostgreSQL directly:
 | `OPES_SEED_DEMO` | Seed demo tenant on an empty database | `true` |
 | `OPES_JOBS_ENABLED` | PM generation, SLA, permit/grant expiry, outbox, insights jobs | `true` |
 | `OPES_SECURITY_OIDC_JWKS_URI` / `_ISSUER` / `_AUDIENCE` | Accept tokens from an OIDC provider | disabled |
+| `OPES_SITE_SCOPED_ROLES` | Internal roles limited to the user's home site | `TECHNICIAN` |
+| `OPES_LOGIN_PER_MINUTE` | Sign-in and reset attempts per client address per minute | `20` |
+| `SPRING_MAIL_HOST` … / `OPES_MAIL_FROM` / `OPES_PUBLIC_URL` | E-mail for notifications and password reset links | disabled |
 | `OPES_API_URL` (web) | Backend URL proxied under `/api` | `http://localhost:8080` |
 
 ## What is implemented
