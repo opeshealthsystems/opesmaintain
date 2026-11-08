@@ -18,8 +18,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class AuthFilter extends OncePerRequestFilter {
     private final TokenService tokens;
     private final AppUserRepository users;
+    private final OidcVerifier oidc;
 
-    public AuthFilter(TokenService tokens, AppUserRepository users) {
+    public AuthFilter(TokenService tokens, AppUserRepository users, OidcVerifier oidc) {
+        this.oidc = oidc;
         this.tokens = tokens;
         this.users = users;
     }
@@ -35,6 +37,10 @@ public class AuthFilter extends OncePerRequestFilter {
         String header = req.getHeader("Authorization");
         UUID userId = header != null && header.startsWith("Bearer ") ? tokens.verify(header.substring(7)) : null;
         AppUser user = userId == null ? null : users.findById(userId).orElse(null);
+        if (user == null && header != null && header.startsWith("Bearer ") && oidc.enabled()) {
+            String email = oidc.verify(header.substring(7));
+            if (email != null) user = users.findAll().stream().filter(u -> email.equalsIgnoreCase(u.email)).findFirst().orElse(null);
+        }
         if (user == null || !"ACTIVE".equals(user.status)) {
             res.setStatus(401);
             res.setContentType("application/problem+json");

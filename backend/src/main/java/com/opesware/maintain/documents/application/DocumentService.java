@@ -32,8 +32,10 @@ public class DocumentService {
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     private final CrudService crud;
     private final Path root;
+    private final MalwareScanner scanner;
 
-    public DocumentService(CrudService crud, @Value("${opes.storage.root}") String root) {
+    public DocumentService(CrudService crud, @Value("${opes.storage.root}") String root, MalwareScanner scanner) {
+        this.scanner = scanner;
         this.crud = crud;
         this.root = Path.of(root);
     }
@@ -63,9 +65,14 @@ public class DocumentService {
         d.contentType = type;
         d.sizeBytes = (int) Math.min(Integer.MAX_VALUE, file.getSize());
         d.checksumSha256 = HexFormat.of().formatHex(md.digest());
-        d.status = ALLOWED.contains(type) ? "ACCEPTED" : "QUARANTINED";
+        byte[] head;
+        try (InputStream in = Files.newInputStream(target)) {
+            head = in.readNBytes(4096);
+        }
+        MalwareScanner.Verdict v = scanner.scan(head, type);
+        d.status = ALLOWED.contains(type) && v.clean() ? "ACCEPTED" : "QUARANTINED";
         return crud.saveDomain(d, previous == null ? "UPLOAD" : "REPLACE_FILE", "DocumentRegistered.v1",
-                Map.of("checksum", d.checksumSha256, "status", d.status));
+                Map.of("checksum", d.checksumSha256, "status", d.status, "scan", ALLOWED.contains(type) ? v.reason() : "content type not allowed"));
     }
 
     @Transactional(readOnly = true)

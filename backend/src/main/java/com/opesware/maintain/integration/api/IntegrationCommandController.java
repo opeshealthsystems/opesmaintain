@@ -33,6 +33,16 @@ public class IntegrationCommandController {
         return crud.get("sensor-alerts", service.alert(id, action).id);
     }
 
+    @PostMapping("/outbox-events/{id}:requeue")
+    public Map<String, Object> requeue(@PathVariable UUID id) {
+        return crud.get("outbox-events", service.requeue(id).id);
+    }
+
+    @PostMapping("/webhook-subscriptions/{id}:reveal-secret")
+    public Map<String, Object> secret(@PathVariable UUID id) {
+        return service.revealSecret(id);
+    }
+
     @PostMapping("/integrations/{id}:test")
     public Map<String, Object> test(@PathVariable UUID id) {
         return crud.get("integrations", service.test(id).id);

@@ -1,0 +1,16 @@
+{
+  "expo": {
+    "name": "OPES Maintain",
+    "slug": "opes-maintain",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "ios": { "bundleIdentifier": "com.opesware.maintain", "supportsTablet": true },
+    "android": { "package": "com.opesware.maintain" },
+    "plugins": [
+      ["expo-sqlite", { "useSQLCipher": true }],
+      "expo-secure-store"
+    ],
+    "extra": { "apiUrl": "https://maintain.opes.cm" }
+  }
+}

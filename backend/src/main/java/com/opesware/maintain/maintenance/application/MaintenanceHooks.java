@@ -65,7 +65,16 @@ public final class MaintenanceHooks {
                         .filter(p -> Objects.equals(p.priority, wo.priority)).findFirst().orElse(null);
             }
             if (policy != null && policy.resolutionHours != null) {
-                wo.slaDueAt = created.plus(Duration.ofMinutes(policy.resolutionHours.multiply(BigDecimal.valueOf(60)).longValue()));
+                long minutes = policy.resolutionHours.multiply(BigDecimal.valueOf(60)).longValue();
+                if (Boolean.TRUE.equals(policy.businessHoursOnly)) {
+                    java.time.ZoneId zone = java.time.ZoneId.of("UTC");
+                    if (wo.siteId != null) {
+                        try { zone = java.time.ZoneId.of(crud.load(Site.class, wo.siteId).timeZone); } catch (RuntimeException ignored) { /* UTC */ }
+                    }
+                    wo.slaDueAt = com.opesware.maintain.platform.application.BusinessCalendar.parse(policy.calendar).addWorkingMinutes(created, minutes, zone);
+                } else {
+                    wo.slaDueAt = created.plus(Duration.ofMinutes(minutes));
+                }
                 if (wo.dueAt == null) wo.dueAt = wo.slaDueAt;
             }
             wo.slaBreached = false;

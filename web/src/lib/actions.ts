@@ -23,6 +23,8 @@ export interface ActionDef {
   navigate?: string;
   versioned?: boolean;
   body?: Record<string, unknown>;
+  /** Display the command's JSON result instead of navigating. */
+  showResult?: boolean;
 }
 
 const s = (row: Record<string, unknown>) => String(row.status ?? "");
@@ -130,6 +132,13 @@ export const ACTIONS: Record<string, ActionDef[]> = {
   sensors: [
     { key: "reading", label: "Record reading", icon: "Activity", endpoint: (id) => `/sensors/${id}/readings`, roles: ["MANAGER", "TECHNICIAN", "PLANNER"],
       fields: [{ name: "value", label: "Value", type: "number", required: true }] },
+  ],
+  "outbox-events": [
+    { key: "requeue", label: "Requeue delivery", icon: "RotateCcw", endpoint: (id) => `/outbox-events/${id}:requeue`, when: is("DEAD_LETTER", "RETRY"), roles: ["MANAGER"] },
+  ],
+  "webhook-subscriptions": [
+    { key: "secret", label: "Reveal signing secret", icon: "KeyRound", endpoint: (id) => `/webhook-subscriptions/${id}:reveal-secret`, roles: ["MANAGER"], showResult: true,
+      confirm: "The signing secret will be displayed. Share it only with the receiving system's owner. This action is audited." },
   ],
   integrations: [
     { key: "test", label: "Test connection", icon: "Plug", endpoint: (id) => `/integrations/${id}:test`, roles: ["MANAGER"] },

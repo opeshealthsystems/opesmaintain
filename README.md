@@ -8,6 +8,7 @@ Enterprise maintenance management platform (CMMS/EAM) for OPES Health Systems, b
 | Backend | Java 21+ (spec target 25 LTS), Spring Boot 4.1, Spring Data JPA, Flyway | `backend/` |
 | Database | PostgreSQL (production) · H2 in PostgreSQL mode (dev/test) | `backend/src/main/resources/db/migration` |
 | Web | Next.js 16, React 19, TypeScript, Lucide icons | `web/` |
+| Mobile | Expo / React Native, SQLCipher offline store | `mobile/` |
 | Contracts | Generated OpenAPI 3.1 | `contracts/openapi/` |
 | Model / codegen | Single resource model → entities, repositories, controllers, DDL, UI registry, OpenAPI | `tools/codegen/` |
 
@@ -43,6 +44,7 @@ Or run the backend against PostgreSQL directly:
 | `OPES_STORAGE_ROOT` | Evidence/document storage root | `./data/files` |
 | `OPES_SEED_DEMO` | Seed demo tenant on an empty database | `true` |
 | `OPES_JOBS_ENABLED` | PM generation, SLA, permit/grant expiry, outbox, insights jobs | `true` |
+| `OPES_SECURITY_OIDC_JWKS_URI` / `_ISSUER` / `_AUDIENCE` | Accept tokens from an OIDC provider | disabled |
 | `OPES_API_URL` (web) | Backend URL proxied under `/api` | `http://localhost:8080` |
 
 ## What is implemented
@@ -78,7 +80,8 @@ Highlights mapped to the specification:
 ## Tests
 
 ```bash
-cd backend && mvn test        # domain invariant suite (tenant isolation, lifecycle, ledger, PM, permits)
+cd backend && mvn test        # invariants, architecture rules, webhooks, OIDC, SLA calendar, scanner
+cd mobile && npm install && npm run typecheck
 cd web && npm run typecheck && npm run build
 ```
 

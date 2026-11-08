@@ -12,7 +12,7 @@ import { formatValue, humanize } from "@/lib/format";
 import { ActionRunner, type RunSpec } from "./ActionRunner";
 import { cellFor, RecordTable } from "./ResourceList";
 import { AssetTree, AuditTrail, DocumentFile, PartStockActions, PassportPanel, PmForecast, StockTable, WorkOrderExecution } from "./panels";
-import { Badge, Empty, ErrorState, Loading, PageHeader, useData, useToast } from "./ui";
+import { Badge, Empty, ErrorState, Loading, Modal, PageHeader, useData, useToast } from "./ui";
 
 const HEADER_BADGES = ["status", "priority", "criticality", "safetyState", "outcome", "severity", "eligibility", "availability"];
 const NEEDS_REASON = new Set(["ON_HOLD", "CANCELLED", "REOPEN"]);
@@ -28,7 +28,8 @@ export function ResourceDetail({ def, id }: { def: ResourceDef; id: string }) {
   const { user, canWrite, hasRole } = useAuth();
   const { data: row, error, loading, reload } = useData(() => api<Record<string, unknown>>(`/${def.path}/${id}`), [def.path, id]);
   const [tab, setTab] = useState("details");
-  const [run, setRun] = useState<(RunSpec & { navigate?: string }) | null>(null);
+  const [run, setRun] = useState<(RunSpec & { navigate?: string; showResult?: boolean }) | null>(null);
+  const [result, setResult] = useState<Record<string, unknown> | null>(null);
   const [transitions, setTransitions] = useState<string[]>([]);
 
   useEffect(() => {
@@ -102,7 +103,7 @@ export function ResourceDetail({ def, id }: { def: ResourceDef; id: string }) {
               </button>
             ))}
             {actions.map((a) => (
-              <button key={a.key} className={`btn ${a.danger ? "btn-danger" : ""}`} onClick={() => setRun({ title: a.label, endpoint: a.endpoint(id), fields: a.fields, confirm: a.confirm, danger: a.danger, body: a.body, navigate: a.navigate })}>
+              <button key={a.key} className={`btn ${a.danger ? "btn-danger" : ""}`} onClick={() => setRun({ title: a.label, endpoint: a.endpoint(id), fields: a.fields, confirm: a.confirm, danger: a.danger, body: a.body, navigate: a.navigate, showResult: a.showResult })}>
                 <Icon name={a.icon} size={16} />{a.label}
               </button>
             ))}
@@ -147,10 +148,19 @@ export function ResourceDetail({ def, id }: { def: ResourceDef; id: string }) {
           {tab.startsWith("rel:") && <RelatedTab tabKey={tab} parentId={id} />}
         </div>
       </div>
+      {result && (
+        <Modal title="Result" onClose={() => setResult(null)} footer={<button className="btn btn-primary" onClick={() => setResult(null)}>Close</button>}>
+          <dl className="stack" style={{ gap: 10 }}>
+            {Object.entries(result).map(([k, v]) => <div key={k}><dt className="small muted">{humanize(k)}</dt><dd className="mono" style={{ margin: 0, overflowWrap: "anywhere" }}>{String(v)}</dd></div>)}
+          </dl>
+        </Modal>
+      )}
       {run && (
         <ActionRunner spec={run} onClose={() => setRun(null)} onDone={(r) => {
           const nav = run.navigate;
+          const show = run.showResult;
           setRun(null);
+          if (show) { setResult(r); return; }
           toast("Action completed");
           if (nav && r?.id && r.id !== id) router.push(`/m/${nav}/${r.id}`);
           else reload();
