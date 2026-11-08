@@ -13432,6 +13432,22 @@
       "format": "date-time",
       "readOnly": true,
       "title": "Last Login At"
+     },
+     "mfaEnrolledAt": {
+      "type": "string",
+      "format": "date-time",
+      "readOnly": true,
+      "title": "MFA Enrolled At"
+     },
+     "lockedUntil": {
+      "type": "string",
+      "format": "date-time",
+      "readOnly": true,
+      "title": "Locked Until"
+     },
+     "emailNotifications": {
+      "type": "boolean",
+      "title": "Email Notifications"
      }
     },
     "required": [
@@ -17962,6 +17978,21 @@
       "format": "date-time",
       "readOnly": true,
       "title": "Created On"
+     },
+     "category": {
+      "type": "string",
+      "title": "Category"
+     },
+     "emailStatus": {
+      "type": "string",
+      "enum": [
+       "NONE",
+       "PENDING",
+       "SENT",
+       "FAILED"
+      ],
+      "readOnly": true,
+      "title": "Email Status"
      }
     },
     "required": [

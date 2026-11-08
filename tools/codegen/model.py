@@ -110,6 +110,8 @@ res("users", "AppUser", "identity", "M02", "Users", "User", "UserRound", [
     "fullName:str!*", "email:str!*", "role:" + ROLES + "!*", "organizationId:ref(organizations)",
     "siteId:ref(sites)*", "customerId:ref(customers)", "jobTitle:str", "phone:str", "language:enum(EN|FR)",
     "mfaEnabled:bool*", "status:enum(ACTIVE|SUSPENDED|OFFBOARDED)*", "lastLoginAt:datetime~", "passwordHash:str#",
+    "mfaEnrolledAt:datetime~@3", "mfaSecret:str#@3", "failedLogins:int#@3", "lockedUntil:datetime~@3",
+    "tokensValidAfter:datetime#@3", "emailNotifications:bool@3",
 ], display="fullName", desc="Memberships, roles and site scope.")
 
 res("delegations", "Delegation", "identity", "M02", "Delegations", "Delegation", "UserCheck", [
@@ -438,5 +440,6 @@ res("settings", "Setting", "platform", "M06", "Settings", "Setting", "SlidersHor
 
 res("notifications", "Notification", "platform", "M06", "Notifications", "Notification", "Bell", [
     "recipient:str*", "channel:enum(IN_APP|EMAIL|SMS)*", "subject:str!*", "body:text", "link:str",
-    "status:enum(UNREAD|READ)*", "createdOn:datetime~*",
+    "status:enum(UNREAD|READ)*", "createdOn:datetime~*", "category:str*@3",
+    "emailStatus:enum(NONE|PENDING|SENT|FAILED)~@3", "emailAttempts:int#@3",
 ], display="subject", desc="In-app notifications.")

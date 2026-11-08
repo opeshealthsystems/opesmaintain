@@ -19,8 +19,10 @@ public class AuthFilter extends OncePerRequestFilter {
     private final TokenService tokens;
     private final AppUserRepository users;
     private final OidcVerifier oidc;
+    private final MfaPolicy mfaPolicy;
 
-    public AuthFilter(TokenService tokens, AppUserRepository users, OidcVerifier oidc) {
+    public AuthFilter(TokenService tokens, AppUserRepository users, OidcVerifier oidc, MfaPolicy mfaPolicy) {
+        this.mfaPolicy = mfaPolicy;
         this.oidc = oidc;
         this.tokens = tokens;
         this.users = users;
@@ -35,8 +37,9 @@ public class AuthFilter extends OncePerRequestFilter {
             return;
         }
         String header = req.getHeader("Authorization");
-        UUID userId = header != null && header.startsWith("Bearer ") ? tokens.verify(header.substring(7)) : null;
-        AppUser user = userId == null ? null : users.findById(userId).orElse(null);
+        TokenService.Verified v = header != null && header.startsWith("Bearer ") ? tokens.verifyFull(header.substring(7)) : null;
+        AppUser user = v == null ? null : users.findById(v.userId()).orElse(null);
+        if (user != null && user.tokensValidAfter != null && v.issuedAt().isBefore(user.tokensValidAfter.minusSeconds(1))) user = null;
         if (user == null && header != null && header.startsWith("Bearer ") && oidc.enabled()) {
             String email = oidc.verify(header.substring(7));
             if (email != null) user = users.findAll().stream().filter(u -> email.equalsIgnoreCase(u.email)).findFirst().orElse(null);
@@ -45,6 +48,12 @@ public class AuthFilter extends OncePerRequestFilter {
             res.setStatus(401);
             res.setContentType("application/problem+json");
             res.getWriter().write("{\"status\":401,\"code\":\"UNAUTHENTICATED\",\"title\":\"Authentication required\"}");
+            return;
+        }
+        if (mfaPolicy.enrollmentRequired(user) && !path.startsWith("/api/v1/me")) {
+            res.setStatus(403);
+            res.setContentType("application/problem+json");
+            res.getWriter().write("{\"status\":403,\"code\":\"MFA_ENROLLMENT_REQUIRED\",\"title\":\"Set up two-step sign-in to continue\",\"detail\":\"Your role requires two-step sign-in. Enrol an authenticator app in Settings.\"}");
             return;
         }
         CurrentUser.set(new Principal(user.id, user.tenantId, user.email, user.fullName, user.role, user.customerId));

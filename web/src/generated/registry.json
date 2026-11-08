@@ -990,6 +990,42 @@
      "managed": true,
      "computed": false,
      "guarded": false
+    },
+    {
+     "name": "mfaEnrolledAt",
+     "label": "MFA Enrolled At",
+     "type": "datetime",
+     "ref": null,
+     "options": [],
+     "required": false,
+     "list": false,
+     "managed": true,
+     "computed": false,
+     "guarded": false
+    },
+    {
+     "name": "lockedUntil",
+     "label": "Locked Until",
+     "type": "datetime",
+     "ref": null,
+     "options": [],
+     "required": false,
+     "list": false,
+     "managed": true,
+     "computed": false,
+     "guarded": false
+    },
+    {
+     "name": "emailNotifications",
+     "label": "Email Notifications",
+     "type": "bool",
+     "ref": null,
+     "options": [],
+     "required": false,
+     "list": false,
+     "managed": false,
+     "computed": false,
+     "guarded": false
     }
    ]
   },
@@ -8877,6 +8913,35 @@
      "options": [],
      "required": false,
      "list": true,
+     "managed": true,
+     "computed": false,
+     "guarded": false
+    },
+    {
+     "name": "category",
+     "label": "Category",
+     "type": "str",
+     "ref": null,
+     "options": [],
+     "required": false,
+     "list": true,
+     "managed": false,
+     "computed": false,
+     "guarded": false
+    },
+    {
+     "name": "emailStatus",
+     "label": "Email Status",
+     "type": "enum",
+     "ref": null,
+     "options": [
+      "NONE",
+      "PENDING",
+      "SENT",
+      "FAILED"
+     ],
+     "required": false,
+     "list": false,
      "managed": true,
      "computed": false,
      "guarded": false

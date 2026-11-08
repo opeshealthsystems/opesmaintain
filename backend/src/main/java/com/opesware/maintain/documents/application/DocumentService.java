@@ -1,78 +1,93 @@
 package com.opesware.maintain.documents.application;
 
 import com.opesware.maintain.documents.domain.Document;
+import com.opesware.maintain.documents.infrastructure.DocumentRepository;
+import com.opesware.maintain.documents.infrastructure.FileStore;
+import com.opesware.maintain.platform.application.Access;
 import com.opesware.maintain.platform.application.ApiException;
 import com.opesware.maintain.platform.application.CrudService;
 import com.opesware.maintain.platform.application.ResourceCatalog;
 import com.opesware.maintain.platform.security.CurrentUser;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.util.HexFormat;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * Staged evidence storage with SHA-256 checksum, content-type allow list and quarantine of
- * disallowed files (spec §12.3). Local filesystem adapter; an S3-compatible adapter uses the same contract.
+ * Staged evidence (spec §12.3): SHA-256 at upload, content-type allow-list, malware scan before
+ * acceptance, storage through the {@link FileStore} port and checksum verification on every download.
  */
 @Service
 public class DocumentService {
-    private static final Set<String> ALLOWED = Set.of("application/pdf", "image/png", "image/jpeg", "image/webp", "text/plain", "text/csv",
+    static final Set<String> ALLOWED = Set.of("application/pdf", "image/png", "image/jpeg", "image/webp", "text/plain", "text/csv",
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     private final CrudService crud;
-    private final Path root;
+    private final FileStore store;
     private final MalwareScanner scanner;
+    private final DocumentRepository documents;
 
-    public DocumentService(CrudService crud, @Value("${opes.storage.root}") String root, MalwareScanner scanner) {
-        this.scanner = scanner;
+    public DocumentService(CrudService crud, FileStore store, MalwareScanner scanner, DocumentRepository documents) {
         this.crud = crud;
-        this.root = Path.of(root);
+        this.store = store;
+        this.scanner = scanner;
+        this.documents = documents;
     }
 
     @Transactional
     public Document upload(UUID documentId, MultipartFile file) throws IOException {
         Document d = crud.load(Document.class, documentId);
-        com.opesware.maintain.platform.application.Access.canWrite(ResourceCatalog.get("documents"));
+        Access.canWrite(ResourceCatalog.get("documents"));
         if (file.isEmpty()) throw ApiException.invalid("File is empty");
+        byte[] data = file.getBytes();
         String type = file.getContentType() == null ? "application/octet-stream" : file.getContentType();
         String key = CurrentUser.requireTenant() + "/" + UUID.randomUUID();
-        Path target = root.resolve(key).normalize();
-        if (!target.startsWith(root.normalize())) throw ApiException.invalid("Invalid storage path");
-        Files.createDirectories(target.getParent());
-        MessageDigest md;
-        try {
-            md = MessageDigest.getInstance("SHA-256");
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
-        }
-        try (InputStream in = new DigestInputStream(file.getInputStream(), md)) {
-            Files.copy(in, target, StandardCopyOption.REPLACE_EXISTING);
-        }
+        store.put(key, data, type);
         String previous = d.storageKey;
         d.storageKey = key;
         d.fileName = sanitize(file.getOriginalFilename());
         d.contentType = type;
-        d.sizeBytes = (int) Math.min(Integer.MAX_VALUE, file.getSize());
-        d.checksumSha256 = HexFormat.of().formatHex(md.digest());
-        byte[] head;
-        try (InputStream in = Files.newInputStream(target)) {
-            head = in.readNBytes(4096);
+        d.sizeBytes = data.length;
+        d.checksumSha256 = sha256(data);
+        String reason;
+        if (!ALLOWED.contains(type)) {
+            d.status = "QUARANTINED";
+            reason = "content type not allowed";
+        } else {
+            MalwareScanner.Verdict v = scanner.scan(data, type);
+            d.status = switch (v.result()) {
+                case CLEAN -> "ACCEPTED";
+                case INFECTED -> "QUARANTINED";
+                case UNAVAILABLE -> "SCANNING";
+            };
+            reason = v.reason();
         }
-        MalwareScanner.Verdict v = scanner.scan(head, type);
-        d.status = ALLOWED.contains(type) && v.clean() ? "ACCEPTED" : "QUARANTINED";
         return crud.saveDomain(d, previous == null ? "UPLOAD" : "REPLACE_FILE", "DocumentRegistered.v1",
-                Map.of("checksum", d.checksumSha256, "status", d.status, "scan", ALLOWED.contains(type) ? v.reason() : "content type not allowed"));
+                Map.of("checksum", d.checksumSha256, "status", d.status, "scan", reason, "store", store.kind()));
+    }
+
+    /** Re-scans documents held because the scanner was unavailable. */
+    @Transactional
+    public int rescanPending(UUID tenant) {
+        int n = 0;
+        for (Document d : documents.findByTenantId(tenant)) {
+            if (!"SCANNING".equals(d.status) || d.storageKey == null) continue;
+            try {
+                MalwareScanner.Verdict v = scanner.scan(store.get(d.storageKey), d.contentType);
+                if (v.result() == MalwareScanner.Result.UNAVAILABLE) continue;
+                d.status = v.clean() ? "ACCEPTED" : "QUARANTINED";
+                crud.saveDomain(d, "RESCAN", "DocumentScanned.v1", Map.of("scan", v.reason()));
+                n++;
+            } catch (IOException e) {
+                // storage temporarily unavailable; retried on the next run
+            }
+        }
+        return n;
     }
 
     @Transactional(readOnly = true)
@@ -83,8 +98,17 @@ public class DocumentService {
         if (Boolean.TRUE.equals(d.confidential) && !CurrentUser.require().is("ADMIN", "MANAGER", "AUDITOR", "SAFETY_OFFICER", "CALIBRATION_OFFICER")) {
             throw ApiException.forbidden("Confidential document");
         }
-        Path p = root.resolve(d.storageKey).normalize();
-        return new Object[]{d, Files.readAllBytes(p)};
+        byte[] data = store.get(d.storageKey);
+        if (!sha256(data).equals(d.checksumSha256)) throw new ApiException(500, "INTEGRITY_FAILURE", "Stored file failed its integrity check; contact support");
+        return new Object[]{d, data};
+    }
+
+    static String sha256(byte[] data) {
+        try {
+            return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(data));
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     private static String sanitize(String name) {

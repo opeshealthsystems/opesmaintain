@@ -19,6 +19,8 @@ function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [code, setCode] = useState("");
+  const [needCode, setNeedCode] = useState(false);
   const [busy, setBusy] = useState(false);
 
   const submit = async (e: React.FormEvent) => {
@@ -26,11 +28,14 @@ function LoginForm() {
     setBusy(true);
     setError(null);
     try {
-      const u = await login(email, password);
+      const u = await login(email, password, needCode ? code : undefined);
+      if (u.mfaEnrollmentRequired) { router.replace("/settings?mfa=1"); return; }
       const next = sp.get("next");
       router.replace(next && next.startsWith("/") && !next.startsWith("//") ? next : u.role === "CUSTOMER" ? "/portal" : u.role === "TECHNICIAN" ? "/technician" : "/");
     } catch (err) {
-      setError((err as Error).message);
+      const e2 = err as { code?: string; message: string };
+      if (e2.code === "MFA_REQUIRED") { setNeedCode(true); setError(null); }
+      else setError(e2.message);
     } finally {
       setBusy(false);
     }
@@ -58,6 +63,11 @@ function LoginForm() {
           <form className="stack" onSubmit={submit}>
             <div className="field"><label htmlFor="email">Email</label><input id="email" className="input" type="email" autoComplete="username" required value={email} onChange={(e) => setEmail(e.target.value)} /></div>
             <div className="field"><label htmlFor="password">Password</label><input id="password" className="input" type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} /></div>
+            {needCode && (
+              <div className="field"><label htmlFor="code">Authenticator code</label>
+                <input id="code" className="input" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]*" maxLength={6} autoFocus value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))} />
+                <span className="hint">Enter the 6-digit code from your authenticator app.</span></div>
+            )}
             <button className="btn btn-primary big-btn" disabled={busy}><Icon name="Lock" size={16} />{busy ? "Signing in…" : "Sign in"}</button>
           </form>
           <div className="card">

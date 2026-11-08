@@ -18,6 +18,10 @@ spring:
       max-file-size: 25MB
       max-request-size: 25MB
 
+logging:
+  pattern:
+    level: "%5p [cid=%X{correlationId:-}]"
+
 server:
   port: ${PORT:8080}
   error:
@@ -30,7 +34,10 @@ management:
         include: health,info,metrics,prometheus
 
 opes:
+  production: ${OPES_PRODUCTION:false}
   security:
+    mfa-required: ${OPES_MFA_REQUIRED:false}
+    cors-origins: ${OPES_CORS_ORIGINS:}
     # Override in every non-development environment (managed secret).
     token-secret: ${OPES_TOKEN_SECRET:dev-only-secret-change-me-0123456789abcdef}
     token-ttl-seconds: 28800
@@ -49,3 +56,18 @@ spring:
     url: ${OPES_DB_URL:jdbc:postgresql://localhost:5432/opes_maintain}
     username: ${OPES_DB_USER:opes}
     password: ${OPES_DB_PASSWORD:opes}
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+logging:
+  structured:
+    format:
+      console: ecs
+opes:
+  production: true
+  seed:
+    demo: false
+  security:
+    mfa-required: ${OPES_MFA_REQUIRED:true}

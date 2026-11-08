@@ -65,6 +65,13 @@ export async function api<T = Json>(
       window.location.href = `/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`;
     }
   }
+  if (res.status === 403 && typeof window !== "undefined" && !window.location.pathname.startsWith("/settings")) {
+    const peek = res.clone();
+    try {
+      const b = await peek.json();
+      if (b.code === "MFA_ENROLLMENT_REQUIRED") window.location.href = "/settings?mfa=1";
+    } catch { /* not JSON */ }
+  }
   if (!res.ok) {
     let parsed: ApiErrorBody;
     try {

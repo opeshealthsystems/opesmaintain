@@ -93,7 +93,13 @@ public final class ResourceCatalog {
                 new FieldDef("mfaEnabled", "MFA Enabled", "bool", null, List.of(), false, true, false, false, false, false),
                 new FieldDef("status", "Status", "enum", null, List.of("ACTIVE", "SUSPENDED", "OFFBOARDED"), false, true, false, false, false, false),
                 new FieldDef("lastLoginAt", "Last Login At", "datetime", null, List.of(), false, false, true, false, false, false),
-                new FieldDef("passwordHash", "Password Hash", "str", null, List.of(), false, false, false, true, false, false))));
+                new FieldDef("passwordHash", "Password Hash", "str", null, List.of(), false, false, false, true, false, false),
+                new FieldDef("mfaEnrolledAt", "MFA Enrolled At", "datetime", null, List.of(), false, false, true, false, false, false),
+                new FieldDef("mfaSecret", "MFA Secret", "str", null, List.of(), false, false, false, true, false, false),
+                new FieldDef("failedLogins", "Failed Logins", "int", null, List.of(), false, false, false, true, false, false),
+                new FieldDef("lockedUntil", "Locked Until", "datetime", null, List.of(), false, false, true, false, false, false),
+                new FieldDef("tokensValidAfter", "Tokens Valid After", "datetime", null, List.of(), false, false, false, true, false, false),
+                new FieldDef("emailNotifications", "Email Notifications", "bool", null, List.of(), false, false, false, false, false, false))));
         add(new ResourceDef("delegations", com.opesware.maintain.identity.domain.Delegation.class, "identity", "M02", "Delegations", "Delegation", null, "permission", false, Set.of("ADMIN"), List.of(
                 new FieldDef("delegatorId", "Delegator", "ref", "users", List.of(), true, true, false, false, false, false),
                 new FieldDef("delegateId", "Delegate", "ref", "users", List.of(), true, true, false, false, false, false),
@@ -675,6 +681,9 @@ public final class ResourceCatalog {
                 new FieldDef("body", "Body", "text", null, List.of(), false, false, false, false, false, false),
                 new FieldDef("link", "Link", "str", null, List.of(), false, false, false, false, false, false),
                 new FieldDef("status", "Status", "enum", null, List.of("UNREAD", "READ"), false, true, false, false, false, false),
-                new FieldDef("createdOn", "Created On", "datetime", null, List.of(), false, true, true, false, false, false))));
+                new FieldDef("createdOn", "Created On", "datetime", null, List.of(), false, true, true, false, false, false),
+                new FieldDef("category", "Category", "str", null, List.of(), false, true, false, false, false, false),
+                new FieldDef("emailStatus", "Email Status", "enum", null, List.of("NONE", "PENDING", "SENT", "FAILED"), false, false, true, false, false, false),
+                new FieldDef("emailAttempts", "Email Attempts", "int", null, List.of(), false, false, false, true, false, false))));
     }
 }

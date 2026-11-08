@@ -14,13 +14,17 @@ export interface User {
   tenantName: string;
   currency: string;
   timeZone: string;
+  mfaEnrolled: boolean;
+  mfaEnrollmentRequired: boolean;
+  emailNotifications: boolean;
 }
 
 interface AuthState {
   user: User | null;
   writable: Set<string>;
   loading: boolean;
-  login: (email: string, password: string) => Promise<User>;
+  login: (email: string, password: string, code?: string) => Promise<User>;
+  refresh: () => Promise<void>;
   logout: () => void;
   setLanguage: (lang: string) => void;
   canWrite: (path: string) => boolean;
@@ -48,8 +52,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const loadPermissions = useCallback(async () => {
-    const p = await api<{ writable: string[] }>("/me/permissions");
-    setWritable(new Set(p.writable));
+    try {
+      const p = await api<{ writable: string[] }>("/me/permissions");
+      setWritable(new Set(p.writable));
+    } catch {
+      setWritable(new Set());
+    }
   }, []);
 
   useEffect(() => {
@@ -64,14 +72,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [apply, loadPermissions]);
 
   const login = useCallback(
-    async (email: string, password: string) => {
-      const r = await api<{ token: string; user: User }>("/auth/login", { body: { email, password } });
+    async (email: string, password: string, code?: string) => {
+      const r = await api<{ token: string; user: User }>("/auth/login", { body: { email, password, ...(code ? { code } : {}) } });
       setToken(r.token);
       await loadPermissions();
       return apply(r.user);
     },
     [apply, loadPermissions],
   );
+
+  const refresh = useCallback(async () => {
+    apply(await api<User>("/me"));
+  }, [apply]);
 
   const logout = useCallback(() => {
     setToken(null);
@@ -97,12 +109,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       writable,
       loading,
       login,
+      refresh,
       logout,
       setLanguage,
       canWrite: (path) => writable.has(path),
       hasRole: (...roles) => !!user && (user.role === "ADMIN" || roles.includes(user.role)),
     }),
-    [user, writable, loading, login, logout, setLanguage],
+    [user, writable, loading, login, refresh, logout, setLanguage],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

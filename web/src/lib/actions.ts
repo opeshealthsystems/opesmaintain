@@ -146,6 +146,11 @@ export const ACTIONS: Record<string, ActionDef[]> = {
   users: [
     { key: "pw", label: "Set password", icon: "KeyRound", endpoint: (id) => `/users/${id}:set-password`, roles: ["ADMIN"],
       fields: [{ name: "password", label: "New password (min. 10 chars, letters and digits)", type: "text", required: true }] },
+    { key: "unlock", label: "Unlock account", icon: "LockOpen", endpoint: (id) => `/users/${id}:unlock`, roles: ["ADMIN"], when: (r) => !!r.lockedUntil && new Date(String(r.lockedUntil)) > new Date() },
+    { key: "mfa", label: "Reset two-step sign-in", icon: "ShieldOff", endpoint: (id) => `/users/${id}:reset-mfa`, roles: ["ADMIN"], when: (r) => !!r.mfaEnrolledAt,
+      confirm: "The user will have to enrol their authenticator again and is signed out everywhere." },
+    { key: "revoke", label: "Sign out everywhere", icon: "LogOut", endpoint: (id) => `/users/${id}:revoke-sessions`, roles: ["ADMIN"], danger: true,
+      confirm: "All existing sessions and devices for this user will be signed out immediately." },
   ],
   "work-orders": [],
 };

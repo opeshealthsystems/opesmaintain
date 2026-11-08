@@ -50,9 +50,14 @@ public class ErrorHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> unexpected(Exception e) {
-        String id = UUID.randomUUID().toString();
+        String id = cid();
         log.error("Unhandled error {}", id, e);
         return body(500, "INTERNAL_ERROR", "Unexpected error. Reference " + id, List.of());
+    }
+
+    private static String cid() {
+        String c = org.slf4j.MDC.get("correlationId");
+        return c != null ? c : UUID.randomUUID().toString();
     }
 
     private ResponseEntity<Map<String, Object>> body(int status, String code, String detail, List<Map<String, String>> errors) {
@@ -63,7 +68,7 @@ public class ErrorHandler {
         m.put("code", code);
         m.put("detail", detail);
         m.put("errors", errors);
-        m.put("correlationId", UUID.randomUUID().toString());
+        m.put("correlationId", cid());
         return ResponseEntity.status(status).contentType(MediaType.APPLICATION_PROBLEM_JSON).body(m);
     }
 }

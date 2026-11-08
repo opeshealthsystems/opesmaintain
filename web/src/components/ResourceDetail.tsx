@@ -52,7 +52,13 @@ export function ResourceDetail({ def, id }: { def: ResourceDef; id: string }) {
     if (def.path === "warehouses") list.push({ key: "stock", label: "Stock on hand", icon: "Package" });
     if (def.path === "documents") list.push({ key: "file", label: "File", icon: "Paperclip" });
     if (["assets", "customers", "sites", "work-orders"].includes(def.path)) list.push({ key: "docs", label: "Documents", icon: "FileText" });
-    for (const r of related) list.push({ key: `rel:${r.res.path}:${r.field.name}`, label: r.field.name === "parentId" || r.field.name === "parentWorkOrderId" ? `Child ${r.res.label.toLowerCase()}` : r.res.label, icon: r.res.icon });
+    const counts = new Map<string, number>();
+    for (const r of related) counts.set(r.res.path, (counts.get(r.res.path) ?? 0) + 1);
+    for (const r of related) {
+      const child = r.field.name === "parentId" || r.field.name === "parentWorkOrderId";
+      const label = child ? `Child ${r.res.label.toLowerCase()}` : (counts.get(r.res.path) ?? 0) > 1 ? `${r.res.label} (${r.field.label.toLowerCase()})` : r.res.label;
+      list.push({ key: `rel:${r.res.path}:${r.field.name}`, label, icon: r.res.icon });
+    }
     if (hasRole(...AUDIT_ROLES)) list.push({ key: "history", label: t("History"), icon: "History" });
     return list;
   }, [def.path, related, hasRole, t]);

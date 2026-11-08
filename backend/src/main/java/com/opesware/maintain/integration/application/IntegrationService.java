@@ -34,8 +34,11 @@ public class IntegrationService {
     private final OutboxEventRepository outbox;
     private final WebhookSubscriptionRepository webhooks;
     private final WebhookDelivery delivery;
+    private final com.opesware.maintain.platform.notify.NotificationRules rules;
 
-    public IntegrationService(CrudService crud, OutboxEventRepository outbox, WebhookSubscriptionRepository webhooks, WebhookDelivery delivery) {
+    public IntegrationService(CrudService crud, OutboxEventRepository outbox, WebhookSubscriptionRepository webhooks, WebhookDelivery delivery,
+                              @org.springframework.context.annotation.Lazy com.opesware.maintain.platform.notify.NotificationRules rules) {
+        this.rules = rules;
         this.crud = crud;
         this.outbox = outbox;
         this.webhooks = webhooks;
@@ -132,6 +135,13 @@ public class IntegrationService {
                 .limit(200).toList();
         List<WebhookSubscription> subs = webhooks.findByTenantId(tenant).stream().filter(w -> "ACTIVE".equals(w.status)).toList();
         for (OutboxEvent e : pending) {
+            if (e.attempts == null || e.attempts == 0) {
+                try {
+                    rules.handle(e);
+                } catch (RuntimeException ex) {
+                    org.slf4j.LoggerFactory.getLogger(IntegrationService.class).warn("Notification rule failed for {} {}: {}", e.eventType, e.id, ex.getMessage());
+                }
+            }
             e.attempts = (e.attempts == null ? 0 : e.attempts) + 1;
             boolean ok = true;
             for (WebhookSubscription w : subs) {
