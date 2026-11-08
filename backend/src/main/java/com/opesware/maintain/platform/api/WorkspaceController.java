@@ -75,7 +75,11 @@ public class WorkspaceController {
     @PostMapping("/notifications/{id}:read")
     @Transactional
     public Map<String, Object> read(@PathVariable UUID id) {
-        Notification n = crud.load(Notification.class, id);
+        Notification n = crud.repo(Notification.class).findById(id).orElse(null);
+        Principal p = CurrentUser.require();
+        boolean mine = n != null && n.tenantId.equals(p.tenantId()) && (n.recipient == null || n.recipient.equalsIgnoreCase(p.email())
+                || n.recipient.equals("role:" + p.role()));
+        if (!mine) throw ApiException.notFound("Notification");
         n.status = "READ";
         em.merge(n);
         return Map.of("ok", true);

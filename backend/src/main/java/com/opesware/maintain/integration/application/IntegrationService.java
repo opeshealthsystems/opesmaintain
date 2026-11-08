@@ -194,15 +194,22 @@ public class IntegrationService {
 
     @Component
     public static class WebhookHook implements ResourceHook {
-        private static final SecureRandom RANDOM = new SecureRandom();
+        private final WebhookUrlPolicy policy;
+
+        public WebhookHook(WebhookUrlPolicy policy) { this.policy = policy; }
 
         @Override
         public String path() { return "webhook-subscriptions"; }
 
         @Override
+        public void beforeUpdate(Object e) {
+            policy.checkOnSave(((WebhookSubscription) e).url);
+        }
+
+        @Override
         public void beforeCreate(Object e) {
             WebhookSubscription w = (WebhookSubscription) e;
-            if (!w.url.startsWith("https://")) throw ApiException.invalid("Webhook URLs must use https");
+            policy.checkOnSave(w.url);
             w.secretHint = "Revealed to managers via :reveal-secret";
             if (w.status == null) w.status = "ACTIVE";
         }

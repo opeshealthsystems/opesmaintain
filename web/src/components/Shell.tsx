@@ -6,7 +6,7 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { useT } from "@/lib/i18n";
 import { Icon } from "@/lib/icons";
-import { GROUP_ORDER, modules, resources } from "@/lib/registry";
+import { GROUP_ORDER, modules, resources, RESTRICTED_RESOURCES } from "@/lib/registry";
 import { humanize, relative } from "@/lib/format";
 import { Badge, Loading } from "./ui";
 
@@ -33,7 +33,7 @@ const CUSTOMER_NAV = [
   { href: "/m/billing-exports", label: "Billing", icon: "FileOutput" },
 ];
 
-const RESTRICTED = new Set(["audit-events", "delegations", "devices", "settings", "outbox-events", "integrations", "webhook-subscriptions"]);
+const RESTRICTED = RESTRICTED_RESOURCES;
 
 export function Shell({ children }: { children: React.ReactNode }) {
   const { user, loading, logout, setLanguage, hasRole } = useAuth();
@@ -92,7 +92,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           ) : (
             <>
               <div className="nav-group-title" style={{ cursor: "default" }}>{t("Operations")}</div>
-              {OPS.map((n) => <NavLink key={n.href} {...n} label={t(n.label)} active={active(n.href)} />)}
+              {OPS.filter((n) => !(user.scoped && ["/analytics", "/reports", "/portal"].includes(n.href))).map((n) => <NavLink key={n.href} {...n} label={t(n.label)} active={active(n.href)} />)}
               {groups.map(({ group, items }) => (
                 <div className="nav-group" key={group}>
                   <button className="nav-group-title" onClick={() => toggle(group)} aria-expanded={!collapsed[group]}>
@@ -205,7 +205,7 @@ function NotificationBell() {
       </button>
       {open && (
         <div className="search-results" style={{ left: "auto", right: 0, width: 360, maxWidth: "calc(100vw - 24px)" }}>
-          <div className="card-head"><h3>Notifications</h3><Link href="/m/notifications" className="small" onClick={() => setOpen(false)}>View all</Link></div>
+          <div className="card-head"><h3>Notifications</h3><Link href="/notifications" className="small" onClick={() => setOpen(false)}>View all</Link></div>
           {items.length === 0 ? <div className="state small">You are all caught up</div> : items.slice(0, 8).map((n) => (
             <Link key={n.id} href={n.link || "#"} className="search-item" onClick={() => { markRead(n.id); setOpen(false); }}>
               <Icon name={n.status === "UNREAD" ? "CircleDot" : "Circle"} size={14} style={{ color: n.status === "UNREAD" ? "var(--accent)" : "var(--text-3)", flex: "0 0 auto" }} />

@@ -97,9 +97,10 @@ export function WorkOrderExecution({ wo, onChanged }: { wo: R; onChanged: () => 
             {!locked && <Link className="btn btn-sm" href={`/m/time-entries/new?workOrderId=${id}${wo.assigneeId ? `&technicianId=${wo.assigneeId}` : ""}`}><Icon name="Timer" size={14} />Log time</Link>}
           </div>
           {time.data && time.data.items.length === 0 ? <Empty title="No time logged" icon="Timer" /> : (
-            <div className="table-wrap"><table className="table"><thead><tr><th>Technician</th><th>Start</th><th className="num">Hours</th><th className="num">Cost</th><th>Approved</th></tr></thead>
+            <div className="table-wrap"><table className="table"><thead><tr><th>Technician</th><th>Start</th><th className="num">Hours</th><th className="num">Cost</th><th>Approved</th><th /></tr></thead>
               <tbody>{(time.data?.items ?? []).map((t) => (
-                <tr key={t.id}><td><Link href={`/m/time-entries/${t.id}`}>{String(t.technicianIdLabel)}</Link></td><td>{dateTime(t.startedAt)}</td><td className="num">{num(t.hours)}</td><td className="num">{money(t.cost)}</td><td><Badge value={t.approved ? "YES" : "PENDING"} /></td></tr>
+                <tr key={t.id}><td><Link href={`/m/time-entries/${t.id}`}>{String(t.technicianIdLabel)}</Link></td><td>{dateTime(t.startedAt)}</td><td className="num">{num(t.hours)}</td><td className="num">{money(t.cost)}</td><td><Badge value={t.approved ? "YES" : "PENDING"} /></td>
+                  <td>{!t.approved && hasRole("MANAGER", "PLANNER", "DISPATCHER") && <button className="btn btn-sm" onClick={async () => { try { await api(`/time-entries/${t.id}:approve`, { method: "POST" }); toast("Time approved"); reload(); } catch (e) { toast((e as Error).message, "err"); } }}>Approve</button>}</td></tr>
               ))}</tbody></table></div>
           )}
         </div>

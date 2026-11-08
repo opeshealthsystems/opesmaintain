@@ -120,6 +120,10 @@ for r in resources:
     finders = "".join(f"    List<{ent}> findBy{f['name'][0].upper() + f['name'][1:]}(UUID value);\n\n"
                       for f in r["fields"] if f["ref"] and not f["computed"])
     finders += f"    List<{ent}> findByTenantId(UUID tenantId);\n"
+    for fname in r.get("unique", []):
+        cap = fname[0].upper() + fname[1:]
+        suffix = "IgnoreCase" if fname == "email" else ""
+        finders += f"\n    java.util.Optional<{ent}> findFirstBy{cap}{suffix}(String value);\n"
     repo = (f"{HEADER}package {PKG}.{ctx}.infrastructure;\n\n"
             f"import {PKG}.{ctx}.domain.{ent};\nimport {PKG}.platform.infrastructure.TenantRepository;\n"
             f"import java.util.List;\nimport java.util.UUID;\n\n"

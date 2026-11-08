@@ -1699,7 +1699,7 @@
    "icon": "QrCode",
    "prefix": null,
    "display": "token",
-   "readonly": false,
+   "readonly": true,
    "writerRoles": [
     "ADMIN",
     "MANAGER",
@@ -3170,7 +3170,7 @@
      ],
      "required": false,
      "list": true,
-     "managed": false,
+     "managed": true,
      "computed": false,
      "guarded": false
     },
@@ -3237,10 +3237,8 @@
    "readonly": false,
    "writerRoles": [
     "ADMIN",
-    "DISPATCHER",
     "MANAGER",
-    "PLANNER",
-    "TECHNICIAN"
+    "PLANNER"
    ],
    "desc": "Versioned calendar and meter-based plans.",
    "fields": [
@@ -3703,8 +3701,7 @@
     "ADMIN",
     "DISPATCHER",
     "MANAGER",
-    "PLANNER",
-    "TECHNICIAN"
+    "PLANNER"
    ],
    "desc": "Workforce, skills, rates and availability.",
    "fields": [
@@ -3900,8 +3897,7 @@
     "ADMIN",
     "DISPATCHER",
     "MANAGER",
-    "PLANNER",
-    "TECHNICIAN"
+    "PLANNER"
    ],
    "desc": "Dispatch calendar entries.",
    "fields": [
@@ -4130,7 +4126,7 @@
      "options": [],
      "required": false,
      "list": true,
-     "managed": false,
+     "managed": true,
      "computed": false,
      "guarded": false
     },
@@ -4162,8 +4158,7 @@
    "writerRoles": [
     "ADMIN",
     "MANAGER",
-    "SAFETY_OFFICER",
-    "TECHNICIAN"
+    "SAFETY_OFFICER"
    ],
    "desc": "Controlled checklists, one question per line.",
    "fields": [
@@ -5431,8 +5426,7 @@
    "writerRoles": [
     "ADMIN",
     "MANAGER",
-    "PLANNER",
-    "TECHNICIAN"
+    "PLANNER"
    ],
    "desc": "Problem / cause / remedy taxonomy.",
    "fields": [
@@ -5512,7 +5506,7 @@
    "icon": "Sparkles",
    "prefix": null,
    "display": "title",
-   "readonly": false,
+   "readonly": true,
    "writerRoles": [
     "ADMIN",
     "MANAGER",
@@ -7171,7 +7165,7 @@
      ],
      "required": false,
      "list": true,
-     "managed": false,
+     "managed": true,
      "computed": false,
      "guarded": false
     },
@@ -7572,7 +7566,7 @@
      ],
      "required": false,
      "list": true,
-     "managed": false,
+     "managed": true,
      "computed": false,
      "guarded": false
     }

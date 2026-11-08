@@ -4,7 +4,7 @@ import QRCode from "qrcode";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Alert, Badge, PageHeader, useData, useToast } from "@/components/ui";
-import { api } from "@/lib/api";
+import { api, setToken } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { humanize } from "@/lib/format";
 import { useT } from "@/lib/i18n";
@@ -26,7 +26,7 @@ export default function Settings() {
   const changePw = async (e: React.FormEvent) => {
     e.preventDefault();
     setPwErr(null);
-    try { await api("/me:change-password", { body: pw }); toast("Password changed"); setPw({ currentPassword: "", newPassword: "" }); } catch (err) { setPwErr((err as Error).message); }
+    try { const r = await api<{ token?: string }>("/me:change-password", { body: pw }); if (r.token) setToken(r.token); toast("Password changed; other sessions were signed out"); setPw({ currentPassword: "", newPassword: "" }); } catch (err) { setPwErr((err as Error).message); }
   };
   return (
     <>

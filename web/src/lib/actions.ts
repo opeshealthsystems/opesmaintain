@@ -133,6 +133,10 @@ export const ACTIONS: Record<string, ActionDef[]> = {
     { key: "reading", label: "Record reading", icon: "Activity", endpoint: (id) => `/sensors/${id}/readings`, roles: ["MANAGER", "TECHNICIAN", "PLANNER"],
       fields: [{ name: "value", label: "Value", type: "number", required: true }] },
   ],
+  "time-entries": [
+    { key: "approve", label: "Approve time", icon: "Check", endpoint: (id) => `/time-entries/${id}:approve`, when: (r) => !r.approved, roles: ["MANAGER", "PLANNER", "DISPATCHER"] },
+  ],
+  "inspection-templates": [],
   "outbox-events": [
     { key: "requeue", label: "Requeue delivery", icon: "RotateCcw", endpoint: (id) => `/outbox-events/${id}:requeue`, when: is("DEAD_LETTER", "RETRY"), roles: ["MANAGER"] },
   ],

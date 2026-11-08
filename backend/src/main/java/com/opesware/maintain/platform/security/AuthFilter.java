@@ -20,6 +20,8 @@ public class AuthFilter extends OncePerRequestFilter {
     private final AppUserRepository users;
     private final OidcVerifier oidc;
     private final MfaPolicy mfaPolicy;
+    @org.springframework.beans.factory.annotation.Autowired
+    private ScopeResolver scopes;
 
     public AuthFilter(TokenService tokens, AppUserRepository users, OidcVerifier oidc, MfaPolicy mfaPolicy) {
         this.mfaPolicy = mfaPolicy;
@@ -42,7 +44,7 @@ public class AuthFilter extends OncePerRequestFilter {
         if (user != null && user.tokensValidAfter != null && v.issuedAt().isBefore(user.tokensValidAfter.minusSeconds(1))) user = null;
         if (user == null && header != null && header.startsWith("Bearer ") && oidc.enabled()) {
             String email = oidc.verify(header.substring(7));
-            if (email != null) user = users.findAll().stream().filter(u -> email.equalsIgnoreCase(u.email)).findFirst().orElse(null);
+            if (email != null) user = users.findFirstByEmailIgnoreCase(email).orElse(null);
         }
         if (user == null || !"ACTIVE".equals(user.status)) {
             res.setStatus(401);
@@ -57,6 +59,7 @@ public class AuthFilter extends OncePerRequestFilter {
             return;
         }
         CurrentUser.set(new Principal(user.id, user.tenantId, user.email, user.fullName, user.role, user.customerId));
+        CurrentUser.setScope(scopes.resolve(user));
         try {
             chain.doFilter(req, res);
         } finally {

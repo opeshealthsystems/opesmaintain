@@ -81,10 +81,27 @@ public final class MaintenanceHooks {
         }
 
         @Override
-        public void beforeUpdate(Object e) {
+        public void beforeUpdate(Object e, java.util.Map<String, Object> before) {
             WorkOrder wo = (WorkOrder) e;
             if ("CLOSED".equals(wo.status) || "CANCELLED".equals(wo.status)) {
                 throw ApiException.guard("RECORD_LOCKED", "Closed or cancelled work orders are immutable; reopen to create a follow-up");
+            }
+            var p = CurrentUser.require();
+            boolean wasRequired = Boolean.TRUE.equals(before.get("permitRequired"));
+            if (wasRequired && !Boolean.TRUE.equals(wo.permitRequired)) {
+                if (!p.is("ADMIN", "MANAGER")) {
+                    throw ApiException.forbidden("Only a manager can remove the permit requirement");
+                }
+                if (wo.assetId != null) {
+                    Asset a = crud.load(Asset.class, wo.assetId);
+                    if ("LOCKED_OUT".equals(a.safetyState) || "PERMIT_REQUIRED".equals(a.safetyState)) {
+                        throw ApiException.guard("SAFETY_BLOCK", "The asset is " + a.safetyState.toLowerCase().replace('_', ' ') + "; a permit stays required");
+                    }
+                }
+            }
+            if (!java.util.Objects.equals(before.get("permitId"), wo.permitId == null ? null : wo.permitId.toString())
+                    && java.util.Set.of("IN_PROGRESS").contains(wo.status)) {
+                throw ApiException.guard("PERMIT_LOCKED", "The linked permit cannot change while work is in progress");
             }
         }
 

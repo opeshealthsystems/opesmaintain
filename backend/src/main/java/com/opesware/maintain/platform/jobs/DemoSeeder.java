@@ -211,6 +211,9 @@ public class DemoSeeder implements ApplicationRunner {
         user("Hélène Atangana", "auditor@opes.demo", "AUDITOR", dgh.id, null);
         user("Paul Essomba", "customer@opes.demo", "CUSTOMER", ypp.id, c2.id);
         user("Marc Djomo", "tech4@opes.demo", "TECHNICIAN", dgh.id, null);
+        AppUser contractorUser = user("Aristide Ngando", "contractor@opes.demo", "TECHNICIAN", dgh.id, null);
+        contractorUser.organizationId = contractor.id;
+        crud.repo(AppUser.class).save(contractorUser);
 
         Delegation d = new Delegation();
         d.delegatorId = users.get("manager@opes.demo").id; d.delegateId = users.get("planner@opes.demo").id;
@@ -226,7 +229,7 @@ public class DemoSeeder implements ApplicationRunner {
         Technician tg = tech(t2.id, "Grace Nyamsi", "T-117", "ELECTRICAL", "4200", dgh.id, "ON_JOB", "LV switchgear, generators, UPS");
         Technician te = tech(t3.id, "Eric Manga", "T-122", "MECHANICAL", "4000", ypp.id, "AVAILABLE", "Tablet presses, compressors, pumps");
         Technician tm = tech(users.get("tech4@opes.demo").id, "Marc Djomo", "T-131", "HVAC", "3900", dgh.id, "AVAILABLE", "Chillers, AHUs, cold rooms");
-        Technician tc = tech(null, "Aristide Ngando", "C-009", "ELECTRICAL", "6500", dgh.id, "OFF_SHIFT", "HV switching (contractor)");
+        Technician tc = tech(contractorUser.id, "Aristide Ngando", "C-009", "ELECTRICAL", "6500", dgh.id, "OFF_SHIFT", "HV switching (contractor)");
         tc.contractor = true; tc.contractorOrgId = contractor.id;
         ids.put("tf", tf.id); ids.put("tg", tg.id); ids.put("te", te.id); ids.put("tm", tm.id);
 

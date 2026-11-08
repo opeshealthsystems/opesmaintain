@@ -74,10 +74,10 @@ R = []
 
 
 def res(path, entity, context, module, label, singular, icon, fields, prefix=None, display=None,
-        readonly=False, guarded=None, writers=None, desc=""):
+        readonly=False, guarded=None, writers=None, desc="", unique=None):
     R.append(dict(path=path, entity=entity, context=context, module=module, label=label,
                   singular=singular, icon=icon, fields=fields, prefix=prefix, display=display,
-                  readonly=readonly, guarded=guarded or [], writers=writers, desc=desc))
+                  readonly=readonly, guarded=guarded or [], writers=writers, desc=desc, unique=unique or []))
 
 
 # ---------------------------------------------------------------- organization
@@ -112,7 +112,7 @@ res("users", "AppUser", "identity", "M02", "Users", "User", "UserRound", [
     "mfaEnabled:bool*", "status:enum(ACTIVE|SUSPENDED|OFFBOARDED)*", "lastLoginAt:datetime~", "passwordHash:str#",
     "mfaEnrolledAt:datetime~@3", "mfaSecret:str#@3", "failedLogins:int#@3", "lockedUntil:datetime~@3",
     "tokensValidAfter:datetime#@3", "emailNotifications:bool@3",
-], display="fullName", desc="Memberships, roles and site scope.")
+], display="fullName", unique=["email"], desc="Memberships, roles and site scope.")
 
 res("delegations", "Delegation", "identity", "M02", "Delegations", "Delegation", "UserCheck", [
     "delegatorId:ref(users)!*", "delegateId:ref(users)!*",
@@ -148,7 +148,7 @@ res("asset-events", "AssetEvent", "asset", "M03", "Asset History", "Asset Event"
 res("passport-tokens", "PassportToken", "asset", "M05", "Passport Tokens", "Passport Token", "QrCode", [
     "assetId:ref(assets)!*", "token:str~*", "status:enum(ACTIVE|REVOKED)~*", "issuedAt:datetime~*",
     "revokedAt:datetime~", "scanCount:int~*",
-], display="token", guarded=["status"], desc="Rotatable QR reference tokens.")
+], display="token", guarded=["status"], readonly=True, unique=["token"], desc="Rotatable QR reference tokens.")
 
 res("meters", "Meter", "asset", "M14", "Meters", "Meter", "Gauge", [
     "assetId:ref(assets)!*", "name:str!*", "meterType:enum(CUMULATIVE|INSTANTANEOUS)!*", "unit:str!*",
@@ -198,7 +198,7 @@ res("work-orders", "WorkOrder", "maintenance", "M08", "Work Orders", "Work Order
 
 res("work-tasks", "WorkTask", "maintenance", "M08", "Work Tasks", "Task", "ListChecks", [
     "workOrderId:ref(work-orders)!*", "sequence:int*", "description:str!*", "required:bool*",
-    "status:enum(PENDING|DONE|SKIPPED|FAILED)*", "result:text", "measuredValue:str", "completedBy:str~",
+    "status:enum(PENDING|DONE|SKIPPED|FAILED)~*", "result:text", "measuredValue:str", "completedBy:str~",
     "completedAt:datetime~",
 ], display="description", desc="Task checklist and evidence per work order.")
 
@@ -210,7 +210,7 @@ res("pm-plans", "PmPlan", "maintenance", "M09", "PM Plans", "PM Plan", "Calendar
     "workType:" + WORK_TYPE, "priority:" + PRIORITY, "estimatedHours:dec", "taskList:text",
     "planVersion:int~*", "status:enum(DRAFT|APPROVED|ACTIVE|PAUSED|RETIRED)~*", "nextDueAt:datetime~*",
     "lastGeneratedAt:datetime~",
-], prefix="PM", display="name", guarded=["status"], desc="Versioned calendar and meter-based plans.")
+], prefix="PM", display="name", guarded=["status"], writers=['MANAGER', 'PLANNER'], desc="Versioned calendar and meter-based plans.")
 
 res("pm-occurrences", "PmOccurrence", "maintenance", "M09", "PM Occurrences", "PM Occurrence", "CalendarCheck", [
     "planId:ref(pm-plans)!*", "planVersion:int*", "occurrenceKey:str*", "dueAt:datetime*", "localDue:str*",
@@ -225,25 +225,25 @@ res("technicians", "Technician", "workforce", "M10", "Technicians", "Technician"
     "certifications:text", "hourlyRate:money*", "siteId:ref(sites)*", "shift:enum(DAY|NIGHT|ROTATING|ON_CALL)*",
     "availability:enum(AVAILABLE|ON_JOB|OFF_SHIFT|LEAVE)*", "contractor:bool", "contractorOrgId:ref(organizations)",
     "phone:str",
-], display="fullName", desc="Workforce, skills, rates and availability.")
+], display="fullName", writers=['MANAGER', 'PLANNER', 'DISPATCHER'], desc="Workforce, skills, rates and availability.")
 
 res("assignments", "Assignment", "workforce", "M10", "Assignments", "Assignment", "CalendarRange", [
     "workOrderId:ref(work-orders)!*", "technicianId:ref(technicians)!*", "scheduledStart:datetime!*",
     "scheduledEnd:datetime!*", "role:enum(LEAD|SUPPORT)*",
     "status:enum(PLANNED|DISPATCHED|ACCEPTED|DECLINED|COMPLETED|CANCELLED)*", "note:text",
-], display="scheduledStart", desc="Dispatch calendar entries.")
+], display="scheduledStart", writers=['MANAGER', 'PLANNER', 'DISPATCHER'], desc="Dispatch calendar entries.")
 
 res("time-entries", "TimeEntry", "workforce", "M16", "Time Entries", "Time Entry", "Timer", [
     "workOrderId:ref(work-orders)!*", "technicianId:ref(technicians)!*", "startedAt:datetime!*", "endedAt:datetime!*",
     "hours:dec~*", "rate:money~", "cost:money~*", "laborType:enum(REGULAR|OVERTIME|TRAVEL|STANDBY)*",
-    "approved:bool*", "note:text",
+    "approved:bool~*", "note:text",
 ], display="startedAt", desc="Labor time with rate-based job costing.")
 
 # ---------------------------------------------------------------- safety
 res("inspection-templates", "InspectionTemplate", "safety", "M12", "Inspection Templates", "Inspection Template", "ClipboardCheck", [
     "code:str*", "name:str!*", "assetType:str*", "templateVersion:int*", "status:enum(DRAFT|PUBLISHED|RETIRED)*",
     "questions:text!", "passThreshold:int",
-], display="name", desc="Controlled checklists, one question per line.")
+], display="name", writers=['MANAGER', 'SAFETY_OFFICER'], desc="Controlled checklists, one question per line.")
 
 res("inspection-results", "InspectionResult", "safety", "M12", "Inspection Results", "Inspection Result", "FileCheck", [
     "templateId:ref(inspection-templates)!*", "assetId:ref(assets)!*", "workOrderId:ref(work-orders)",
@@ -293,13 +293,13 @@ res("downtime-events", "DowntimeEvent", "reliability", "M13", "Downtime Events",
 
 res("failure-codes", "FailureCode", "reliability", "M13", "Failure Codes", "Failure Code", "Tags", [
     "code:str!*", "name:str!*", "codeType:enum(PROBLEM|CAUSE|REMEDY)!*", "assetType:str*", "active:bool*",
-], display="name", desc="Problem / cause / remedy taxonomy.")
+], display="name", writers=['MANAGER', 'PLANNER'], desc="Problem / cause / remedy taxonomy.")
 
 res("ai-insights", "AiInsight", "reliability", "M28", "AI Insights", "Insight", "Sparkles", [
     "assetId:ref(assets)*", "insightType:enum(REPEAT_FAILURE|OVERDUE_PM|LOW_STOCK|METER_ANOMALY|SLA_RISK|CALIBRATION_DUE|SENSOR_ALARM)*",
     "title:str!*", "rationale:text", "confidence:dec*", "suggestedAction:text",
     "status:enum(PROPOSED|ACCEPTED|REJECTED)~*", "reviewedBy:str~", "reviewedAt:datetime~",
-], display="title", guarded=["status"], desc="Explainable recommendations requiring human review.")
+], display="title", guarded=["status"], readonly=True, desc="Explainable recommendations requiring human review.")
 
 # ---------------------------------------------------------------- inventory
 res("warehouses", "Warehouse", "inventory", "M15", "Warehouses", "Warehouse", "Warehouse", [
@@ -360,7 +360,7 @@ res("quotes", "Quote", "commercial", "M19", "Quotations", "Quotation", "Receipt"
 res("billing-exports", "BillingExport", "commercial", "M19", "Billing Exports", "Billing Export", "FileOutput", [
     "number:str~*", "customerId:ref(customers)!*", "contractId:ref(service-contracts)", "periodStart:date!*",
     "periodEnd:date!*", "workOrderCount:int~*", "amount:money~*", "currency:str",
-    "targetSystem:enum(OPES_ERP|SAGE|ODOO|QUICKBOOKS|CSV)*", "status:enum(PENDING|ACKNOWLEDGED|REJECTED|REVERSED)*",
+    "targetSystem:enum(OPES_ERP|SAGE|ODOO|QUICKBOOKS|CSV)*", "status:enum(PENDING|ACKNOWLEDGED|REJECTED|REVERSED)~*",
     "externalRef:str",
 ], prefix="BX", display="number", desc="Closed-work billing batches for ERP.")
 
@@ -378,7 +378,7 @@ res("vendors", "Vendor", "procurement", "M21", "Vendors", "Vendor", "Store", [
 res("purchase-requisitions", "PurchaseRequisition", "procurement", "M21", "Requisitions", "Requisition", "ClipboardPen", [
     "number:str~*", "partId:ref(parts)*", "description:str!*", "quantity:dec!*", "estimatedCost:money*",
     "requestedBy:str*", "neededBy:date*", "workOrderId:ref(work-orders)",
-    "status:enum(DRAFT|SUBMITTED|APPROVED|REJECTED|ORDERED)*",
+    "status:enum(DRAFT|SUBMITTED|APPROVED|REJECTED|ORDERED)~*",
 ], prefix="PR", display="description", desc="Internal purchase requests.")
 
 res("purchase-orders", "PurchaseOrder", "procurement", "M21", "Purchase Orders", "Purchase Order", "ShoppingCart", [

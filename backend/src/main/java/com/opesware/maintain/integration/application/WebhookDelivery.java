@@ -23,8 +23,11 @@ public class WebhookDelivery {
     private final byte[] master;
     private final HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).followRedirects(HttpClient.Redirect.NEVER).build();
 
-    public WebhookDelivery(@Value("${opes.security.token-secret}") String master) {
+    private final WebhookUrlPolicy policy;
+
+    public WebhookDelivery(@Value("${opes.security.token-secret}") String master, WebhookUrlPolicy policy) {
         this.master = master.getBytes(StandardCharsets.UTF_8);
+        this.policy = policy;
     }
 
     public String secretFor(WebhookSubscription w) {
@@ -33,6 +36,11 @@ public class WebhookDelivery {
 
     /** Returns true on a 2xx response. */
     public boolean send(WebhookSubscription w, String eventType, String body) {
+        try {
+            policy.check(w.url);
+        } catch (RuntimeException e) {
+            return false;
+        }
         String ts = String.valueOf(Instant.now().getEpochSecond());
         String sig = HexFormat.of().formatHex(hmac(secretFor(w).getBytes(StandardCharsets.UTF_8), ts + "." + body));
         try {

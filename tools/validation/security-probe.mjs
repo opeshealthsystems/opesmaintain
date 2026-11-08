@@ -100,13 +100,47 @@ await call(`/users/${tech2.id}:revoke-sessions`, { token: A, body: {} });
 await new Promise((r) => setTimeout(r, 1100));
 check((await call("/work-orders?size=1", { token: T2 })).status === 401, "revoked session still accepted");
 
-// 8. Web security headers
+// 8. Audit regressions (platform audit, Nov 2026)
+{
+  const permitWo = (await call("/work-orders?permitRequired=true&size=1", { token: A })).json.items[0];
+  if (permitWo) check([403, 422].includes((await call(`/work-orders/${permitWo.id}`, { method: "PATCH", token: T, body: { permitRequired: false }, headers: { "If-Match": String(permitWo.version) } })).status), "technician removed permit requirement");
+  const foreignAsset = (await call("/assets?q=GEN-001&size=1", { token: A })).json.items[0];
+  check((await call("/maintenance-requests", { token: C, body: { title: "x", description: "y", priority: "LOW", siteId: foreignAsset.siteId, assetId: foreignAsset.id } })).status === 400, "customer attached another customer's asset");
+  check((await call("/webhook-subscriptions", { token: A, body: { url: "https://169.254.169.254/latest", eventTypes: "*" } })).status === 400, "webhook to metadata address accepted");
+  check((await call("/notifications?size=5", { token: T })).status === 403, "technician listed all notifications");
+  const mgrNote = (await call("/notifications?recipient=role:MANAGER&size=1", { token: A })).json.items[0];
+  if (mgrNote) check((await call(`/notifications/${mgrNote.id}:read`, { token: T, method: "POST" })).status === 404, "technician marked another role's notification read");
+  check((await call("/users?size=1", { token: T })).status === 403, "technician listed the staff directory");
+  const tech = (await call("/technicians?size=1", { token: A })).json.items[0];
+  check((await call(`/technicians/${tech.id}`, { method: "PATCH", token: T, body: { hourlyRate: 99999 }, headers: { "If-Match": String(tech.version) } })).status === 403, "technician changed an hourly rate");
+  const anyWo = (await call("/work-orders?status=APPROVED&size=1", { token: A })).json.items[0];
+  if (anyWo) check((await call("/assignments", { token: T, body: { workOrderId: anyWo.id, technicianId: tech.id, scheduledStart: new Date().toISOString(), scheduledEnd: new Date(Date.now() + 3600e3).toISOString() } })).status === 403, "technician self-dispatched");
+  const req = (await call("/purchase-requisitions?size=1", { token: A })).json.items[0];
+  const proc = await login("procurement@opes.demo");
+  const patched = await call(`/purchase-requisitions/${req.id}`, { method: "PATCH", token: proc, body: { status: "APPROVED" }, headers: { "If-Match": String(req.version) } });
+  check(patched.status >= 400 || patched.json.status === req.status, "requisition approved by direct status edit");
+  const te = (await call("/time-entries?size=1", { token: A })).json.items[0];
+  const tPatch = await call(`/time-entries/${te.id}`, { method: "PATCH", token: T, body: { approved: !te.approved }, headers: { "If-Match": String(te.version) } });
+  check(tPatch.status >= 400 || tPatch.json.approved === te.approved, "time entry approval changed by direct edit");
+  check((await call("/passport-tokens", { token: A, body: { assetId: foreignAsset.id } })).status >= 400, "passport token created outside rotation");
+  // contractor (service-provider user) is limited to granted sites
+  const K = await login("contractor@opes.demo");
+  const kAssets = (await call("/assets?size=200", { token: K })).json;
+  const allAssets = (await call("/assets?size=200", { token: A })).json;
+  check(kAssets.total > 0 && kAssets.total < allAssets.total, "contractor scope not applied to assets");
+  const outside = allAssets.items.find((a) => !kAssets.items.some((k) => k.id === a.id));
+  if (outside) check((await call(`/assets/${outside.id}`, { token: K })).status === 404, "contractor read an asset outside its grant");
+  check((await call("/kpis", { token: K })).status === 403, "contractor read organization-wide KPIs");
+}
+
+// 9. Web security headers
 if (WEB) {
   const h = (await fetch(WEB + "/login")).headers;
   check(h.get("x-frame-options") === "DENY", "missing X-Frame-Options");
   check(h.get("x-content-type-options") === "nosniff", "missing nosniff");
   check(!!h.get("referrer-policy"), "missing Referrer-Policy");
   check(!h.get("x-powered-by"), "X-Powered-By disclosed");
+  check((h.get("content-security-policy") ?? "").includes("frame-ancestors 'none'"), "missing Content-Security-Policy");
 }
 
 console.log(`${checks} checks, ${findings.length} finding(s)`);

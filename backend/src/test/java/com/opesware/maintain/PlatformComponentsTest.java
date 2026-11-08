@@ -62,7 +62,7 @@ class PlatformComponentsTest {
         });
         server.start();
         try {
-            WebhookDelivery d = new WebhookDelivery("test-secret-0123456789abcdef0123456789");
+            WebhookDelivery d = new WebhookDelivery("test-secret-0123456789abcdef0123456789", new com.opesware.maintain.integration.application.WebhookUrlPolicy(true));
             WebhookSubscription w = new WebhookSubscription();
             w.id = UUID.randomUUID();
             w.url = "http://127.0.0.1:" + server.getAddress().getPort() + "/hook";

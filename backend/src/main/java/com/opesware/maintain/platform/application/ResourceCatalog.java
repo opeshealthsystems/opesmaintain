@@ -148,7 +148,7 @@ public final class ResourceCatalog {
                 new FieldDef("reason", "Reason", "text", null, List.of(), false, true, false, false, false, false),
                 new FieldDef("effectiveAt", "Effective At", "datetime", null, List.of(), false, true, false, false, false, false),
                 new FieldDef("actor", "Actor", "str", null, List.of(), false, true, false, false, false, false))));
-        add(new ResourceDef("passport-tokens", com.opesware.maintain.asset.domain.PassportToken.class, "asset", "M05", "Passport Tokens", "Passport Token", null, "token", false, Set.of("ADMIN", "MANAGER", "PLANNER"), List.of(
+        add(new ResourceDef("passport-tokens", com.opesware.maintain.asset.domain.PassportToken.class, "asset", "M05", "Passport Tokens", "Passport Token", null, "token", true, Set.of("ADMIN", "MANAGER", "PLANNER"), List.of(
                 new FieldDef("assetId", "Asset", "ref", "assets", List.of(), true, true, false, false, false, false),
                 new FieldDef("token", "Token", "str", null, List.of(), false, true, true, false, false, false),
                 new FieldDef("status", "Status", "enum", null, List.of("ACTIVE", "REVOKED"), false, true, true, false, false, true),
@@ -258,12 +258,12 @@ public final class ResourceCatalog {
                 new FieldDef("sequence", "Sequence", "int", null, List.of(), false, true, false, false, false, false),
                 new FieldDef("description", "Description", "str", null, List.of(), true, true, false, false, false, false),
                 new FieldDef("required", "Required", "bool", null, List.of(), false, true, false, false, false, false),
-                new FieldDef("status", "Status", "enum", null, List.of("PENDING", "DONE", "SKIPPED", "FAILED"), false, true, false, false, false, false),
+                new FieldDef("status", "Status", "enum", null, List.of("PENDING", "DONE", "SKIPPED", "FAILED"), false, true, true, false, false, false),
                 new FieldDef("result", "Result", "text", null, List.of(), false, false, false, false, false, false),
                 new FieldDef("measuredValue", "Measured Value", "str", null, List.of(), false, false, false, false, false, false),
                 new FieldDef("completedBy", "Completed By", "str", null, List.of(), false, false, true, false, false, false),
                 new FieldDef("completedAt", "Completed At", "datetime", null, List.of(), false, false, true, false, false, false))));
-        add(new ResourceDef("pm-plans", com.opesware.maintain.maintenance.domain.PmPlan.class, "maintenance", "M09", "PM Plans", "PM Plan", "PM", "name", false, Set.of("ADMIN", "DISPATCHER", "MANAGER", "PLANNER", "TECHNICIAN"), List.of(
+        add(new ResourceDef("pm-plans", com.opesware.maintain.maintenance.domain.PmPlan.class, "maintenance", "M09", "PM Plans", "PM Plan", "PM", "name", false, Set.of("ADMIN", "MANAGER", "PLANNER"), List.of(
                 new FieldDef("number", "Number", "str", null, List.of(), false, true, true, false, false, false),
                 new FieldDef("code", "Code", "str", null, List.of(), false, true, true, false, false, false),
                 new FieldDef("name", "Name", "str", null, List.of(), true, true, false, false, false, false),
@@ -297,7 +297,7 @@ public final class ResourceCatalog {
                 new FieldDef("workOrderId", "Work Order", "ref", "work-orders", List.of(), false, true, false, false, false, false),
                 new FieldDef("status", "Status", "enum", null, List.of("SCHEDULED", "GENERATED", "COMPLETED", "SKIPPED", "MISSED"), false, true, false, false, false, false),
                 new FieldDef("completedAt", "Completed At", "datetime", null, List.of(), false, false, false, false, false, false))));
-        add(new ResourceDef("technicians", com.opesware.maintain.workforce.domain.Technician.class, "workforce", "M10", "Technicians", "Technician", null, "fullName", false, Set.of("ADMIN", "DISPATCHER", "MANAGER", "PLANNER", "TECHNICIAN"), List.of(
+        add(new ResourceDef("technicians", com.opesware.maintain.workforce.domain.Technician.class, "workforce", "M10", "Technicians", "Technician", null, "fullName", false, Set.of("ADMIN", "DISPATCHER", "MANAGER", "PLANNER"), List.of(
                 new FieldDef("userId", "User", "ref", "users", List.of(), false, true, false, false, false, false),
                 new FieldDef("fullName", "Full Name", "str", null, List.of(), true, true, false, false, false, false),
                 new FieldDef("employeeNo", "Employee No", "str", null, List.of(), false, true, false, false, false, false),
@@ -311,7 +311,7 @@ public final class ResourceCatalog {
                 new FieldDef("contractor", "Contractor", "bool", null, List.of(), false, false, false, false, false, false),
                 new FieldDef("contractorOrgId", "Contractor Org", "ref", "organizations", List.of(), false, false, false, false, false, false),
                 new FieldDef("phone", "Phone", "str", null, List.of(), false, false, false, false, false, false))));
-        add(new ResourceDef("assignments", com.opesware.maintain.workforce.domain.Assignment.class, "workforce", "M10", "Assignments", "Assignment", null, "scheduledStart", false, Set.of("ADMIN", "DISPATCHER", "MANAGER", "PLANNER", "TECHNICIAN"), List.of(
+        add(new ResourceDef("assignments", com.opesware.maintain.workforce.domain.Assignment.class, "workforce", "M10", "Assignments", "Assignment", null, "scheduledStart", false, Set.of("ADMIN", "DISPATCHER", "MANAGER", "PLANNER"), List.of(
                 new FieldDef("workOrderId", "Work Order", "ref", "work-orders", List.of(), true, true, false, false, false, false),
                 new FieldDef("technicianId", "Technician", "ref", "technicians", List.of(), true, true, false, false, false, false),
                 new FieldDef("scheduledStart", "Scheduled Start", "datetime", null, List.of(), true, true, false, false, false, false),
@@ -328,9 +328,9 @@ public final class ResourceCatalog {
                 new FieldDef("rate", "Rate", "money", null, List.of(), false, false, true, false, false, false),
                 new FieldDef("cost", "Cost", "money", null, List.of(), false, true, true, false, false, false),
                 new FieldDef("laborType", "Labor Type", "enum", null, List.of("REGULAR", "OVERTIME", "TRAVEL", "STANDBY"), false, true, false, false, false, false),
-                new FieldDef("approved", "Approved", "bool", null, List.of(), false, true, false, false, false, false),
+                new FieldDef("approved", "Approved", "bool", null, List.of(), false, true, true, false, false, false),
                 new FieldDef("note", "Note", "text", null, List.of(), false, false, false, false, false, false))));
-        add(new ResourceDef("inspection-templates", com.opesware.maintain.safety.domain.InspectionTemplate.class, "safety", "M12", "Inspection Templates", "Inspection Template", null, "name", false, Set.of("ADMIN", "MANAGER", "SAFETY_OFFICER", "TECHNICIAN"), List.of(
+        add(new ResourceDef("inspection-templates", com.opesware.maintain.safety.domain.InspectionTemplate.class, "safety", "M12", "Inspection Templates", "Inspection Template", null, "name", false, Set.of("ADMIN", "MANAGER", "SAFETY_OFFICER"), List.of(
                 new FieldDef("code", "Code", "str", null, List.of(), false, true, false, false, false, false),
                 new FieldDef("name", "Name", "str", null, List.of(), true, true, false, false, false, false),
                 new FieldDef("assetType", "Asset Type", "str", null, List.of(), false, true, false, false, false, false),
@@ -424,13 +424,13 @@ public final class ResourceCatalog {
                 new FieldDef("failureCause", "Failure Cause", "str", null, List.of(), false, false, false, false, false, false),
                 new FieldDef("impact", "Impact", "enum", null, List.of("PRODUCTION_STOP", "DEGRADED", "PATIENT_IMPACT", "NONE"), false, true, false, false, false, false),
                 new FieldDef("status", "Status", "enum", null, List.of("OPEN", "CLOSED"), false, true, true, false, false, false))));
-        add(new ResourceDef("failure-codes", com.opesware.maintain.reliability.domain.FailureCode.class, "reliability", "M13", "Failure Codes", "Failure Code", null, "name", false, Set.of("ADMIN", "MANAGER", "PLANNER", "TECHNICIAN"), List.of(
+        add(new ResourceDef("failure-codes", com.opesware.maintain.reliability.domain.FailureCode.class, "reliability", "M13", "Failure Codes", "Failure Code", null, "name", false, Set.of("ADMIN", "MANAGER", "PLANNER"), List.of(
                 new FieldDef("code", "Code", "str", null, List.of(), true, true, false, false, false, false),
                 new FieldDef("name", "Name", "str", null, List.of(), true, true, false, false, false, false),
                 new FieldDef("codeType", "Code Type", "enum", null, List.of("PROBLEM", "CAUSE", "REMEDY"), true, true, false, false, false, false),
                 new FieldDef("assetType", "Asset Type", "str", null, List.of(), false, true, false, false, false, false),
                 new FieldDef("active", "Active", "bool", null, List.of(), false, true, false, false, false, false))));
-        add(new ResourceDef("ai-insights", com.opesware.maintain.reliability.domain.AiInsight.class, "reliability", "M28", "AI Insights", "Insight", null, "title", false, Set.of("ADMIN", "MANAGER", "PLANNER", "TECHNICIAN"), List.of(
+        add(new ResourceDef("ai-insights", com.opesware.maintain.reliability.domain.AiInsight.class, "reliability", "M28", "AI Insights", "Insight", null, "title", true, Set.of("ADMIN", "MANAGER", "PLANNER", "TECHNICIAN"), List.of(
                 new FieldDef("assetId", "Asset", "ref", "assets", List.of(), false, true, false, false, false, false),
                 new FieldDef("insightType", "Insight Type", "enum", null, List.of("REPEAT_FAILURE", "OVERDUE_PM", "LOW_STOCK", "METER_ANOMALY", "SLA_RISK", "CALIBRATION_DUE", "SENSOR_ALARM"), false, true, false, false, false, false),
                 new FieldDef("title", "Title", "str", null, List.of(), true, true, false, false, false, false),
@@ -553,7 +553,7 @@ public final class ResourceCatalog {
                 new FieldDef("amount", "Amount", "money", null, List.of(), false, true, true, false, false, false),
                 new FieldDef("currency", "Currency", "str", null, List.of(), false, false, false, false, false, false),
                 new FieldDef("targetSystem", "Target System", "enum", null, List.of("OPES_ERP", "SAGE", "ODOO", "QUICKBOOKS", "CSV"), false, true, false, false, false, false),
-                new FieldDef("status", "Status", "enum", null, List.of("PENDING", "ACKNOWLEDGED", "REJECTED", "REVERSED"), false, true, false, false, false, false),
+                new FieldDef("status", "Status", "enum", null, List.of("PENDING", "ACKNOWLEDGED", "REJECTED", "REVERSED"), false, true, true, false, false, false),
                 new FieldDef("externalRef", "External Ref", "str", null, List.of(), false, false, false, false, false, false))));
         add(new ResourceDef("service-signoffs", com.opesware.maintain.commercial.domain.ServiceSignoff.class, "commercial", "M20", "Customer Sign-offs", "Sign-off", null, "signedBy", false, Set.of("ADMIN", "COMMERCIAL", "MANAGER"), List.of(
                 new FieldDef("workOrderId", "Work Order", "ref", "work-orders", List.of(), true, true, false, false, false, false),
@@ -583,7 +583,7 @@ public final class ResourceCatalog {
                 new FieldDef("requestedBy", "Requested By", "str", null, List.of(), false, true, false, false, false, false),
                 new FieldDef("neededBy", "Needed By", "date", null, List.of(), false, true, false, false, false, false),
                 new FieldDef("workOrderId", "Work Order", "ref", "work-orders", List.of(), false, false, false, false, false, false),
-                new FieldDef("status", "Status", "enum", null, List.of("DRAFT", "SUBMITTED", "APPROVED", "REJECTED", "ORDERED"), false, true, false, false, false, false))));
+                new FieldDef("status", "Status", "enum", null, List.of("DRAFT", "SUBMITTED", "APPROVED", "REJECTED", "ORDERED"), false, true, true, false, false, false))));
         add(new ResourceDef("purchase-orders", com.opesware.maintain.procurement.domain.PurchaseOrder.class, "procurement", "M21", "Purchase Orders", "Purchase Order", "PO", "number", false, Set.of("ADMIN", "MANAGER", "PROCUREMENT", "STOREKEEPER"), List.of(
                 new FieldDef("number", "Number", "str", null, List.of(), false, true, true, false, false, false),
                 new FieldDef("vendorId", "Vendor", "ref", "vendors", List.of(), true, true, false, false, false, false),

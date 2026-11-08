@@ -18,6 +18,8 @@ export interface User {
   mfaEnrolled: boolean;
   mfaEnrollmentRequired: boolean;
   emailNotifications: boolean;
+  /** Service-provider user limited by service grants. */
+  scoped: boolean;
 }
 
 interface AuthState {

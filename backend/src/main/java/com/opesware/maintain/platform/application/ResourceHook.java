@@ -10,6 +10,11 @@ public interface ResourceHook {
 
     default void beforeUpdate(Object entity) {}
 
+    /** Update hook with the field values as they were before the change. */
+    default void beforeUpdate(Object entity, java.util.Map<String, Object> before) {
+        beforeUpdate(entity);
+    }
+
     default void afterSave(Object entity, boolean created) {}
 
     default void enrich(List<?> entities) {}

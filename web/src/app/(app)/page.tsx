@@ -20,9 +20,10 @@ export default function Dashboard() {
   const router = useRouter();
   const { user, canWrite } = useAuth();
   useEffect(() => { if (user?.role === "CUSTOMER") router.replace("/portal"); }, [user, router]);
-  const kpis = useData(() => api<K>("/kpis?days=90"), []);
+  const kpis = useData(() => (user?.scoped ? Promise.resolve(null as unknown as K) : api<K>("/kpis?days=90")), [user?.scoped]);
   const open = useData(() => api<Page>("/work-orders?status=DRAFT,TRIAGED,APPROVED,PLANNED,DISPATCHED,IN_PROGRESS,ON_HOLD&sort=dueAt,asc&size=8"), []);
   const insights = useData(() => api<Page>("/ai-insights?status=PROPOSED&size=5&sort=confidence,desc"), []);
+  // contractors and customers never see tenant-wide KPIs
   const parts = useData(() => api<Page>("/parts?size=200"), []);
   if (user?.role === "CUSTOMER") return <Loading />;
   const k = kpis.data;
@@ -36,7 +37,14 @@ export default function Dashboard() {
           {canWrite("maintenance-requests") && <Link className="btn" href="/m/maintenance-requests/new"><Icon name="TriangleAlert" size={16} />{t("Report a fault")}</Link>}
           {canWrite("work-orders") && <Link className="btn btn-primary" href="/m/work-orders/new"><Icon name="Plus" size={16} />{t("New work order")}</Link>}
         </>} />
-      {kpis.error ? <ErrorState error={kpis.error} onRetry={kpis.reload} /> : !k ? <Loading /> : (
+      {user?.scoped ? (
+        <div className="card">
+          <div className="card-head"><h2>{t("Open work orders by due date")}</h2><Link href="/technician" className="small">{t("My work")}</Link></div>
+          {open.loading ? <Loading /> : open.data && open.data.items.length ? (
+            <RecordTable def={wo} rows={open.data.items} columns={["number", "title", "priority", "status", "assigneeId", "dueAt"]} onOpen={(id) => router.push(`/m/work-orders/${id}`)} />
+          ) : <Empty title={t("No open work")} hint="Only work at sites covered by your service grant is shown." icon="ClipboardList" />}
+        </div>
+      ) : kpis.error ? <ErrorState error={kpis.error} onRetry={kpis.reload} /> : !k ? <Loading /> : (
         <div className="stack">
           <div className="grid grid-4">
             <Stat icon="ClipboardList" label={t("Open work orders")} value={num(k.backlog, 0)} meta={`${num(k.emergencyOpen, 0)} emergency · ${num(k.slaAtRisk, 0)} SLA due ≤ 24 h`} href="/work-board" />

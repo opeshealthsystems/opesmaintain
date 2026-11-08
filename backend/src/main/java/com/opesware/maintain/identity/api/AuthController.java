@@ -39,7 +39,11 @@ public class AuthController {
     private final TenantRepo tenants;
     private final AuditService audit;
     private final CrudService crud;
+    @jakarta.persistence.PersistenceContext
+    private jakarta.persistence.EntityManager em;
     private final MfaPolicy mfaPolicy;
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.opesware.maintain.platform.security.ScopeResolver scopes;
     private final com.opesware.maintain.identity.application.PersonalDataService personalData;
 
     public AuthController(AppUserRepository users, TokenService tokens, TenantRepo tenants, AuditService audit, CrudService crud, MfaPolicy mfaPolicy,
@@ -60,7 +64,8 @@ public class AuthController {
     @Transactional(noRollbackFor = ApiException.class)
     public Map<String, Object> login(@RequestBody Map<String, String> body) {
         String email = body.getOrDefault("email", "").trim().toLowerCase();
-        AppUser u = users.findAll().stream().filter(x -> email.equalsIgnoreCase(x.email)).findFirst().orElse(null);
+        AppUser u = em.createQuery("select u from AppUser u where lower(u.email) = :e", AppUser.class)
+                .setParameter("e", email).getResultStream().findFirst().orElse(null);
         ApiException invalid = new ApiException(401, "INVALID_CREDENTIALS", "Email or password is incorrect");
         if (u == null) {
             PasswordHasher.verify(body.get("password"), PasswordHasher.hash("timing-equaliser"));
@@ -223,8 +228,11 @@ public class AuthController {
         AppUser u = users.findById(p.userId()).orElseThrow();
         if (!PasswordHasher.verify(body.get("currentPassword"), u.passwordHash)) throw ApiException.invalid("Current password is incorrect");
         setPassword(u, body.get("newPassword"));
+        u.tokensValidAfter = Instant.now();
+        users.save(u);
         audit.record("PASSWORD_CHANGED", "User", u.id, Map.of());
-        return Map.of("ok", true);
+        // other sessions end; this one continues with a fresh token
+        return Map.of("ok", true, "token", tokens.issue(u.id));
     }
 
     @PostMapping("/users/{id}:set-password")
@@ -233,6 +241,8 @@ public class AuthController {
         Access.requireRole("ADMIN");
         AppUser u = crud.load(AppUser.class, id);
         setPassword(u, body.get("password"));
+        u.tokensValidAfter = Instant.now();
+        users.save(u);
         audit.record("PASSWORD_RESET", "User", u.id, Map.of("by", CurrentUser.actorName()));
         return Map.of("ok", true);
     }
@@ -278,6 +288,7 @@ public class AuthController {
         m.put("currency", t == null ? "XAF" : t.currency);
         m.put("timeZone", t == null ? "UTC" : t.timeZone);
         m.put("mfaEnrolled", u.mfaEnrolledAt != null);
+        m.put("scoped", scopes.resolve(u) != null);
         m.put("mfaEnrollmentRequired", mfaPolicy.enrollmentRequired(u));
         m.put("emailNotifications", !Boolean.FALSE.equals(u.emailNotifications));
         return m;

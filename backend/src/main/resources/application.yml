@@ -46,6 +46,7 @@ opes:
   security:
     mfa-required: ${OPES_MFA_REQUIRED:false}
     cors-origins: ${OPES_CORS_ORIGINS:}
+    login-per-minute: ${OPES_LOGIN_PER_MINUTE:20}
     # Override in every non-development environment (managed secret).
     token-secret: ${OPES_TOKEN_SECRET:dev-only-secret-change-me-0123456789abcdef}
     token-ttl-seconds: 28800

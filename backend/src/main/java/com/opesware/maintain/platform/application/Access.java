@@ -12,7 +12,7 @@ public final class Access {
     public static final Set<String> CUSTOMER_CREATABLE = Set.of("maintenance-requests", "service-signoffs");
     /** Sensitive administrative resources limited to managers/auditors. */
     private static final Set<String> RESTRICTED_READ = Set.of("audit-events", "users", "delegations", "devices",
-            "settings", "outbox-events", "integrations", "webhook-subscriptions");
+            "settings", "outbox-events", "integrations", "webhook-subscriptions", "notifications");
 
     private Access() {}
 
@@ -22,8 +22,7 @@ public final class Access {
             if (!CUSTOMER_READABLE.contains(def.path())) throw ApiException.forbidden("Not available in the customer portal");
             return p;
         }
-        if (RESTRICTED_READ.contains(def.path()) && !p.is("ADMIN", "MANAGER", "AUDITOR")
-                && !(def.path().equals("users"))) {
+        if (RESTRICTED_READ.contains(def.path()) && !p.is("ADMIN", "MANAGER", "AUDITOR")) {
             throw ApiException.forbidden("Requires administrator, manager or auditor role");
         }
         return p;

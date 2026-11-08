@@ -44,7 +44,7 @@ public abstract class ReadController {
     @GetMapping(value = "/export.csv", produces = "text/csv")
     public ResponseEntity<byte[]> export(@RequestParam Map<String, String> params) {
         Map<String, String> p = new HashMap<>(params);
-        p.put("size", "500");
+        p.put("size", "5000");
         ResourceDef def = crud.def(path);
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> items = (List<Map<String, Object>>) crud.list(path, p).get("items");

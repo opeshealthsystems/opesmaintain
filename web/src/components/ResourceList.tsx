@@ -100,7 +100,10 @@ export function ResourceList({ def }: { def: ResourceDef }) {
         actions={
           <>
             <button className="btn" onClick={() => download(`/${def.path}/export.csv?${params}`, `${def.path}.csv`)}><Icon name="Download" size={16} />{t("Export")}</button>
-            {canWrite(def.path) && !def.readonly && (
+            {def.path === "inspection-results" && canWrite(def.path) && (
+              <Link className="btn btn-primary" href="/inspect"><Icon name="ClipboardCheck" size={16} />Perform inspection</Link>
+            )}
+            {canWrite(def.path) && !def.readonly && def.path !== "inspection-results" && (
               <Link className="btn btn-primary" href={`/m/${def.path}/new`}><Icon name="Plus" size={16} />{t("New")} {def.singular.toLowerCase()}</Link>
             )}
           </>

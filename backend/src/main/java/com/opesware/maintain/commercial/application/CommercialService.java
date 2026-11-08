@@ -32,8 +32,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class CommercialService {
     private final CrudService crud;
     private final WorkOrderRepository workOrders;
+    private final com.opesware.maintain.identity.application.DelegationService delegation;
 
-    public CommercialService(CrudService crud, WorkOrderRepository workOrders) {
+    public CommercialService(CrudService crud, WorkOrderRepository workOrders, com.opesware.maintain.identity.application.DelegationService delegation) {
+        this.delegation = delegation;
         this.crud = crud;
         this.workOrders = workOrders;
     }
@@ -50,7 +52,7 @@ public class CommercialService {
                 q.status = "SENT";
             }
             case "approve", "reject" -> {
-                if (!p.is("CUSTOMER")) Access.requireRole("COMMERCIAL", "MANAGER");
+                if (!p.is("CUSTOMER")) delegation.requireRoleOrDelegation("APPROVE_QUOTES", "COMMERCIAL", "MANAGER");
                 if (!"SENT".equals(from)) throw bad(q);
                 if (q.validUntil != null && q.validUntil.isBefore(LocalDate.now())) {
                     q.status = "EXPIRED";
@@ -191,6 +193,9 @@ public class CommercialService {
                 throw ApiException.guard("WORK_NOT_COMPLETE", "Sign-off is possible only after the work is completed");
             }
             if (s.customerId == null) s.customerId = wo.customerId;
+            boolean exists = ((com.opesware.maintain.commercial.infrastructure.ServiceSignoffRepository) crud.repo(ServiceSignoff.class))
+                    .findByWorkOrderId(wo.id).stream().anyMatch(x -> Boolean.TRUE.equals(x.accepted));
+            if (exists) throw ApiException.guard("ALREADY_SIGNED", "This work has already been signed off");
             s.signedAt = Instant.now();
             if (s.accepted == null) s.accepted = true;
             if (s.rating != null && (s.rating < 1 || s.rating > 5)) throw ApiException.invalid("Rating must be between 1 and 5");

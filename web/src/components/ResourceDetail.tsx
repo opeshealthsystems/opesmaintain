@@ -7,7 +7,7 @@ import { PRINTABLE, visibleActions } from "@/lib/actions";
 import { useAuth } from "@/lib/auth";
 import { useT } from "@/lib/i18n";
 import { Icon } from "@/lib/icons";
-import { modules, relatedOf, resource, type ResourceDef } from "@/lib/registry";
+import { modules, relatedOf, resource, RESTRICTED_RESOURCES, type ResourceDef } from "@/lib/registry";
 import { formatValue, humanize } from "@/lib/format";
 import { ActionRunner, type RunSpec } from "./ActionRunner";
 import { cellFor, RecordTable } from "./ResourceList";
@@ -39,19 +39,20 @@ export function ResourceDetail({ def, id }: { def: ResourceDef; id: string }) {
   const related = useMemo(() => relatedOf(def.path).filter(({ res }) => {
     if (res.path === "audit-events" || res.path === "outbox-events") return false;
     if (user?.role === "CUSTOMER") return ["work-orders", "maintenance-requests", "service-signoffs", "quotes", "assets"].includes(res.path);
-    if (["delegations", "devices"].includes(res.path)) return hasRole("MANAGER", "AUDITOR");
+    if (RESTRICTED_RESOURCES.has(res.path)) return hasRole("MANAGER", "AUDITOR");
     return true;
   }), [def.path, user, hasRole]);
 
   const tabs: Tab[] = useMemo(() => {
     const list: Tab[] = [{ key: "details", label: t("Details"), icon: "FileText" }];
-    if (def.path === "work-orders") list.push({ key: "execution", label: t("Execution & cost"), icon: "Wrench" });
-    if (def.path === "assets") list.push({ key: "passport", label: t("QR passport"), icon: "QrCode" }, { key: "tree", label: t("Hierarchy"), icon: "Network" }, { key: "reliability", label: t("Reliability"), icon: "Activity" });
+    const customer = user?.role === "CUSTOMER";
+    if (def.path === "work-orders" && !customer) list.push({ key: "execution", label: t("Execution & cost"), icon: "Wrench" });
+    if (def.path === "assets" && !customer) list.push({ key: "passport", label: t("QR passport"), icon: "QrCode" }, { key: "tree", label: t("Hierarchy"), icon: "Network" }, { key: "reliability", label: t("Reliability"), icon: "Activity" });
     if (def.path === "pm-plans") list.push({ key: "forecast", label: t("Forecast"), icon: "CalendarDays" });
     if (def.path === "parts") list.push({ key: "stock", label: t("Stock by warehouse"), icon: "Package" });
     if (def.path === "warehouses") list.push({ key: "stock", label: t("Stock on hand"), icon: "Package" });
     if (def.path === "documents") list.push({ key: "file", label: t("File"), icon: "Paperclip" });
-    if (["assets", "customers", "sites", "work-orders"].includes(def.path)) list.push({ key: "docs", label: t("Documents"), icon: "FileText" });
+    if (["assets", "customers", "sites", "work-orders"].includes(def.path) && !customer) list.push({ key: "docs", label: t("Documents"), icon: "FileText" });
     const counts = new Map<string, number>();
     for (const r of related) counts.set(r.res.path, (counts.get(r.res.path) ?? 0) + 1);
     for (const r of related) {
@@ -61,7 +62,7 @@ export function ResourceDetail({ def, id }: { def: ResourceDef; id: string }) {
     }
     if (hasRole(...AUDIT_ROLES)) list.push({ key: "history", label: t("History"), icon: "History" });
     return list;
-  }, [def.path, related, hasRole, t]);
+  }, [def.path, related, hasRole, t, user]);
 
   if (loading && !row) return <Loading />;
   if (error) return <ErrorState error={error} onRetry={reload} />;
@@ -117,6 +118,12 @@ export function ResourceDetail({ def, id }: { def: ResourceDef; id: string }) {
               <button className="btn" onClick={() => download(`/users/${id}/personal-data`, `personal-data-${id}.json`).then(() => toast("Export downloaded")).catch((e) => toast((e as Error).message, "err"))}>
                 <Icon name="FileDown" size={16} />{t("Export personal data")}
               </button>
+            )}
+            {def.path === "inspection-templates" && row.status === "PUBLISHED" && canWrite("inspection-results") && (
+              <Link className="btn btn-primary" href={`/inspect?templateId=${id}`}><Icon name="ClipboardCheck" size={16} />Perform inspection</Link>
+            )}
+            {def.path === "assets" && canWrite("inspection-results") && (
+              <Link className="btn" href={`/inspect?assetId=${id}`}><Icon name="ClipboardCheck" size={16} />Inspect</Link>
             )}
             {printable && <Link className="btn" href={`/print/${printable}/${id}`}><Icon name="Printer" size={16} />{t("Print")}</Link>}
             {editable && <Link className="btn" href={`/m/${def.path}/${id}/edit`}><Icon name="Pencil" size={16} />{t("Edit")}</Link>}

@@ -85,6 +85,23 @@ public class SyncController {
         if (devices.stream().anyMatch(d -> "REVOKED".equals(d.status))) {
             throw ApiException.forbidden("This device has been revoked; local queued data cannot be synchronized");
         }
+        Device mine = devices.stream().filter(d -> p.userId() != null && p.userId().equals(d.userId)).findFirst().orElse(null);
+        if (devices.stream().anyMatch(d -> p.userId() != null && !p.userId().equals(d.userId))) {
+            throw ApiException.forbidden("This device is registered to another user");
+        }
+        if (mine == null && p.userId() != null) {
+            // first sync registers the device so it can be listed and revoked by administrators
+            Device d = new Device();
+            d.userId = p.userId();
+            d.name = deviceId;
+            d.platform = deviceId.startsWith("MOB-") ? "ANDROID" : "WEB";
+            d.status = "TRUSTED";
+            mine = crud.persistNew(d);
+        }
+        if (mine != null) {
+            mine.lastSyncAt = Instant.now();
+            em.merge(mine);
+        }
     }
 
     private Map<String, Object> apply(Principal p, String deviceId, Map<String, Object> op) {

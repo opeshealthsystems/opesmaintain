@@ -26,7 +26,7 @@ public final class IdentityHooks {
         public void beforeCreate(Object e) {
             AppUser u = (AppUser) e;
             u.email = u.email.trim().toLowerCase();
-            if (users.findAll().stream().anyMatch(x -> u.email.equalsIgnoreCase(x.email))) {
+            if (users.findFirstByEmailIgnoreCase(u.email).isPresent()) {
                 throw ApiException.conflict("EMAIL_IN_USE", "A user with this email already exists");
             }
             if (u.status == null) u.status = "ACTIVE";

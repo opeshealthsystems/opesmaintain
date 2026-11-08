@@ -11,4 +11,6 @@ public interface PassportTokenRepository extends TenantRepository<PassportToken>
     List<PassportToken> findByAssetId(UUID value);
 
     List<PassportToken> findByTenantId(UUID tenantId);
+
+    java.util.Optional<PassportToken> findFirstByToken(String value);
 }

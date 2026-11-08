@@ -43,6 +43,11 @@ public class ErrorHandler {
         return body(400, "MALFORMED_REQUEST", "The request could not be read.", List.of());
     }
 
+    @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
+    public ResponseEntity<Map<String, Object>> tooLarge(Exception e) {
+        return body(413, "FILE_TOO_LARGE", "The file is larger than the 25 MB limit.", List.of());
+    }
+
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<Map<String, Object>> missing(NoResourceFoundException e) {
         return body(404, "NOT_FOUND", "Endpoint not found", List.of());

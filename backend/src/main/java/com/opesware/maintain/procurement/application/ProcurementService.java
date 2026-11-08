@@ -24,8 +24,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProcurementService {
     private final CrudService crud;
     private final InventoryService inventory;
+    private final com.opesware.maintain.identity.application.DelegationService delegation;
 
-    public ProcurementService(CrudService crud, InventoryService inventory) {
+    public ProcurementService(CrudService crud, InventoryService inventory, com.opesware.maintain.identity.application.DelegationService delegation) {
+        this.delegation = delegation;
         this.crud = crud;
         this.inventory = inventory;
     }
@@ -53,7 +55,8 @@ public class ProcurementService {
 
     @Transactional
     public PurchaseRequisition decide(UUID id, String action) {
-        Access.requireRole("PROCUREMENT", "MANAGER");
+        if ("approve".equals(action)) delegation.requireRoleOrDelegation("APPROVE_PURCHASES", "PROCUREMENT", "MANAGER");
+        else Access.requireRole("PROCUREMENT", "MANAGER");
         PurchaseRequisition r = crud.load(PurchaseRequisition.class, id);
         String from = r.status;
         switch (action) {

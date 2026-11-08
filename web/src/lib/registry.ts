@@ -61,6 +61,9 @@ export function relatedOf(path: string): { res: ResourceDef; field: FieldDef }[]
   return out;
 }
 
+/** Resources only administrators, managers and auditors may list (mirrors the server policy). */
+export const RESTRICTED_RESOURCES = new Set(["audit-events", "delegations", "devices", "settings", "outbox-events", "integrations", "webhook-subscriptions", "users", "notifications"]);
+
 export const GROUP_ORDER = [
   "Maintenance",
   "Assets",

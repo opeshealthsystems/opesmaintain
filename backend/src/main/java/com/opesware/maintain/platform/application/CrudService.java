@@ -88,7 +88,7 @@ public class CrudService {
         ResourceDef def = def(path);
         Principal p = Access.canRead(def);
         int page = Math.max(0, parseInt(params.get("page"), 0));
-        int size = Math.min(500, Math.max(1, parseInt(params.get("size"), 25)));
+        int size = Math.min(5000, Math.max(1, parseInt(params.get("size"), 25)));
         Page<Object> result = repo(def).findAll(spec(def, p, params), PageRequest.of(page, size, sort(def, params.get("sort"))));
         List<Object> items = result.getContent();
         enrich(def, items);
@@ -139,6 +139,10 @@ public class CrudService {
         if (e == null || !Objects.equals(((TenantEntity) e).tenantId, p.tenantId())) throw ApiException.notFound(def.singular());
         if (p.is("CUSTOMER") && def.has("customerId") && !Objects.equals(Fields.get(e, "customerId"), p.customerId())) {
             throw ApiException.notFound(def.singular());
+        }
+        if (CurrentUser.scope() != null) {
+            Specification<Object> byId = (r, q, cb) -> cb.equal(r.get("id"), id);
+            if (repo(def).count(spec(def, p, Map.of()).and(byId)) == 0) throw ApiException.notFound(def.singular());
         }
         return e;
     }
@@ -205,7 +209,7 @@ public class CrudService {
         checkVersion(e, ifMatch, body);
         Map<String, Object> before = snapshot(def, e);
         applyBody(def, e, body, false);
-        for (ResourceHook h : hooks(def.path())) h.beforeUpdate(e);
+        for (ResourceHook h : hooks(def.path())) h.beforeUpdate(e, before);
         validate(def, e);
         repo(def).save(e);
         for (ResourceHook h : hooks(def.path())) h.afterSave(e, false);
@@ -274,6 +278,18 @@ public class CrudService {
                 Object ref = repo(target).findById((UUID) v).orElse(null);
                 if (ref == null || !Objects.equals(((TenantEntity) ref).tenantId, tenant)) {
                     errors.add(Map.of("field", f.name(), "message", f.label() + " does not exist"));
+                } else {
+                    Principal cp = CurrentUser.get();
+                    if (cp != null && cp.is("CUSTOMER") && target.has("customerId")
+                            && !Objects.equals(Fields.get(ref, "customerId"), cp.customerId())) {
+                        errors.add(Map.of("field", f.name(), "message", f.label() + " does not exist"));
+                    } else if (cp != null && CurrentUser.scope() != null) {
+                        UUID refId = (UUID) v;
+                        Specification<Object> byId = (r, q, cb) -> cb.equal(r.get("id"), refId);
+                        if (repo(target).count(spec(target, cp, Map.of()).and(byId)) == 0) {
+                            errors.add(Map.of("field", f.name(), "message", f.label() + " is outside your service grant"));
+                        }
+                    }
                 }
             }
         }
@@ -285,6 +301,8 @@ public class CrudService {
             List<Predicate> and = new ArrayList<>();
             and.add(cb.equal(root.get("tenantId"), p.tenantId()));
             if (p.is("CUSTOMER") && def.has("customerId")) and.add(cb.equal(root.get("customerId"), p.customerId()));
+            com.opesware.maintain.platform.security.AccessScope scope = CurrentUser.scope();
+            if (scope != null) and.add(scoped(def, root, query, cb, scope));
             String q = params.get("q");
             if (q != null && !q.isBlank()) {
                 List<Predicate> or = new ArrayList<>();
@@ -322,6 +340,34 @@ public class CrudService {
             }
             return cb.and(and.toArray(new Predicate[0]));
         };
+    }
+
+    /** Service-provider users see only records at granted sites or on granted assets. */
+    private jakarta.persistence.criteria.Predicate scoped(ResourceDef def, jakarta.persistence.criteria.Root<Object> root,
+                                                          jakarta.persistence.criteria.CriteriaQuery<?> query,
+                                                          jakarta.persistence.criteria.CriteriaBuilder cb,
+                                                          com.opesware.maintain.platform.security.AccessScope scope) {
+        java.util.Set<UUID> none = java.util.Set.of(new UUID(0, 0));
+        java.util.Collection<UUID> sites = scope.sites().isEmpty() ? none : scope.sites();
+        java.util.Collection<UUID> assets = scope.assets().isEmpty() ? none : scope.assets();
+        if ("assets".equals(def.path())) return root.get("id").in(assets);
+        if ("sites".equals(def.path())) return root.get("id").in(sites);
+        List<Predicate> or = new ArrayList<>();
+        if (def.has("siteId")) or.add(root.get("siteId").in(sites));
+        if (def.has("assetId")) or.add(root.get("assetId").in(assets));
+        if (def.has("workOrderId")) {
+            var sub = query.subquery(UUID.class);
+            var w = sub.from(com.opesware.maintain.maintenance.domain.WorkOrder.class);
+            sub.select(w.get("id")).where(cb.or(w.get("siteId").in(sites), w.get("assetId").in(assets)));
+            or.add(root.get("workOrderId").in(sub));
+        }
+        if (def.has("meterId")) {
+            var sub = query.subquery(UUID.class);
+            var m = sub.from(com.opesware.maintain.asset.domain.Meter.class);
+            sub.select(m.get("id")).where(m.get("assetId").in(assets));
+            or.add(root.get("meterId").in(sub));
+        }
+        return or.isEmpty() ? cb.conjunction() : cb.or(or.toArray(new Predicate[0]));
     }
 
     @SuppressWarnings("unchecked")

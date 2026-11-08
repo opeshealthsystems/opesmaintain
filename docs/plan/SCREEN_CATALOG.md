@@ -191,9 +191,9 @@ Buildings, floors, zones, rooms and production lines.
 
 Rotatable QR reference tokens.
 
-- **Screens:** list (search, Status filters, sort, pagination, CSV), new, edit, detail
+- **Screens:** list (search, Status filters, sort, pagination, CSV), detail
 - **Columns:** Asset, Token, Status, Issued At, Scan Count
-- **Form fields:** Asset*
+- **Form fields:** read-only — created by domain commands
 - **Detail tabs:** Details, History (managers, auditors)
 - **Actions:** Revoke
 - **Printable:** no
@@ -287,7 +287,7 @@ Task checklist and evidence per work order.
 
 - **Screens:** list (search, Status filters, sort, pagination, CSV), new, edit, detail
 - **Columns:** Work Order, Sequence, Description, Required, Status
-- **Form fields:** Work Order*, Sequence, Description*, Required, Status, Result, Measured Value
+- **Form fields:** Work Order*, Sequence, Description*, Required, Result, Measured Value
 - **Detail tabs:** Details, History (managers, auditors)
 - **Actions:** —
 - **Printable:** no
@@ -305,7 +305,7 @@ Versioned calendar and meter-based plans.
 - **Detail tabs:** Details, Forecast (next 8 occurrences in site-local time and UTC), Work Orders, PM Occurrences, History (managers, auditors)
 - **Actions:** Approve, Activate, Generate work now, Pause, Resume, Retire
 - **Printable:** no
-- **Write roles:** ADMIN, DISPATCHER, MANAGER, PLANNER, TECHNICIAN
+- **Write roles:** ADMIN, MANAGER, PLANNER
 
 #### PM Occurrences — `/m/pm-occurrences`
 
@@ -333,7 +333,7 @@ Workforce, skills, rates and availability.
 - **Detail tabs:** Details, Work Orders, Assignments, Time Entries, History (managers, auditors)
 - **Actions:** —
 - **Printable:** no
-- **Write roles:** ADMIN, DISPATCHER, MANAGER, PLANNER, TECHNICIAN
+- **Write roles:** ADMIN, DISPATCHER, MANAGER, PLANNER
 
 #### Assignments — `/m/assignments`
 
@@ -345,7 +345,7 @@ Dispatch calendar entries.
 - **Detail tabs:** Details, History (managers, auditors)
 - **Actions:** —
 - **Printable:** no
-- **Write roles:** ADMIN, DISPATCHER, MANAGER, PLANNER, TECHNICIAN
+- **Write roles:** ADMIN, DISPATCHER, MANAGER, PLANNER
 
 ### M11 — Technician Mobile
 
@@ -357,9 +357,9 @@ Labor time with rate-based job costing.
 
 - **Screens:** list (search, Labor Type filters, sort, pagination, CSV), new, edit, detail
 - **Columns:** Work Order, Technician, Started At, Ended At, Hours, Cost, Labor Type, Approved
-- **Form fields:** Work Order*, Technician*, Started At*, Ended At*, Labor Type, Approved, Note
+- **Form fields:** Work Order*, Technician*, Started At*, Ended At*, Labor Type, Note
 - **Detail tabs:** Details, History (managers, auditors)
-- **Actions:** —
+- **Actions:** Approve time
 - **Printable:** no
 - **Write roles:** ADMIN, DISPATCHER, MANAGER, PLANNER, TECHNICIAN
 
@@ -375,9 +375,9 @@ Controlled checklists, one question per line.
 - **Columns:** Code, Name, Asset Type, Template Version, Status
 - **Form fields:** Code, Name*, Asset Type, Template Version, Status, Questions*, Pass Threshold
 - **Detail tabs:** Details, Inspection Results, History (managers, auditors)
-- **Actions:** —
+- **Actions:** Requeue delivery
 - **Printable:** no
-- **Write roles:** ADMIN, MANAGER, SAFETY_OFFICER, TECHNICIAN
+- **Write roles:** ADMIN, MANAGER, SAFETY_OFFICER
 
 #### Inspection Results — `/m/inspection-results`
 
@@ -481,7 +481,7 @@ Problem / cause / remedy taxonomy.
 - **Detail tabs:** Details, History (managers, auditors)
 - **Actions:** —
 - **Printable:** no
-- **Write roles:** ADMIN, MANAGER, PLANNER, TECHNICIAN
+- **Write roles:** ADMIN, MANAGER, PLANNER
 
 ### M24 — Reliability & Analytics
 
@@ -553,9 +553,9 @@ Transactional outbox of domain events.
 
 Explainable recommendations requiring human review.
 
-- **Screens:** list (search, Insight Type, Status filters, sort, pagination, CSV), new, edit, detail
+- **Screens:** list (search, Insight Type, Status filters, sort, pagination, CSV), detail
 - **Columns:** Asset, Insight Type, Title, Confidence, Status
-- **Form fields:** Asset, Insight Type, Title*, Rationale, Confidence, Suggested Action
+- **Form fields:** read-only — created by domain commands
 - **Detail tabs:** Details, History (managers, auditors)
 - **Actions:** Accept, Dismiss
 - **Printable:** no
@@ -687,7 +687,7 @@ Closed-work billing batches for ERP.
 
 - **Screens:** list (search, Target System, Status filters, sort, pagination, CSV), new, edit, detail
 - **Columns:** Number, Customer, Period Start, Period End, Work Order Count, Amount, Target System, Status
-- **Form fields:** Customer*, Contract, Period Start*, Period End*, Currency, Target System, Status, External Ref
+- **Form fields:** Customer*, Contract, Period Start*, Period End*, Currency, Target System, External Ref
 - **Detail tabs:** Details, History (managers, auditors)
 - **Actions:** Generate batch, Mark acknowledged, Mark rejected, Reverse
 - **Printable:** yes — /print/billing
@@ -729,7 +729,7 @@ Internal purchase requests.
 
 - **Screens:** list (search, Status filters, sort, pagination, CSV), new, edit, detail
 - **Columns:** Number, Part, Description, Quantity, Estimated Cost, Requested By, Needed By, Status
-- **Form fields:** Part, Description*, Quantity*, Estimated Cost, Requested By, Needed By, Work Order, Status
+- **Form fields:** Part, Description*, Quantity*, Estimated Cost, Requested By, Needed By, Work Order
 - **Detail tabs:** Details, Purchase Orders, History (managers, auditors)
 - **Actions:** Submit, Approve, Reject, Create purchase order
 - **Printable:** no
