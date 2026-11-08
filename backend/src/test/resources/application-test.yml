@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:opes-test;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;NON_KEYWORDS=VALUE,YEAR,KEY,MONTH,DAY;DB_CLOSE_DELAY=-1
+opes:
+  seed:
+    demo: false
+  jobs:
+    enabled: false
+  storage:
+    root: ./target/test-files

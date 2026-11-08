@@ -1,0 +1,34 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: opes_maintain
+      POSTGRES_USER: opes
+      POSTGRES_PASSWORD: opes
+    volumes: [dbdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U opes"]
+      interval: 5s
+      retries: 20
+  api:
+    build: ../backend
+    environment:
+      SPRING_PROFILES_ACTIVE: postgres
+      OPES_DB_URL: jdbc:postgresql://db:5432/opes_maintain
+      OPES_DB_USER: opes
+      OPES_DB_PASSWORD: opes
+      OPES_TOKEN_SECRET: ${OPES_TOKEN_SECRET:-change-me-to-a-long-random-secret-value}
+      OPES_STORAGE_ROOT: /data/files
+    volumes: [files:/data/files]
+    depends_on:
+      db: { condition: service_healthy }
+    ports: ["8080:8080"]
+  web:
+    build: ../web
+    environment:
+      OPES_API_URL: http://api:8080
+    depends_on: [api]
+    ports: ["3000:3000"]
+volumes:
+  dbdata: {}
+  files: {}
