@@ -159,7 +159,7 @@ public final class ResourceCatalog {
                 new FieldDef("minValue", "Min Value", "dec", null, List.of(), false, false, false, false, false, false),
                 new FieldDef("maxValue", "Max Value", "dec", null, List.of(), false, false, false, false, false, false),
                 new FieldDef("status", "Status", "enum", null, List.of("ACTIVE", "REPLACED", "RETIRED"), false, true, false, false, false, false))));
-        add(new ResourceDef("meter-readings", com.opesware.maintain.asset.domain.MeterReading.class, "asset", "M14", "Meter Readings", "Meter Reading", null, "value", false, Set.of("ADMIN", "MANAGER", "PLANNER"), List.of(
+        add(new ResourceDef("meter-readings", com.opesware.maintain.asset.domain.MeterReading.class, "asset", "M14", "Meter Readings", "Meter Reading", null, "value", false, Set.of("ADMIN", "MANAGER", "PLANNER", "TECHNICIAN"), List.of(
                 new FieldDef("meterId", "Meter", "ref", "meters", List.of(), true, true, false, false, false, false),
                 new FieldDef("assetId", "Asset", "ref", "assets", List.of(), false, true, true, false, false, false),
                 new FieldDef("value", "Value", "dec", null, List.of(), true, true, false, false, false, false),

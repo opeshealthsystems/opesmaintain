@@ -5,7 +5,7 @@ Enterprise maintenance management platform (CMMS/EAM) for OPES Health Systems, b
 
 | Layer | Technology | Location |
 |---|---|---|
-| Backend | Java 21+ (spec target 25 LTS), Spring Boot 4.1, Spring Data JPA, Flyway | `backend/` |
+| Backend | Java 25 LTS, Spring Boot 4.1, Spring Data JPA, Flyway | `backend/` |
 | Database | PostgreSQL (production) · H2 in PostgreSQL mode (dev/test) | `backend/src/main/resources/db/migration` |
 | Web | Next.js 16, React 19, TypeScript, Lucide icons | `web/` |
 | Mobile | Expo / React Native, SQLCipher offline store | `mobile/` |
@@ -90,6 +90,10 @@ cd web && npm run typecheck && npm run build
 Resources are defined once in `tools/codegen/model.py`. After editing it run
 `python3 tools/codegen/generate.py`. For a deployed database add a new Flyway migration rather than
 editing `V1__baseline_schema.sql`.
+
+## Validation
+
+See [`docs/validation/RELEASE_VALIDATION.md`](docs/validation/RELEASE_VALIDATION.md). Scripts: `tools/validation/loadtest.mjs`, `restore-drill.sh`, `security-probe.mjs`, `mobile-e2e.js`.
 
 ## Known gaps / next steps
 

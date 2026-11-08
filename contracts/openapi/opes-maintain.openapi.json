@@ -2704,7 +2704,8 @@
     "x-roles-write": [
      "ADMIN",
      "MANAGER",
-     "PLANNER"
+     "PLANNER",
+     "TECHNICIAN"
     ],
     "x-audit": "CREATE"
    }
@@ -2791,7 +2792,8 @@
     "x-roles-write": [
      "ADMIN",
      "MANAGER",
-     "PLANNER"
+     "PLANNER",
+     "TECHNICIAN"
     ],
     "x-audit": "UPDATE"
    }

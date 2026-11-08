@@ -1897,7 +1897,8 @@
    "writerRoles": [
     "ADMIN",
     "MANAGER",
-    "PLANNER"
+    "PLANNER",
+    "TECHNICIAN"
    ],
    "desc": "Recorded measurements with acceptance checks.",
    "fields": [

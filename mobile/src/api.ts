@@ -2,10 +2,14 @@ import Constants from "expo-constants";
 import * as Crypto from "expo-crypto";
 import { enqueue, getKv, ops, setOp, setKv } from "./store";
 
-const BASE = ((Constants.expoConfig?.extra as { apiUrl?: string } | undefined)?.apiUrl ?? "http://10.0.2.2:8080") + "/api/v1";
+const BASE = (process.env.EXPO_PUBLIC_API_URL ?? (Constants.expoConfig?.extra as { apiUrl?: string } | undefined)?.apiUrl ?? "http://10.0.2.2:8080") + "/api/v1";
 
 export class ApiError extends Error {
-  constructor(public status: number, message: string) { super(message); }
+  status: number;
+  constructor(status: number, message: string) {
+    super(message);
+    this.status = status;
+  }
 }
 
 export async function api<T>(path: string, init: { method?: string; body?: unknown; headers?: Record<string, string> } = {}): Promise<T> {

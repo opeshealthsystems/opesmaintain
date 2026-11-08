@@ -157,7 +157,7 @@ res("meters", "Meter", "asset", "M14", "Meters", "Meter", "Gauge", [
 res("meter-readings", "MeterReading", "asset", "M14", "Meter Readings", "Meter Reading", "LineChart", [
     "meterId:ref(meters)!*", "assetId:ref(assets)~*", "value:dec!*", "readingAt:datetime!*",
     "source:enum(MANUAL|MOBILE|IOT|IMPORT)*", "accepted:bool~*", "rejectionReason:str~", "note:text",
-], display="value", desc="Recorded measurements with acceptance checks.")
+], display="value", writers=["MANAGER", "PLANNER", "TECHNICIAN"], desc="Recorded measurements with acceptance checks.")
 
 res("vehicles", "Vehicle", "asset", "M26", "Fleet Vehicles", "Vehicle", "Truck", [
     "assetId:ref(assets)!*", "plateNumber:str!*", "vin:str", "make:str*", "model:str*", "year:int",

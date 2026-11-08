@@ -24,10 +24,12 @@ All 28 modules are implemented across the backend, the web app and the native te
   an ambiguous time takes the earlier offset (`java.time.ZonedDateTime` rules). The resolved UTC
   instant and the local representation are both stored.
 
-## Remaining constraints
-- **Java 25**: the build agents in this environment have JDK 21. Run `mvn -Djava.version=25 verify`
-  where JDK 25 is installed; the code uses no version-specific APIs.
-- **Native app runtime check**: the mobile app typechecks but has not been run on a device or
-  emulator here (none available). Build it with `npx expo run:android` / `run:ios`.
-- **Release gates** from spec §15–16 (load tests, backup/restore drills, penetration test) are
-  operational activities that happen against a deployed environment.
+## Validation
+Release gates were executed. Results are in [`validation/RELEASE_VALIDATION.md`](validation/RELEASE_VALIDATION.md).
+The project now builds and tests on **Java 25 LTS**.
+
+## Remaining external activities
+- An independent penetration test and manual assistive-technology testing (the spec requires
+  human sign-off; automated equivalents pass).
+- An on-device run of the native app's SQLCipher store (no emulator is available here; the UI and
+  sync logic pass end to end via React Native Web).

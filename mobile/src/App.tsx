@@ -59,7 +59,7 @@ function SyncBar({ c, online, onSynced }: { c: typeof light; online: boolean; on
   const [items, setItems] = useState<Op[]>([]);
   const [open, setOpen] = useState(false);
   const load = useCallback(() => { ops().then(setItems); }, []);
-  useEffect(() => { load(); const h = setInterval(load, 3000); return () => clearInterval(h); }, [load]);
+  useEffect(() => { load(); const h = setInterval(load, 1000); return () => clearInterval(h); }, [load]);
   const pending = items.filter((o) => o.state === "QUEUED" || o.state === "SYNCING").length;
   const issues = items.filter((o) => ["CONFLICT", "REJECTED", "REQUIRES_ONLINE_REVIEW"].includes(o.state)).length;
   return (

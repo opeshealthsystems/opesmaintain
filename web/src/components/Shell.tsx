@@ -118,7 +118,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <button className="btn btn-ghost icon-btn menu-btn" onClick={() => setOpen(true)} aria-label="Open menu"><Icon name="Menu" /></button>
           <GlobalSearch />
           <div className="topbar-spacer" />
-          <button className="btn btn-ghost btn-sm hide-sm" onClick={() => setLanguage(user.language === "FR" ? "EN" : "FR")} aria-label={t("Language")} title={t("Language")}>
+          <button className="btn btn-ghost btn-sm hide-sm" onClick={() => setLanguage(user.language === "FR" ? "EN" : "FR")} aria-label={`${user.language === "FR" ? "FR" : "EN"} — ${t("Language")}`} title={t("Language")}>
             <Icon name="Languages" size={16} />{user.language === "FR" ? "FR" : "EN"}
           </button>
           <NotificationBell />
@@ -234,7 +234,7 @@ function UserMenu({ name, role, onLogout }: { name: string; role: string; onLogo
   const initials = name.split(" ").map((p) => p[0]).slice(0, 2).join("");
   return (
     <div ref={ref} style={{ position: "relative" }}>
-      <button className="btn btn-ghost" onClick={() => setOpen(!open)} aria-expanded={open} aria-label="User menu" style={{ gap: 8, paddingRight: 6 }}>
+      <button className="btn btn-ghost" onClick={() => setOpen(!open)} aria-expanded={open} aria-haspopup="menu" style={{ gap: 8, paddingRight: 6 }}>
         <span style={{ width: 28, height: 28, borderRadius: "50%", background: "var(--accent-soft)", color: "var(--accent)", display: "grid", placeItems: "center", fontWeight: 600, fontSize: 12 }}>{initials}</span>
         <span className="hide-sm" style={{ textAlign: "left", lineHeight: 1.15 }}>
           <span style={{ display: "block", fontSize: 13 }}>{name}</span>
