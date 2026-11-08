@@ -32,7 +32,7 @@ check in `backend/src/test/java/com/opesware/maintain/AuditRegressionTest.java`,
 | 20 | UI gap | No way to approve labor from the work order | "Approve" on each time entry for supervisors (never their own) |
 
 ## Verification
-- Backend: 30 tests pass, including the audit regression suite and the rate-limiter test.
+- Backend: 29 tests pass, including the audit regression suite and the rate-limiter test.
 - Security probe: 210 checks, 0 findings.
 - Role sweep: every sidebar link, the first record of every list, and every tab on that record, for
   12 roles including the new `contractor@opes.demo`. Results are below.
