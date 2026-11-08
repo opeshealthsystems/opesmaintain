@@ -7,6 +7,8 @@ matches what is built.
 
 Status key: ✅ done · 🔧 in this plan (built by engineering) · 👤 needs people, a device or an environment
 
+**Current status:** every engineering workstream (A–H) is ✅ and verified. Only the 👤 items in section I remain; each has a hand-off kit.
+
 ---
 
 ## 1. Product surface (baseline, ✅)
@@ -53,13 +55,13 @@ Status key: ✅ done · 🔧 in this plan (built by engineering) · 👤 needs p
 | W8 | Field offline | Technician app caches jobs → records tasks, readings and labor offline → reconnect → server re-validates each operation → accepted, conflict, rejected or needs online review |
 | W9 | Condition monitoring | Sensor reading → threshold alert → acknowledge → convert to work order or clear |
 | W10 | Recommendations | Rules raise explainable insights → planner accepts or dismisses → audit |
-| W11 | Notifications | Domain events raise in-app and e-mail notifications to the right person or role (🔧 workstream B) |
+| W11 | Notifications | Domain events raise in-app and e-mail notifications to the right person or role (✅ workstream B) |
 
 ---
 
 ## 3. Workstreams to production readiness
 
-### A. Identity and access hardening 🔧
+### A. Identity and access hardening ✅
 | Item | Acceptance criteria |
 |---|---|
 | A1 TOTP multi-factor sign-in for local accounts | Users enrol by scanning a QR code; sign-in then asks for a 6-digit code; enrolment is required for admins, managers and safety and calibration officers when `opes.security.mfa-required=true` |
@@ -68,20 +70,20 @@ Status key: ✅ done · 🔧 in this plan (built by engineering) · 👤 needs p
 | A4 Production secret guard | Startup fails under the `prod` profile if the token secret is the dev default or shorter than 32 characters |
 | A5 API security headers and CORS | API responses carry `nosniff`, `no-store` on authenticated data, and a strict CORS allow-list from configuration |
 
-### B. Notifications 🔧
+### B. Notifications ✅
 | Item | Acceptance criteria |
 |---|---|
 | B1 Event-driven notifications | Assignment → technician; request submitted → dispatchers; approval needed → managers; SLA breached → managers; permit awaiting issue → safety officers; quote sent → customer users; low stock → storekeepers; calibration out of tolerance → calibration officers |
 | B2 E-mail channel | SMTP via configuration; notifications with an e-mail recipient are sent; a failed send is recorded and retried, never lost silently |
 | B3 Notification preferences | Each user can switch e-mail on or off per category in Settings |
 
-### C. Files and scanning 🔧
+### C. Files and scanning ✅
 | Item | Acceptance criteria |
 |---|---|
 | C1 S3-compatible storage adapter | `opes.storage.type=s3` stores evidence in a bucket (AWS, MinIO, Ceph) with SHA-256 checks; filesystem stays the default |
 | C2 ClamAV adapter | `opes.scan.clamd.host` streams uploads to clamd; infected files are quarantined; if the scanner is unreachable the file stays in SCANNING and is retried, never auto-accepted |
 
-### D. Observability and operations 🔧
+### D. Observability and operations ✅
 | Item | Acceptance criteria |
 |---|---|
 | D1 Prometheus metrics | `/actuator/prometheus` exposes HTTP latency plus domain gauges: outbox backlog, dead letters, open work orders, SLA breaches, sync outcomes |
@@ -89,27 +91,27 @@ Status key: ✅ done · 🔧 in this plan (built by engineering) · 👤 needs p
 | D3 Grafana dashboard and alert rules | Dashboard JSON and Prometheus alert rules for API p95, 5xx rate, dead letters, outbox backlog, DB connections and job failures |
 | D4 Runbooks | Incident, restore, secret rotation, webhook dead-letter and user lock-out runbooks |
 
-### E. Data protection and recovery 🔧
+### E. Data protection and recovery ✅
 | Item | Acceptance criteria |
 |---|---|
 | E1 Point-in-time recovery | WAL archiving and pgBackRest configuration in `infra/`; RPO ≤ 15 min by configuration |
 | E2 Restore drill | `tools/validation/restore-drill.sh` (✅) plus a PITR drill procedure in the restore runbook |
 | E3 Personal-data export and erasure | Admin command exports one person's personal data, and pseudonymises an offboarded user while keeping the audit trail intact |
 
-### F. Deployment 🔧
+### F. Deployment ✅
 | Item | Acceptance criteria |
 |---|---|
 | F1 Production compose | Caddy reverse proxy with automatic TLS, PostgreSQL, API, web; secrets from environment files; health checks |
 | F2 Kubernetes manifests | Deployments with readiness and liveness probes, resource limits, an HPA for API and web, Ingress with TLS, NetworkPolicy limiting the database to the API |
 | F3 Release pipeline | CI builds and pushes signed images on tags; SBOM generated; dependency audit is a release gate |
 
-### G. Maintenance intelligence 🔧
+### G. Maintenance intelligence ✅
 | Item | Acceptance criteria |
 |---|---|
 | G1 Statistical anomaly detection | Meter and sensor readings beyond 3σ of their own recent history raise an explained `METER_ANOMALY` insight |
 | G2 Failure forecasting | Per-asset MTBF from failure history predicts the next likely failure date with a stated sample size; shown on the asset and as an insight when within 14 days |
 
-### H. Localisation 🔧
+### H. Localisation ✅
 | Item | Acceptance criteria |
 |---|---|
 | H1 French for every module | Module titles, record names and field labels are translated; the FR toggle changes the whole UI, not only the shell |
@@ -117,9 +119,9 @@ Status key: ✅ done · 🔧 in this plan (built by engineering) · 👤 needs p
 ### I. External sign-offs 👤
 | Item | Who | What we provide |
 |---|---|---|
-| I1 Penetration test | Independent security firm | Scope, test accounts per role, the second tenant for isolation tests, `tools/validation/security-probe.mjs` results |
-| I2 Manual accessibility test | Screen-reader users (NVDA, VoiceOver, TalkBack) | Test script covering W1, W3, W8 and the customer portal |
-| I3 Device test of the native app | QA with Android and iOS devices | Build instructions, a test plan for offline, encryption at rest, revocation and wipe |
+| I1 Penetration test | Independent security firm | [Scope and rules of engagement](../validation/external/penetration-test-scope.md) |
+| I2 Manual accessibility test | Screen-reader users (NVDA, JAWS, VoiceOver, TalkBack) | [Test script](../validation/external/screen-reader-test-script.md) |
+| I3 Device test of the native app | QA with Android and iOS devices | [Device test plan](../validation/external/mobile-device-test-plan.md) |
 | I4 Pilot load sizing | OPES operations with a pilot customer | `tools/validation/loadtest.mjs` re-run with pilot data volumes |
 | I5 Production environment | OPES infrastructure | Hosting account, DNS, TLS, SMTP, bucket, backup storage, secrets |
 

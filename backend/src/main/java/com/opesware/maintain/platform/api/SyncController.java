@@ -39,6 +39,8 @@ public class SyncController {
     private final SyncOperationRepo receipts;
     private final TransactionTemplate tx;
     private final EntityManager em;
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private io.micrometer.core.instrument.MeterRegistry metrics;
 
     public SyncController(CrudService crud, WorkOrderService workOrders, SyncOperationRepo receipts,
                           PlatformTransactionManager tm, EntityManager em) {
@@ -138,6 +140,7 @@ public class SyncController {
         });
         r.put("outcome", outcome);
         r.put("message", message);
+        if (metrics != null) metrics.counter("opes_sync_operations_total", "outcome", outcome, "type", type).increment();
         return r;
     }
 

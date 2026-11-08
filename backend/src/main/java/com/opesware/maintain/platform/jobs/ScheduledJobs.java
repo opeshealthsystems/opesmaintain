@@ -36,6 +36,8 @@ public class ScheduledJobs {
     private final WorkOrderRepository workOrders;
     private final ServiceGrantRepository grants;
     private final CrudService crud;
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private io.micrometer.core.instrument.MeterRegistry metrics;
     private final com.opesware.maintain.platform.notify.NotificationService notifications;
     private final com.opesware.maintain.documents.application.DocumentService documents;
 
@@ -106,6 +108,7 @@ public class ScheduledJobs {
                 Integer n = CurrentUser.runAsSystem(t.id, () -> work.apply(t));
                 if (n != null && n > 0) log.info("job={} tenant={} affected={}", job, t.code, n);
             } catch (RuntimeException e) {
+                if (metrics != null) metrics.counter("opes_job_failures_total", "job", job).increment();
                 log.error("job={} tenant={} failed", job, t.code, e);
             }
         }

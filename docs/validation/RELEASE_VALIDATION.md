@@ -1,5 +1,7 @@
 # Release validation report — OPES Maintain 1.0.0
 
+**Latest run:** after the production-readiness workstreams A–H. Backend: 23/23 tests on Java 25. Security probe: 198 checks, 0 findings. axe: 0 violations. Page crawl: 177 pages in English (1280 px) and French (390 px), no errors. Load (PostgreSQL): list p95 130 ms, transitions p95 35 ms, 50-op sync 607 ms. Restore drill and mobile E2E: passed.
+
 Run on 8 Nov 2026 against this commit, on Java 25.0.5 LTS (Temurin), PostgreSQL 16 and Chromium.
 Each check can be repeated with the scripts in `tools/validation/`.
 
@@ -26,6 +28,24 @@ Each check can be repeated with the scripts in `tools/validation/`.
 - Sidebar group headers were below the 24 px minimum target size.
 - Two header buttons had accessible names that didn't match their visible text.
 - The mobile sync queue counter lagged by up to 3 s.
+
+## Production-readiness additions (verified)
+| Area | Evidence |
+|---|---|
+| TOTP two-step sign-in | RFC 6238 test vectors; login requires a valid code once enrolled; privileged roles are blocked until enrolled when `OPES_MFA_REQUIRED=true` |
+| Lockout, revocation | 5 failures → 15-minute lock with indistinguishable responses; `Sign out everywhere` rejects existing tokens (security probe) |
+| Production secret guard | Startup fails in production with the development token secret (unit test) |
+| Notifications | New request → dispatchers, exactly once through the outbox (integration test); e-mail queue with 5 retries |
+| S3 storage | Signature V4 matches AWS's published test vector; round trip through a signed-request server |
+| ClamAV | clamd INSTREAM protocol tested against a protocol server; unreachable scanner holds files (never accepts) |
+| Metrics | `/actuator/prometheus` exposes domain gauges; 11 alert rules, each with a runbook |
+| Anomalies and forecasts | 3σ detector and MTBF forecaster unit-tested; explained insights |
+| French | Every module, record, field and status translated; 177 pages crawled in French at 390 px |
+
+## External sign-off kits
+- [Penetration test scope](external/penetration-test-scope.md)
+- [Screen-reader test script](external/screen-reader-test-script.md)
+- [Mobile device test plan](external/mobile-device-test-plan.md)
 
 ## Limits of this evidence
 - Automated probes and axe scans do not replace an independent penetration test or manual

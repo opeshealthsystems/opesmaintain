@@ -77,7 +77,30 @@ check(!/Exception|at com\.|java\./.test(bad.text), "stack trace leaked in error"
 const stale = await call(`/work-orders/${wo.id}`, { method: "PATCH", token: A, body: { title: "x" }, headers: { "If-Match": "999" } });
 check(stale.status === 412, "lost update not prevented");
 
-// 7. Web security headers
+// 7. Identity hardening (plan workstream A, E3)
+const M = await login("manager@opes.demo");
+const someUser = (await call("/users?size=1&role=TECHNICIAN", { token: A })).json.items[0];
+check((await call(`/users/${someUser.id}/personal-data`, { token: M })).status === 403, "non-admin exported personal data");
+check((await call(`/users/${someUser.id}/personal-data`, { token: X })).status === 404, "cross-tenant personal-data export");
+check((await call(`/users/${someUser.id}:pseudonymise`, { token: A, method: "POST" })).status === 422, "pseudonymised an active user");
+check((await call(`/users/${someUser.id}:reset-mfa`, { token: M, method: "POST" })).status === 403, "manager reset MFA");
+check((await call(`/users/${someUser.id}:revoke-sessions`, { token: T, method: "POST" })).status === 403, "technician revoked sessions");
+const probeEmail = `lock-${Date.now()}@nowhere.test`;
+const unknown = await call("/auth/login", { body: { email: probeEmail, password: "x" } });
+check(unknown.status === 401 && unknown.json?.code === "INVALID_CREDENTIALS", "unknown account distinguishable");
+const pre = await fetch(API + "/work-orders", { method: "OPTIONS", headers: { Origin: "https://evil.example", "Access-Control-Request-Method": "GET" } });
+check(pre.status === 403 && !pre.headers.get("access-control-allow-origin"), "CORS allowed an unknown origin");
+const any = await call("/kpis", { token: A });
+check(!!any.headers.get("x-correlation-id") && any.headers.get("cache-control") === "no-store", "missing correlation id or no-store");
+// session revocation takes effect immediately
+const T2 = await login("tech2@opes.demo");
+const tech2 = (await call("/users?q=tech2%40opes.demo&size=1", { token: A })).json.items[0];
+await new Promise((r) => setTimeout(r, 1100));
+await call(`/users/${tech2.id}:revoke-sessions`, { token: A, body: {} });
+await new Promise((r) => setTimeout(r, 1100));
+check((await call("/work-orders?size=1", { token: T2 })).status === 401, "revoked session still accepted");
+
+// 8. Web security headers
 if (WEB) {
   const h = (await fetch(WEB + "/login")).headers;
   check(h.get("x-frame-options") === "DENY", "missing X-Frame-Options");

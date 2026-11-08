@@ -20,8 +20,11 @@ public class ReliabilityController {
     private final KpiService kpis;
     private final InsightService insights;
     private final CrudService crud;
+    private final com.opesware.maintain.reliability.application.PredictiveService predictive;
 
-    public ReliabilityController(KpiService kpis, InsightService insights, CrudService crud) {
+    public ReliabilityController(KpiService kpis, InsightService insights, CrudService crud,
+                                 com.opesware.maintain.reliability.application.PredictiveService predictive) {
+        this.predictive = predictive;
         this.kpis = kpis;
         this.insights = insights;
         this.crud = crud;
@@ -30,6 +33,11 @@ public class ReliabilityController {
     @GetMapping("/kpis")
     public Map<String, Object> kpis(@RequestParam(defaultValue = "90") int days, @RequestParam(required = false) UUID siteId) {
         return kpis.kpis(Math.max(1, Math.min(days, 730)), siteId);
+    }
+
+    @GetMapping("/assets/{id}/reliability")
+    public Map<String, Object> assetReliability(@PathVariable UUID id) {
+        return predictive.reliability(id);
     }
 
     @PostMapping("/ai-insights:refresh")

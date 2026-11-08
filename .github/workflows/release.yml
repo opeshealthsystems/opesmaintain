@@ -1,0 +1,44 @@
+name: Release
+on:
+  push:
+    tags: ["v*"]
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: "25", cache: maven }
+      - run: mvn -B -f backend/pom.xml verify
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+      - name: Dependency audit gate (high and critical block the release)
+        run: |
+          (cd web && npm ci && npm audit --omit=dev --audit-level=high)
+          (cd mobile && npm ci && npm audit --omit=dev --audit-level=critical)
+  images:
+    needs: verify
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        component: [api, web]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with: { registry: ghcr.io, username: "${{ github.actor }}", password: "${{ secrets.GITHUB_TOKEN }}" }
+      - id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.component == 'api' && 'backend' || 'web' }}
+          push: true
+          provenance: true
+          sbom: true
+          tags: ghcr.io/${{ github.repository_owner }}/opes-maintain-${{ matrix.component }}:${{ github.ref_name }}
+      - uses: sigstore/cosign-installer@v3
+      - name: Sign image (keyless)
+        run: cosign sign --yes ghcr.io/${{ github.repository_owner }}/opes-maintain-${{ matrix.component }}@${{ steps.build.outputs.digest }}

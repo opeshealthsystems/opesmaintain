@@ -260,3 +260,22 @@ export function AuditTrail({ entityId }: { entityId: string }) {
 }
 
 export const fmtDate = date;
+
+export function AssetReliability({ id }: { id: string }) {
+  const { data, error, loading } = useData(() => api<Record<string, unknown>>(`/assets/${id}/reliability`), [id]);
+  if (loading) return <Loading />;
+  if (error) return <ErrorState error={error} />;
+  const d = data!;
+  return (
+    <div className="card-body stack">
+      <div className="grid grid-4">
+        <div className="card stat"><div className="label">Unplanned failures</div><div className="value">{num(d.unplannedFailures, 0)}</div></div>
+        <div className="card stat"><div className="label">MTBF</div><div className="value">{d.mtbfDays === null ? "—" : `${num(d.mtbfDays, 1)} d`}</div></div>
+        <div className="card stat"><div className="label">Next expected failure</div><div className="value" style={{ fontSize: 18 }}>{d.predictedNextFailure ? date(d.predictedNextFailure) : "—"}</div>
+          <div className="meta">{d.predictedNextFailure ? `${Math.round(Number(d.confidence) * 100)}% confidence` : "Needs at least 3 failures"}</div></div>
+        <div className="card stat"><div className="label">Total downtime</div><div className="value">{num(d.totalDowntimeHours, 1)} h</div></div>
+      </div>
+      <Alert tone="info">{String(d.method)}. Forecasts are guidance for planning and do not trigger work automatically.</Alert>
+    </div>
+  );
+}

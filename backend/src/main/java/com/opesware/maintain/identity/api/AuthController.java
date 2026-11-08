@@ -40,8 +40,11 @@ public class AuthController {
     private final AuditService audit;
     private final CrudService crud;
     private final MfaPolicy mfaPolicy;
+    private final com.opesware.maintain.identity.application.PersonalDataService personalData;
 
-    public AuthController(AppUserRepository users, TokenService tokens, TenantRepo tenants, AuditService audit, CrudService crud, MfaPolicy mfaPolicy) {
+    public AuthController(AppUserRepository users, TokenService tokens, TenantRepo tenants, AuditService audit, CrudService crud, MfaPolicy mfaPolicy,
+                          com.opesware.maintain.identity.application.PersonalDataService personalData) {
+        this.personalData = personalData;
         this.mfaPolicy = mfaPolicy;
         this.users = users;
         this.tokens = tokens;
@@ -170,6 +173,16 @@ public class AuthController {
         users.save(u);
         audit.record("SESSIONS_REVOKED", "User", u.id, Map.of("by", CurrentUser.actorName()));
         return Map.of("ok", true);
+    }
+
+    @GetMapping("/users/{id}/personal-data")
+    public Map<String, Object> exportPersonalData(@PathVariable UUID id) {
+        return personalData.export(id);
+    }
+
+    @PostMapping("/users/{id}:pseudonymise")
+    public Map<String, Object> pseudonymise(@PathVariable UUID id) {
+        return personalData.pseudonymise(id);
     }
 
     @PostMapping("/users/{id}:unlock")

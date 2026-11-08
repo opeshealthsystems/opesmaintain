@@ -65,7 +65,7 @@ Memberships, roles and site scope.
 - **Columns:** Full Name, Email, Role, Site, MFA Enabled, Status
 - **Form fields:** Full Name*, Email*, Role*, Organization, Site, Customer, Job Title, Phone, Language, MFA Enabled, Status, Email Notifications
 - **Detail tabs:** Details, Delegations (delegator), Delegations (delegate), Delegations (reviewer), Devices, Technicians, History (managers, auditors)
-- **Actions:** Set password, Unlock account, Reset two-step sign-in, Sign out everywhere
+- **Actions:** Set password, Unlock account, Reset two-step sign-in, Pseudonymise, Sign out everywhere
 - **Printable:** no
 - **Write roles:** ADMIN
 
@@ -142,7 +142,7 @@ Typed equipment records with hierarchy, ownership and lifecycle.
 - **Screens:** list (search, Asset Type, Criticality, Status, Safety State filters, sort, pagination, CSV), new, edit, detail
 - **Columns:** Tag, Name, Asset Type, Manufacturer, Criticality, Status, Safety State, Site
 - **Form fields:** Tag*, Name*, Asset Type*, Category, Manufacturer, Model, Serial Number, Criticality*, Status, Safety State, Site*, Location, Parent, Customer, Owner Org, Custodian, Purchase Date, Purchase Cost, Commissioned On, Warranty End, Expected Life Years, External Ref, Notes
-- **Detail tabs:** Details, QR passport (QR code, scans, open/print), Hierarchy (component tree), Documents, Child assets, Asset History, Passport Tokens, Meters, Meter Readings, Fleet Vehicles, Maintenance Requests, Work Orders, PM Plans, Inspection Results, Work Permits, Safety Incidents, Calibration Plans, Calibration Events, Compliance Register, Downtime Events, AI Insights, Sensors, Sensor Alerts, History (managers, auditors)
+- **Detail tabs:** Details, QR passport (QR code, scans, open/print), Hierarchy (component tree), Documents, Assets (children), Asset History, Passport Tokens, Meters, Meter Readings, Fleet Vehicles, Maintenance Requests, Work Orders, PM Plans, Inspection Results, Work Permits, Safety Incidents, Calibration Plans, Calibration Events, Compliance Register, Downtime Events, AI Insights, Sensors, Sensor Alerts, History (managers, auditors)
 - **Actions:** Change status, Safety state, Transfer, Issue QR passport, Retire
 - **Printable:** yes — /print/asset
 - **Write roles:** ADMIN, MANAGER, PLANNER
@@ -180,7 +180,7 @@ Buildings, floors, zones, rooms and production lines.
 - **Screens:** list (search, Kind, Status filters, sort, pagination, CSV), new, edit, detail
 - **Columns:** Code, Name, Site, Kind, Status
 - **Form fields:** Code, Name*, Site*, Kind*, Parent, Latitude, Longitude, Status
-- **Detail tabs:** Details, Child locations, Assets, Maintenance Requests, Work Orders, History (managers, auditors)
+- **Detail tabs:** Details, Locations (children), Assets, Maintenance Requests, Work Orders, History (managers, auditors)
 - **Actions:** —
 - **Printable:** no
 - **Write roles:** ADMIN, MANAGER
@@ -276,7 +276,7 @@ Guarded work-order lifecycle.
 - **Screens:** list (search, Work Type, Priority, Status filters, sort, pagination, CSV), new, edit, detail
 - **Columns:** Number, Title, Work Type, Priority, Status, Asset, Site, Assignee, Due At, SLA Breached
 - **Form fields:** Title*, Description, Work Type*, Priority*, Asset, Site*, Location, Customer, Contract, Assignee, Planned Start, Planned End, Due At, Estimated Hours, Permit Required, Permit, Failure Code, Cause Code, Remedy Code, Completion Notes
-- **Detail tabs:** Details, Execution & cost (task checklist, parts reserve/issue/release, labor log, live job cost), Documents, Maintenance Requests, Child work orders, Work Tasks, PM Occurrences, Assignments, Time Entries, Inspection Results (work order), Inspection Results (follow up work order), Work Permits, Downtime Events, Stock Ledger, Reservations, Quotations, Customer Sign-offs, Requisitions, Sensor Alerts, History (managers, auditors)
+- **Detail tabs:** Details, Execution & cost (task checklist, parts reserve/issue/release, labor log, live job cost), Documents, Maintenance Requests, Work Orders (children), Work Tasks, PM Occurrences, Assignments, Time Entries, Inspection Results (work order), Inspection Results (follow up work order), Work Permits, Downtime Events, Stock Ledger, Reservations, Quotations, Customer Sign-offs, Requisitions, Sensor Alerts, History (managers, auditors)
 - **Actions:** Work-order transitions from server (Triage → Approve → Plan → Dispatch → Start → Complete → Review → Close; Hold, Resume, Cancel, Reopen)
 - **Printable:** yes — /print/work-order
 - **Write roles:** ADMIN, DISPATCHER, MANAGER, PLANNER, TECHNICIAN

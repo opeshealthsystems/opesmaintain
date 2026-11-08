@@ -2,6 +2,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { api, getToken, setToken } from "./api";
 import { setLocaleSettings } from "./format";
+import { applyModelLanguage } from "./registry";
 
 export interface User {
   id: string;
@@ -47,6 +48,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     const nu = { ...u, language: lang };
     setLocaleSettings(nu.currency, nu.language);
+    applyModelLanguage(nu.language);
+    try { document.documentElement.lang = nu.language === "FR" ? "fr" : "en"; } catch { /* SSR */ }
     setUser(nu);
     return nu;
   }, []);
@@ -99,6 +102,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         /* ignore */
       }
       if (user) apply({ ...user, language: lang });
+      api("/me:preferences", { body: { language: lang } }).catch(() => undefined);
     },
     [user, apply],
   );

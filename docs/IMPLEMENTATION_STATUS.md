@@ -1,5 +1,7 @@
 # Implementation status
 
+> The production-readiness plan is in [`plan/PRODUCTION_READINESS_PLAN.md`](plan/PRODUCTION_READINESS_PLAN.md). Engineering workstreams A–H are complete; see the plan for the remaining external sign-offs.
+
 All 28 modules are implemented across the backend, the web app and the native technician app.
 
 ## Completed in the second build pass

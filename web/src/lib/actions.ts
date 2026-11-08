@@ -149,6 +149,8 @@ export const ACTIONS: Record<string, ActionDef[]> = {
     { key: "unlock", label: "Unlock account", icon: "LockOpen", endpoint: (id) => `/users/${id}:unlock`, roles: ["ADMIN"], when: (r) => !!r.lockedUntil && new Date(String(r.lockedUntil)) > new Date() },
     { key: "mfa", label: "Reset two-step sign-in", icon: "ShieldOff", endpoint: (id) => `/users/${id}:reset-mfa`, roles: ["ADMIN"], when: (r) => !!r.mfaEnrolledAt,
       confirm: "The user will have to enrol their authenticator again and is signed out everywhere." },
+    { key: "pseudo", label: "Pseudonymise", icon: "UserX", endpoint: (id) => `/users/${id}:pseudonymise`, roles: ["ADMIN"], danger: true, when: (r) => r.status === "OFFBOARDED",
+      confirm: "Name, e-mail, phone and credentials will be replaced irreversibly. Work history and audit records keep the pseudonym." },
     { key: "revoke", label: "Sign out everywhere", icon: "LogOut", endpoint: (id) => `/users/${id}:revoke-sessions`, roles: ["ADMIN"], danger: true,
       confirm: "All existing sessions and devices for this user will be signed out immediately." },
   ],
