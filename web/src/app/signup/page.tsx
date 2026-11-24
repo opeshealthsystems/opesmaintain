@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { SignupFlow } from "@/components/SignupFlow";
 import "../public.css";
+import "../site.css";
 
 export const metadata: Metadata = {
   title: "Create your account",

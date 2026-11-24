@@ -1,12 +1,14 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { Providers } from "./providers";
 
 // Self-hosted at build time (no request to Google from visitors' browsers).
 const inter = Inter({ subsets: ["latin", "latin-ext"], display: "swap", variable: "--font-inter" });
-import { Providers } from "./providers";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://opesmaintain.com"),
+  applicationName: "OPES Maintain",
   title: { default: "OPES Maintain", template: "%s · OPES Maintain" },
   description: "Enterprise maintenance management — assets, work orders, preventive maintenance, inventory, safety and reliability.",
   icons: { icon: "/favicon.svg" },

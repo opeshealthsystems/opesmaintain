@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.opesware.maintain.identity.api.AuthController;
 import com.opesware.maintain.identity.infrastructure.AppUserRepository;
+import com.opesware.maintain.onboarding.api.InboxEndpoint;
+import com.opesware.maintain.onboarding.api.PublicContactController;
 import com.opesware.maintain.onboarding.api.PublicSignupController;
 import com.opesware.maintain.onboarding.api.SignupReviewEndpoint;
 import com.opesware.maintain.platform.application.ApiException;
@@ -24,6 +26,8 @@ class SignupReviewTest {
     @Autowired SignupReviewEndpoint review;
     @Autowired AuthController auth;
     @Autowired AppUserRepository users;
+    @Autowired PublicContactController contact;
+    @Autowired InboxEndpoint inbox;
 
     private static Map<String, String> form(String email) {
         Map<String, String> m = new HashMap<>();
@@ -64,5 +68,30 @@ class SignupReviewTest {
         assertThat(review.pending()).extracting(m -> m.get("email")).doesNotContain(email);
         assertThat(users.findFirstByEmailIgnoreCase(email)).isEmpty();
         assertThatThrownBy(() -> review.decide(email, "approve")).isInstanceOf(ApiException.class);
+    }
+
+    @Test
+    void contactMessagesAreStoredValidatedAndReadInTheInbox() {
+        String email = "lead-" + UUID.randomUUID() + "@example.com";
+        Map<String, String> m = new HashMap<>(Map.of("name", "Jean Kamga", "email", email, "topic", "perpetual",
+                "company", "Hôpital Laquintinie", "country", "CM", "message", "We need an on-premise license for 30 users."));
+        assertThat(contact.send(m).get("ok")).isEqualTo(true);
+        assertThat(inbox.messages(null)).anySatisfy(x -> {
+            assertThat(x.get("email")).isEqualTo(email);
+            assertThat(x.get("topic")).isEqualTo("PERPETUAL");
+        });
+        assertThat(inbox.markRead().get("markedRead")).isNotEqualTo(0);
+        assertThat(inbox.messages(null)).noneMatch(x -> email.equals(x.get("email")));
+        assertThat(inbox.messages(true)).anyMatch(x -> email.equals(x.get("email")));
+
+        Map<String, String> bot = new HashMap<>(m);
+        bot.put("email", "bot-" + UUID.randomUUID() + "@example.com");
+        bot.put("website", "spam");
+        contact.send(bot);
+        assertThat(inbox.messages(true)).noneMatch(x -> bot.get("email").equals(x.get("email")));
+
+        Map<String, String> bad = new HashMap<>(m);
+        bad.put("message", "hi");
+        assertThatThrownBy(() -> contact.send(bad)).isInstanceOf(ApiException.class);
     }
 }

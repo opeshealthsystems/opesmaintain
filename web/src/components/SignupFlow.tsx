@@ -6,8 +6,8 @@ import { Alert } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { Icon } from "@/lib/icons";
-import { COUNTRIES, INDUSTRIES, PLANS, dict, usePublicLang, type Lang } from "@/lib/public-i18n";
-import { PublicHeader } from "./PublicChrome";
+import { COUNTRIES, INDUSTRIES, dict, usePublicLang, type Lang } from "@/lib/public-i18n";
+import { SiteHeader } from "./site/SiteChrome";
 
 const S = {
   en: {
@@ -89,11 +89,6 @@ export function SignupFlow() {
   const [note, setNote] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  useEffect(() => {
-    const p = sp.get("plan")?.toUpperCase();
-    if (p && PLANS.some((x) => x.code === p)) setF((v) => ({ ...v, plan: p }));
-  }, [sp]);
-
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setF((v) => ({ ...v, [k]: e.target.value }));
 
   const submit = async (e: React.FormEvent) => {
@@ -144,8 +139,8 @@ export function SignupFlow() {
   };
 
   return (
-    <div className="pub">
-      <PublicHeader lang={lang} setLang={setLang} signIn={t.sign_in} openApp={t.open_app} />
+    <div className="site pub">
+      <SiteHeader lang={lang} page="signup" />
       <main id="main" className="signup">
         <aside className="signup-side">
           <h2 style={{ margin: 0, fontSize: 22 }}>{s.sideTitle}</h2>
@@ -193,10 +188,6 @@ export function SignupFlow() {
                       <select id="industry" className="input" required value={f.industry} onChange={set("industry")}>
                         <option value="">{s.choose}</option>
                         {INDUSTRIES.map((i) => <option key={i.code} value={i.code}>{i[lang]}</option>)}
-                      </select></div>
-                    <div className="field"><label htmlFor="plan">{s.plan}</label>
-                      <select id="plan" className="input" value={f.plan} onChange={set("plan")}>
-                        {PLANS.map((p) => <option key={p.code} value={p.code}>{t.plan[p.code][0]}</option>)}
                       </select></div>
                     <div className="field"><label htmlFor="password">{s.password}</label>
                       <input id="password" className="input" type="password" required minLength={10} autoComplete="new-password" value={f.password} onChange={set("password")} /></div>
