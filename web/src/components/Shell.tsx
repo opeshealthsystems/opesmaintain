@@ -11,7 +11,7 @@ import { humanize, relative } from "@/lib/format";
 import { Badge, Loading } from "./ui";
 
 const OPS = [
-  { href: "/", label: "Dashboard", icon: "LayoutDashboard" },
+  { href: "/dashboard", label: "Dashboard", icon: "LayoutDashboard" },
   { href: "/work-board", label: "Work board", icon: "SquareKanban" },
   { href: "/dispatch", label: "Dispatch calendar", icon: "CalendarRange" },
   { href: "/pm-board", label: "PM board", icon: "CalendarClock" },

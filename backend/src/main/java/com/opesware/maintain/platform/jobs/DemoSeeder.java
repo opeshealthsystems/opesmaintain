@@ -608,7 +608,7 @@ public class DemoSeeder implements ApplicationRunner {
         notify("role:STOREKEEPER", "Low stock: Ventilator flow sensor", "Available quantity is at reorder point.", "/m/parts/" + ids.get("o2"));
         notify("role:TECHNICIAN", "New assignment", "You have been dispatched to " + wVent.number + ".", "/technician");
         notify("role:SAFETY_OFFICER", "Permit awaiting issue", "Electrical isolation permit verified and ready to issue.", "/m/work-permits/" + permit.id);
-        notify(null, "Welcome to OPES Maintain", "Your demo workspace is ready. Explore modules from the sidebar.", "/");
+        notify(null, "Welcome to OPES Maintain", "Your demo workspace is ready. Explore modules from the sidebar.", "/dashboard");
 
         insights.refresh(tenantId);
     }
