@@ -20,16 +20,18 @@ export class ApiError extends Error {
 }
 
 const TOKEN_KEY = "opes.token";
+let memToken: string | null = null;
 
 export function getToken(): string | null {
   try {
-    return window.localStorage.getItem(TOKEN_KEY);
+    return window.localStorage.getItem(TOKEN_KEY) ?? memToken;
   } catch {
-    return null;
+    return memToken;
   }
 }
 
 export function setToken(token: string | null) {
+  memToken = token;
   try {
     if (token) window.localStorage.setItem(TOKEN_KEY, token);
     else window.localStorage.removeItem(TOKEN_KEY);
