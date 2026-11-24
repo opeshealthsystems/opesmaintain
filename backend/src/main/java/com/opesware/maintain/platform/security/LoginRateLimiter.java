@@ -29,7 +29,8 @@ public class LoginRateLimiter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest req) {
-        return !("POST".equals(req.getMethod()) && req.getRequestURI().startsWith("/api/v1/auth/"));
+        String uri = req.getRequestURI();
+        return !("POST".equals(req.getMethod()) && (uri.startsWith("/api/v1/auth/") || uri.startsWith("/api/v1/public/signup")));
     }
 
     @Override
@@ -41,7 +42,7 @@ public class LoginRateLimiter extends OncePerRequestFilter {
             res.setStatus(429);
             res.setHeader("Retry-After", "60");
             res.setContentType("application/problem+json");
-            res.getWriter().write("{\"status\":429,\"code\":\"RATE_LIMITED\",\"title\":\"Too many sign-in attempts\",\"detail\":\"Wait a minute and try again.\"}");
+            res.getWriter().write("{\"status\":429,\"code\":\"RATE_LIMITED\",\"title\":\"Too many attempts\",\"detail\":\"Wait a minute and try again.\"}");
             return;
         }
         chain.doFilter(req, res);

@@ -24,6 +24,14 @@ public class Tenant {
     public Integer maxUsers;
     public Integer maxAssets;
     public Instant createdAt;
+    /** Self-service trial end; null for contracted tenants. */
+    public Instant trialEndsAt;
+    public String industry;
+    /** Next onboarding wizard step, null once onboarding is finished. */
+    public String onboardingStep;
+    public Instant onboardedAt;
+    /** How the tenant was created: SELF_SIGNUP, MANUAL, DEMO. */
+    public String source;
     @Version
     public Long version;
 }

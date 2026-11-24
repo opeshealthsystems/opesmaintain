@@ -18,7 +18,7 @@ jobs:
         with: { node-version: "22" }
       - name: Dependency audit gate (high and critical block the release)
         run: |
-          (cd web && npm ci && npm audit --omit=dev --audit-level=high)
+          (cd web && npm ci --workspaces=false && npm audit --workspaces=false --omit=dev --audit-level=high)
           (cd mobile && npm ci && npm audit --omit=dev --audit-level=critical)
   images:
     needs: verify
