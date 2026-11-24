@@ -42,6 +42,14 @@ export function setToken(token: string | null) {
 
 type Json = Record<string, unknown>;
 
+const PUBLIC_PAGES = ["/features", "/pricing", "/licensing", "/industries", "/about", "/contact", "/privacy", "/terms",
+  "/signup", "/login", "/forgot-password", "/reset-password", "/fr"];
+
+/** Pages anyone may view signed out: the website, sign-up and sign-in flows. */
+export function isPublicPath(path: string): boolean {
+  return path === "/" || PUBLIC_PAGES.some((p) => path === p || path.startsWith(p + "/"));
+}
+
 export async function api<T = Json>(
   path: string,
   init: { method?: string; body?: unknown; headers?: Record<string, string>; raw?: boolean } = {},
@@ -63,11 +71,12 @@ export async function api<T = Json>(
   }
   if (res.status === 401 && !path.startsWith("/auth/")) {
     setToken(null);
-    if (typeof window !== "undefined" && !window.location.pathname.startsWith("/login")) {
+    // An expired session must never bounce a visitor off the public website — only off app pages.
+    if (typeof window !== "undefined" && !isPublicPath(window.location.pathname)) {
       window.location.href = `/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`;
     }
   }
-  if (res.status === 403 && typeof window !== "undefined" && !window.location.pathname.startsWith("/settings")) {
+  if (res.status === 403 && typeof window !== "undefined" && !window.location.pathname.startsWith("/settings") && !isPublicPath(window.location.pathname)) {
     const peek = res.clone();
     try {
       const b = await peek.json();

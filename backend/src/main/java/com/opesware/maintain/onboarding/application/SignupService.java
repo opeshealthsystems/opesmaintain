@@ -47,11 +47,14 @@ public class SignupService {
     private final ObjectProvider<JavaMailSender> mail;
     private final String from;
     private final boolean production;
+    private final boolean forceReview;
 
     public SignupService(SignupRequestRepository requests, AppUserRepository users, TenantProvisioningService provisioning,
                          ObjectProvider<JavaMailSender> mail,
                          @Value("${opes.mail.from:no-reply@opes-maintain.local}") String from,
-                         @Value("${opes.production:false}") boolean production) {
+                         @Value("${opes.production:false}") boolean production,
+                         @Value("${opes.signup.force-review:false}") boolean forceReview) {
+        this.forceReview = forceReview;
         this.requests = requests;
         this.users = users;
         this.provisioning = provisioning;
@@ -60,8 +63,20 @@ public class SignupService {
         this.production = production;
     }
 
-    /** Result of {@link #start}: the raw code is returned only outside production (tests, local dev). */
-    public record Started(String email, Instant expiresAt, String devCode) {}
+    /**
+     * Result of {@link #start}: the raw code is returned only outside production (tests, local dev).
+     * {@code review} is true when e-mail is unavailable and the sign-up waits for an operator instead.
+     */
+    public record Started(String email, Instant expiresAt, String devCode, boolean review) {
+        Started(String email, Instant expiresAt, String devCode) { this(email, expiresAt, devCode, false); }
+    }
+
+    static final Duration REVIEW_TTL = Duration.ofDays(30);
+
+    /** True when verification codes cannot be e-mailed and production sign-ups go to manual review. */
+    boolean reviewMode() {
+        return forceReview || (production && mail.getIfAvailable() == null);
+    }
 
     @Transactional
     public Started start(Map<String, String> body) {
@@ -103,11 +118,59 @@ public class SignupService {
         r.language = "FR".equals(language) ? "FR" : "EN";
         r.passwordHash = PasswordHasher.hash(password);
         r.codeHash = hash(r.id, code);
-        r.expiresAt = now.plus(CODE_TTL);
         r.createdAt = now;
+        if (reviewMode()) {
+            r.status = "PENDING_REVIEW";
+            r.expiresAt = now.plus(REVIEW_TTL);
+            requests.save(r);
+            log.warn("New sign-up waiting for manual review: {} <{}> ({}) — activate with: opes-signups approve {}",
+                    r.companyName, r.email, r.country, r.email);
+            return new Started(email, r.expiresAt, null, true);
+        }
+        r.status = "PENDING_CODE";
+        r.expiresAt = now.plus(CODE_TTL);
         requests.save(r);
         sendCode(r, code);
         return new Started(email, r.expiresAt, production ? null : code);
+    }
+
+    /** Sign-ups waiting for an operator, oldest first. */
+    @Transactional(readOnly = true)
+    public java.util.List<SignupRequest> pendingReview() {
+        Instant now = Instant.now();
+        return requests.findByStatusOrderByCreatedAtAsc("PENDING_REVIEW").stream().filter(r -> r.pending(now)).toList();
+    }
+
+    /** Operator approval of a sign-up that could not be verified by e-mail: creates the workspace. */
+    @Transactional
+    public TenantProvisioningService.Provisioned approve(String rawEmail) {
+        String email = norm(rawEmail).toLowerCase(Locale.ROOT);
+        Instant now = Instant.now();
+        SignupRequest r = requests.findFirstByEmailOrderByCreatedAtDesc(email)
+                .filter(x -> "PENDING_REVIEW".equals(x.status) && x.pending(now))
+                .orElseThrow(() -> ApiException.notFound("Pending sign-up for " + email));
+        if (users.findFirstByEmailIgnoreCase(email).isPresent()) {
+            throw ApiException.conflict("EMAIL_IN_USE", "An account already exists for " + email);
+        }
+        TenantProvisioningService.Provisioned p = provisioning.provision(r);
+        r.status = "COMPLETED";
+        r.completedAt = now;
+        r.tenantId = p.tenantId();
+        requests.save(r);
+        log.info("Sign-up approved by operator: {} (tenant {})", r.companyName, p.tenantId());
+        return p;
+    }
+
+    /** Operator rejection (spam, duplicate): the request is closed and nothing is created. */
+    @Transactional
+    public void reject(String rawEmail) {
+        String email = norm(rawEmail).toLowerCase(Locale.ROOT);
+        SignupRequest r = requests.findFirstByEmailOrderByCreatedAtDesc(email)
+                .filter(x -> "PENDING_REVIEW".equals(x.status))
+                .orElseThrow(() -> ApiException.notFound("Pending sign-up for " + email));
+        r.status = "REJECTED";
+        r.expiresAt = Instant.now();
+        requests.save(r);
     }
 
     /** Issues a fresh code for the latest pending sign-up of this e-mail (silently does nothing otherwise). */
@@ -117,6 +180,7 @@ public class SignupService {
         Instant now = Instant.now();
         SignupRequest r = requests.findFirstByEmailOrderByCreatedAtDesc(email).filter(x -> x.completedAt == null).orElse(null);
         if (r == null) return new Started(email, null, null);
+        if ("PENDING_REVIEW".equals(r.status)) return new Started(email, r.expiresAt, null, true);
         String code = String.format("%06d", RANDOM.nextInt(1_000_000));
         r.codeHash = hash(r.id, code);
         r.attempts = 0;
@@ -134,6 +198,9 @@ public class SignupService {
         Instant now = Instant.now();
         ApiException invalid = new ApiException(400, "SIGNUP_CODE_INVALID", "The code is not valid. Check the e-mail we sent you or request a new code.");
         SignupRequest r = requests.findFirstByEmailOrderByCreatedAtDesc(email).orElseThrow(() -> invalid);
+        if ("PENDING_REVIEW".equals(r.status)) {
+            throw new ApiException(409, "SIGNUP_IN_REVIEW", "Your request is being reviewed. We will activate your account shortly.");
+        }
         if (!r.pending(now)) {
             throw new ApiException(400, "SIGNUP_CODE_EXPIRED", "This code has expired or was already used. Request a new code.");
         }
@@ -149,6 +216,7 @@ public class SignupService {
             throw ApiException.conflict("EMAIL_IN_USE", "An account already exists for this e-mail. Sign in or reset your password.");
         }
         TenantProvisioningService.Provisioned p = provisioning.provision(r);
+        r.status = "COMPLETED";
         r.completedAt = now;
         r.tenantId = p.tenantId();
         requests.save(r);

@@ -52,6 +52,7 @@ public class PublicSignupController {
         m.put("email", s.email());
         if (s.expiresAt() != null) m.put("expiresAt", s.expiresAt().toString());
         if (s.devCode() != null) m.put("devCode", s.devCode());
+        if (s.review()) m.put("review", true);
         return m;
     }
 }

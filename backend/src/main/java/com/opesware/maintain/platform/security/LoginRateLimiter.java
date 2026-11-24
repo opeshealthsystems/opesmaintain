@@ -30,7 +30,7 @@ public class LoginRateLimiter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest req) {
         String uri = req.getRequestURI();
-        return !("POST".equals(req.getMethod()) && (uri.startsWith("/api/v1/auth/") || uri.startsWith("/api/v1/public/signup")));
+        return !("POST".equals(req.getMethod()) && (uri.startsWith("/api/v1/auth/") || uri.startsWith("/api/v1/public/signup") || uri.equals("/api/v1/public/contact")));
     }
 
     @Override
