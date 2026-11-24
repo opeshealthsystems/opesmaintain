@@ -1,5 +1,9 @@
 import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
+
+// Self-hosted at build time (no request to Google from visitors' browsers).
+const inter = Inter({ subsets: ["latin", "latin-ext"], display: "swap", variable: "--font-inter" });
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
@@ -19,7 +23,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={inter.variable}>
       <body>
         <a href="#main" className="sr-only">Skip to content</a>
         <Providers>{children}</Providers>

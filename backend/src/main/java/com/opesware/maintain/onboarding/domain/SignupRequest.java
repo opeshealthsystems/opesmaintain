@@ -30,6 +30,8 @@ public class SignupRequest {
     public Instant createdAt;
     public Instant completedAt;
     public UUID tenantId;
+    /** PENDING_CODE (waiting for the e-mailed code), PENDING_REVIEW (waiting for an operator), COMPLETED. */
+    public String status;
 
     public boolean pending(Instant now) {
         return completedAt == null && expiresAt != null && expiresAt.isAfter(now);

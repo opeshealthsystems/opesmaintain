@@ -53,10 +53,10 @@ export function Landing() {
         <section className="pub-section alt">
           <div className="pub-wrap">
             <h2 className="pub-h2">{t.who_title}</h2>
-            <div className="grid-4">
+            <div className="pub-grid-4">
               {t.who.map(([icon, title, text]) => (
-                <div className="tile" key={title}>
-                  <div className="tile-icon"><Icon name={icon} size={20} /></div>
+                <div className="pub-tile" key={title}>
+                  <div className="pub-icon"><Icon name={icon} size={20} /></div>
                   <h3>{title}</h3><p>{text}</p>
                 </div>
               ))}
@@ -72,7 +72,7 @@ export function Landing() {
             <div className="asset-grid">
               {ASSET_TYPES.map((a) => (
                 <div className="asset-chip" key={a.code}>
-                  <div className="tile-icon"><Icon name={a.icon} size={18} /></div>{a[lang]}
+                  <div className="pub-icon"><Icon name={a.icon} size={18} /></div>{a[lang]}
                 </div>
               ))}
             </div>
@@ -83,10 +83,10 @@ export function Landing() {
         <section className="pub-section alt" id="features">
           <div className="pub-wrap">
             <h2 className="pub-h2">{t.feat_title}</h2>
-            <div className="grid-3">
+            <div className="pub-grid-3">
               {t.feats.map(([icon, title, text]) => (
-                <div className="tile" key={title}>
-                  <div className="tile-icon"><Icon name={icon} size={20} /></div>
+                <div className="pub-tile" key={title}>
+                  <div className="pub-icon"><Icon name={icon} size={20} /></div>
                   <h3>{title}</h3><p>{text}</p>
                 </div>
               ))}
@@ -98,9 +98,9 @@ export function Landing() {
         <section className="pub-section" id="how">
           <div className="pub-wrap">
             <h2 className="pub-h2">{t.how_title}</h2>
-            <div className="grid-3 steps">
+            <div className="pub-grid-3 steps">
               {t.how.map(([title, text], i) => (
-                <div className="tile" key={title}>
+                <div className="pub-tile" key={title}>
                   <div className="step-num">{i + 1}</div>
                   <h3>{title}</h3><p>{text}</p>
                 </div>
@@ -114,11 +114,11 @@ export function Landing() {
           <div className="pub-wrap">
             <h2 className="pub-h2">{t.pricing_title}</h2>
             <p className="pub-lead">{t.pricing_sub}</p>
-            <div className="grid-4">
+            <div className="pub-grid-4">
               {PLANS.map((p) => {
                 const [name, tag] = t.plan[p.code];
                 return (
-                  <div className={"tile plan" + (p.code === "PROFESSIONAL" ? " featured" : "")} key={p.code}>
+                  <div className={"pub-tile plan" + (p.code === "PROFESSIONAL" ? " featured" : "")} key={p.code}>
                     <h3 style={{ margin: 0 }}>{name}</h3>
                     <p>{tag}</p>
                     <div className="plan-price">{p.code === "TRIAL" ? t.price_free : t.price_contact}</div>
