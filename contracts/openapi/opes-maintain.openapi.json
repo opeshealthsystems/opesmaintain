@@ -2157,66 +2157,6 @@
     },
     "x-roles-read": "all internal roles",
     "x-audit": "none"
-   },
-   "post": {
-    "tags": [
-     "Equipment Passport"
-    ],
-    "summary": "Create Passport Token",
-    "security": [
-     {
-      "bearer": []
-     }
-    ],
-    "parameters": [
-     {
-      "name": "Idempotency-Key",
-      "in": "header",
-      "schema": {
-       "type": "string"
-      }
-     }
-    ],
-    "requestBody": {
-     "content": {
-      "application/json": {
-       "schema": {
-        "$ref": "#/components/schemas/PassportToken"
-       }
-      }
-     }
-    },
-    "responses": {
-     "201": {
-      "description": "Created",
-      "content": {
-       "application/json": {
-        "schema": {
-         "$ref": "#/components/schemas/PassportToken"
-        }
-       }
-      }
-     },
-     "400": {
-      "description": "Validation",
-      "content": {
-       "application/problem+json": {
-        "schema": {
-         "$ref": "#/components/schemas/Problem"
-        }
-       }
-      }
-     },
-     "403": {
-      "description": "Role not permitted"
-     }
-    },
-    "x-roles-write": [
-     "ADMIN",
-     "MANAGER",
-     "PLANNER"
-    ],
-    "x-audit": "CREATE"
    }
   },
   "/api/v1/passport-tokens/{id}": {
@@ -2252,58 +2192,6 @@
       }
      }
     }
-   },
-   "patch": {
-    "tags": [
-     "Equipment Passport"
-    ],
-    "summary": "Update Passport Token",
-    "security": [
-     {
-      "bearer": []
-     }
-    ],
-    "parameters": [
-     {
-      "name": "If-Match",
-      "in": "header",
-      "required": true,
-      "schema": {
-       "type": "string"
-      },
-      "description": "Current version"
-     }
-    ],
-    "requestBody": {
-     "content": {
-      "application/json": {
-       "schema": {
-        "$ref": "#/components/schemas/PassportToken"
-       }
-      }
-     }
-    },
-    "responses": {
-     "200": {
-      "description": "Updated"
-     },
-     "412": {
-      "description": "Version precondition failed",
-      "content": {
-       "application/problem+json": {
-        "schema": {
-         "$ref": "#/components/schemas/Problem"
-        }
-       }
-      }
-     }
-    },
-    "x-roles-write": [
-     "ADMIN",
-     "MANAGER",
-     "PLANNER"
-    ],
-    "x-audit": "UPDATE"
    }
   },
   "/api/v1/passport-tokens/export.csv": {
@@ -2704,7 +2592,8 @@
     "x-roles-write": [
      "ADMIN",
      "MANAGER",
-     "PLANNER"
+     "PLANNER",
+     "TECHNICIAN"
     ],
     "x-audit": "CREATE"
    }
@@ -2791,7 +2680,8 @@
     "x-roles-write": [
      "ADMIN",
      "MANAGER",
-     "PLANNER"
+     "PLANNER",
+     "TECHNICIAN"
     ],
     "x-audit": "UPDATE"
    }
@@ -4185,10 +4075,8 @@
     },
     "x-roles-write": [
      "ADMIN",
-     "DISPATCHER",
      "MANAGER",
-     "PLANNER",
-     "TECHNICIAN"
+     "PLANNER"
     ],
     "x-audit": "CREATE"
    }
@@ -4274,10 +4162,8 @@
     },
     "x-roles-write": [
      "ADMIN",
-     "DISPATCHER",
      "MANAGER",
-     "PLANNER",
-     "TECHNICIAN"
+     "PLANNER"
     ],
     "x-audit": "UPDATE"
    }
@@ -4569,8 +4455,7 @@
      "ADMIN",
      "DISPATCHER",
      "MANAGER",
-     "PLANNER",
-     "TECHNICIAN"
+     "PLANNER"
     ],
     "x-audit": "CREATE"
    }
@@ -4658,8 +4543,7 @@
      "ADMIN",
      "DISPATCHER",
      "MANAGER",
-     "PLANNER",
-     "TECHNICIAN"
+     "PLANNER"
     ],
     "x-audit": "UPDATE"
    }
@@ -4818,8 +4702,7 @@
      "ADMIN",
      "DISPATCHER",
      "MANAGER",
-     "PLANNER",
-     "TECHNICIAN"
+     "PLANNER"
     ],
     "x-audit": "CREATE"
    }
@@ -4907,8 +4790,7 @@
      "ADMIN",
      "DISPATCHER",
      "MANAGER",
-     "PLANNER",
-     "TECHNICIAN"
+     "PLANNER"
     ],
     "x-audit": "UPDATE"
    }
@@ -5315,8 +5197,7 @@
     "x-roles-write": [
      "ADMIN",
      "MANAGER",
-     "SAFETY_OFFICER",
-     "TECHNICIAN"
+     "SAFETY_OFFICER"
     ],
     "x-audit": "CREATE"
    }
@@ -5403,8 +5284,7 @@
     "x-roles-write": [
      "ADMIN",
      "MANAGER",
-     "SAFETY_OFFICER",
-     "TECHNICIAN"
+     "SAFETY_OFFICER"
     ],
     "x-audit": "UPDATE"
    }
@@ -7285,8 +7165,7 @@
     "x-roles-write": [
      "ADMIN",
      "MANAGER",
-     "PLANNER",
-     "TECHNICIAN"
+     "PLANNER"
     ],
     "x-audit": "CREATE"
    }
@@ -7373,8 +7252,7 @@
     "x-roles-write": [
      "ADMIN",
      "MANAGER",
-     "PLANNER",
-     "TECHNICIAN"
+     "PLANNER"
     ],
     "x-audit": "UPDATE"
    }
@@ -7475,67 +7353,6 @@
     },
     "x-roles-read": "all internal roles",
     "x-audit": "none"
-   },
-   "post": {
-    "tags": [
-     "AI Maintenance Intelligence"
-    ],
-    "summary": "Create Insight",
-    "security": [
-     {
-      "bearer": []
-     }
-    ],
-    "parameters": [
-     {
-      "name": "Idempotency-Key",
-      "in": "header",
-      "schema": {
-       "type": "string"
-      }
-     }
-    ],
-    "requestBody": {
-     "content": {
-      "application/json": {
-       "schema": {
-        "$ref": "#/components/schemas/AiInsight"
-       }
-      }
-     }
-    },
-    "responses": {
-     "201": {
-      "description": "Created",
-      "content": {
-       "application/json": {
-        "schema": {
-         "$ref": "#/components/schemas/AiInsight"
-        }
-       }
-      }
-     },
-     "400": {
-      "description": "Validation",
-      "content": {
-       "application/problem+json": {
-        "schema": {
-         "$ref": "#/components/schemas/Problem"
-        }
-       }
-      }
-     },
-     "403": {
-      "description": "Role not permitted"
-     }
-    },
-    "x-roles-write": [
-     "ADMIN",
-     "MANAGER",
-     "PLANNER",
-     "TECHNICIAN"
-    ],
-    "x-audit": "CREATE"
    }
   },
   "/api/v1/ai-insights/{id}": {
@@ -7571,59 +7388,6 @@
       }
      }
     }
-   },
-   "patch": {
-    "tags": [
-     "AI Maintenance Intelligence"
-    ],
-    "summary": "Update Insight",
-    "security": [
-     {
-      "bearer": []
-     }
-    ],
-    "parameters": [
-     {
-      "name": "If-Match",
-      "in": "header",
-      "required": true,
-      "schema": {
-       "type": "string"
-      },
-      "description": "Current version"
-     }
-    ],
-    "requestBody": {
-     "content": {
-      "application/json": {
-       "schema": {
-        "$ref": "#/components/schemas/AiInsight"
-       }
-      }
-     }
-    },
-    "responses": {
-     "200": {
-      "description": "Updated"
-     },
-     "412": {
-      "description": "Version precondition failed",
-      "content": {
-       "application/problem+json": {
-        "schema": {
-         "$ref": "#/components/schemas/Problem"
-        }
-       }
-      }
-     }
-    },
-    "x-roles-write": [
-     "ADMIN",
-     "MANAGER",
-     "PLANNER",
-     "TECHNICIAN"
-    ],
-    "x-audit": "UPDATE"
    }
   },
   "/api/v1/ai-insights/export.csv": {
@@ -13430,6 +13194,22 @@
       "format": "date-time",
       "readOnly": true,
       "title": "Last Login At"
+     },
+     "mfaEnrolledAt": {
+      "type": "string",
+      "format": "date-time",
+      "readOnly": true,
+      "title": "MFA Enrolled At"
+     },
+     "lockedUntil": {
+      "type": "string",
+      "format": "date-time",
+      "readOnly": true,
+      "title": "Locked Until"
+     },
+     "emailNotifications": {
+      "type": "boolean",
+      "title": "Email Notifications"
      }
     },
     "required": [
@@ -13746,6 +13526,14 @@
      "notes": {
       "type": "string",
       "title": "Notes"
+     },
+     "assetClassId": {
+      "type": "string",
+      "title": "Asset Class"
+     },
+     "specs": {
+      "type": "string",
+      "title": "Specs"
      }
     },
     "required": [
@@ -14647,6 +14435,7 @@
        "SKIPPED",
        "FAILED"
       ],
+      "readOnly": true,
       "title": "Status"
      },
      "result": {
@@ -15178,6 +14967,7 @@
      },
      "approved": {
       "type": "boolean",
+      "readOnly": true,
       "title": "Approved"
      },
      "note": {
@@ -16916,6 +16706,7 @@
        "REJECTED",
        "REVERSED"
       ],
+      "readOnly": true,
       "title": "Status"
      },
      "externalRef": {
@@ -17141,6 +16932,7 @@
        "REJECTED",
        "ORDERED"
       ],
+      "readOnly": true,
       "title": "Status"
      }
     },
@@ -17960,6 +17752,21 @@
       "format": "date-time",
       "readOnly": true,
       "title": "Created On"
+     },
+     "category": {
+      "type": "string",
+      "title": "Category"
+     },
+     "emailStatus": {
+      "type": "string",
+      "enum": [
+       "NONE",
+       "PENDING",
+       "SENT",
+       "FAILED"
+      ],
+      "readOnly": true,
+      "title": "Email Status"
      }
     },
     "required": [

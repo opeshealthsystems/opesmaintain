@@ -61,6 +61,9 @@ export function relatedOf(path: string): { res: ResourceDef; field: FieldDef }[]
   return out;
 }
 
+/** Resources only administrators, managers and auditors may list (mirrors the server policy). */
+export const RESTRICTED_RESOURCES = new Set(["audit-events", "delegations", "devices", "settings", "outbox-events", "integrations", "webhook-subscriptions", "users", "notifications"]);
+
 export const GROUP_ORDER = [
   "Maintenance",
   "Assets",
@@ -76,4 +79,25 @@ export const GROUP_ORDER = [
 
 export function resourcesOfModule(code: string): ResourceDef[] {
   return resources.filter((r) => r.module === code);
+}
+
+// ---------------------------------------------------------------- localisation (plan item H1)
+import { FR_LABELS, FR_MODULES, FR_RESOURCES } from "./fr";
+
+const original = {
+  modules: Object.fromEntries(Object.entries(modules).map(([k, m]) => [k, m.title])),
+  resources: Object.fromEntries(resources.map((r) => [r.path, { label: r.label, singular: r.singular, fields: r.fields.map((f) => f.label) }])),
+};
+
+/** Switches model labels between English (source) and French in place. */
+export function applyModelLanguage(lang: string) {
+  const fr = lang === "FR";
+  for (const [k, m] of Object.entries(modules)) m.title = fr ? FR_MODULES[k] ?? original.modules[k] : original.modules[k];
+  for (const r of resources) {
+    const o = original.resources[r.path];
+    const t = FR_RESOURCES[r.path];
+    r.label = fr && t ? t[0] : o.label;
+    r.singular = fr && t ? t[1] : o.singular;
+    r.fields.forEach((f, i) => { f.label = fr ? FR_LABELS[o.fields[i]] ?? o.fields[i] : o.fields[i]; });
+  }
 }

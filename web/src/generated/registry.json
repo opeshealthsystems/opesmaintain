@@ -990,6 +990,42 @@
      "managed": true,
      "computed": false,
      "guarded": false
+    },
+    {
+     "name": "mfaEnrolledAt",
+     "label": "MFA Enrolled At",
+     "type": "datetime",
+     "ref": null,
+     "options": [],
+     "required": false,
+     "list": false,
+     "managed": true,
+     "computed": false,
+     "guarded": false
+    },
+    {
+     "name": "lockedUntil",
+     "label": "Locked Until",
+     "type": "datetime",
+     "ref": null,
+     "options": [],
+     "required": false,
+     "list": false,
+     "managed": true,
+     "computed": false,
+     "guarded": false
+    },
+    {
+     "name": "emailNotifications",
+     "label": "Email Notifications",
+     "type": "bool",
+     "ref": null,
+     "options": [],
+     "required": false,
+     "list": false,
+     "managed": false,
+     "computed": false,
+     "guarded": false
     }
    ]
   },
@@ -1537,6 +1573,30 @@
      "managed": false,
      "computed": false,
      "guarded": false
+    },
+    {
+     "name": "assetClassId",
+     "label": "Asset Class",
+     "type": "str",
+     "ref": null,
+     "options": [],
+     "required": false,
+     "list": false,
+     "managed": false,
+     "computed": false,
+     "guarded": false
+    },
+    {
+     "name": "specs",
+     "label": "Specs",
+     "type": "text",
+     "ref": null,
+     "options": [],
+     "required": false,
+     "list": false,
+     "managed": false,
+     "computed": false,
+     "guarded": false
     }
    ]
   },
@@ -1663,7 +1723,7 @@
    "icon": "QrCode",
    "prefix": null,
    "display": "token",
-   "readonly": false,
+   "readonly": true,
    "writerRoles": [
     "ADMIN",
     "MANAGER",
@@ -1897,7 +1957,8 @@
    "writerRoles": [
     "ADMIN",
     "MANAGER",
-    "PLANNER"
+    "PLANNER",
+    "TECHNICIAN"
    ],
    "desc": "Recorded measurements with acceptance checks.",
    "fields": [
@@ -3133,7 +3194,7 @@
      ],
      "required": false,
      "list": true,
-     "managed": false,
+     "managed": true,
      "computed": false,
      "guarded": false
     },
@@ -3200,10 +3261,8 @@
    "readonly": false,
    "writerRoles": [
     "ADMIN",
-    "DISPATCHER",
     "MANAGER",
-    "PLANNER",
-    "TECHNICIAN"
+    "PLANNER"
    ],
    "desc": "Versioned calendar and meter-based plans.",
    "fields": [
@@ -3666,8 +3725,7 @@
     "ADMIN",
     "DISPATCHER",
     "MANAGER",
-    "PLANNER",
-    "TECHNICIAN"
+    "PLANNER"
    ],
    "desc": "Workforce, skills, rates and availability.",
    "fields": [
@@ -3863,8 +3921,7 @@
     "ADMIN",
     "DISPATCHER",
     "MANAGER",
-    "PLANNER",
-    "TECHNICIAN"
+    "PLANNER"
    ],
    "desc": "Dispatch calendar entries.",
    "fields": [
@@ -4093,7 +4150,7 @@
      "options": [],
      "required": false,
      "list": true,
-     "managed": false,
+     "managed": true,
      "computed": false,
      "guarded": false
     },
@@ -4125,8 +4182,7 @@
    "writerRoles": [
     "ADMIN",
     "MANAGER",
-    "SAFETY_OFFICER",
-    "TECHNICIAN"
+    "SAFETY_OFFICER"
    ],
    "desc": "Controlled checklists, one question per line.",
    "fields": [
@@ -5394,8 +5450,7 @@
    "writerRoles": [
     "ADMIN",
     "MANAGER",
-    "PLANNER",
-    "TECHNICIAN"
+    "PLANNER"
    ],
    "desc": "Problem / cause / remedy taxonomy.",
    "fields": [
@@ -5475,7 +5530,7 @@
    "icon": "Sparkles",
    "prefix": null,
    "display": "title",
-   "readonly": false,
+   "readonly": true,
    "writerRoles": [
     "ADMIN",
     "MANAGER",
@@ -7134,7 +7189,7 @@
      ],
      "required": false,
      "list": true,
-     "managed": false,
+     "managed": true,
      "computed": false,
      "guarded": false
     },
@@ -7535,7 +7590,7 @@
      ],
      "required": false,
      "list": true,
-     "managed": false,
+     "managed": true,
      "computed": false,
      "guarded": false
     }
@@ -8876,6 +8931,35 @@
      "options": [],
      "required": false,
      "list": true,
+     "managed": true,
+     "computed": false,
+     "guarded": false
+    },
+    {
+     "name": "category",
+     "label": "Category",
+     "type": "str",
+     "ref": null,
+     "options": [],
+     "required": false,
+     "list": true,
+     "managed": false,
+     "computed": false,
+     "guarded": false
+    },
+    {
+     "name": "emailStatus",
+     "label": "Email Status",
+     "type": "enum",
+     "ref": null,
+     "options": [
+      "NONE",
+      "PENDING",
+      "SENT",
+      "FAILED"
+     ],
+     "required": false,
+     "list": false,
      "managed": true,
      "computed": false,
      "guarded": false

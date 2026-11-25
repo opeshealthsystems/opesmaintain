@@ -23,6 +23,8 @@ export interface ActionDef {
   navigate?: string;
   versioned?: boolean;
   body?: Record<string, unknown>;
+  /** Display the command's JSON result instead of navigating. */
+  showResult?: boolean;
 }
 
 const s = (row: Record<string, unknown>) => String(row.status ?? "");
@@ -131,12 +133,30 @@ export const ACTIONS: Record<string, ActionDef[]> = {
     { key: "reading", label: "Record reading", icon: "Activity", endpoint: (id) => `/sensors/${id}/readings`, roles: ["MANAGER", "TECHNICIAN", "PLANNER"],
       fields: [{ name: "value", label: "Value", type: "number", required: true }] },
   ],
+  "time-entries": [
+    { key: "approve", label: "Approve time", icon: "Check", endpoint: (id) => `/time-entries/${id}:approve`, when: (r) => !r.approved, roles: ["MANAGER", "PLANNER", "DISPATCHER"] },
+  ],
+  "inspection-templates": [],
+  "outbox-events": [
+    { key: "requeue", label: "Requeue delivery", icon: "RotateCcw", endpoint: (id) => `/outbox-events/${id}:requeue`, when: is("DEAD_LETTER", "RETRY"), roles: ["MANAGER"] },
+  ],
+  "webhook-subscriptions": [
+    { key: "secret", label: "Reveal signing secret", icon: "KeyRound", endpoint: (id) => `/webhook-subscriptions/${id}:reveal-secret`, roles: ["MANAGER"], showResult: true,
+      confirm: "The signing secret will be displayed. Share it only with the receiving system's owner. This action is audited." },
+  ],
   integrations: [
     { key: "test", label: "Test connection", icon: "Plug", endpoint: (id) => `/integrations/${id}:test`, roles: ["MANAGER"] },
   ],
   users: [
     { key: "pw", label: "Set password", icon: "KeyRound", endpoint: (id) => `/users/${id}:set-password`, roles: ["ADMIN"],
       fields: [{ name: "password", label: "New password (min. 10 chars, letters and digits)", type: "text", required: true }] },
+    { key: "unlock", label: "Unlock account", icon: "LockOpen", endpoint: (id) => `/users/${id}:unlock`, roles: ["ADMIN"], when: (r) => !!r.lockedUntil && new Date(String(r.lockedUntil)) > new Date() },
+    { key: "mfa", label: "Reset two-step sign-in", icon: "ShieldOff", endpoint: (id) => `/users/${id}:reset-mfa`, roles: ["ADMIN"], when: (r) => !!r.mfaEnrolledAt,
+      confirm: "The user will have to enrol their authenticator again and is signed out everywhere." },
+    { key: "pseudo", label: "Pseudonymise", icon: "UserX", endpoint: (id) => `/users/${id}:pseudonymise`, roles: ["ADMIN"], danger: true, when: (r) => r.status === "OFFBOARDED",
+      confirm: "Name, e-mail, phone and credentials will be replaced irreversibly. Work history and audit records keep the pseudonym." },
+    { key: "revoke", label: "Sign out everywhere", icon: "LogOut", endpoint: (id) => `/users/${id}:revoke-sessions`, roles: ["ADMIN"], danger: true,
+      confirm: "All existing sessions and devices for this user will be signed out immediately." },
   ],
   "work-orders": [],
 };

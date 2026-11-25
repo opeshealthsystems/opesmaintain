@@ -37,4 +37,20 @@ public class AppUser extends TenantEntity {
     public Instant lastLoginAt;
 
     public String passwordHash;
+
+    public Instant mfaEnrolledAt;
+
+    public String mfaSecret;
+
+    public Integer failedLogins;
+
+    public Instant lockedUntil;
+
+    public Instant tokensValidAfter;
+
+    public Boolean emailNotifications;
+
+    public String resetTokenHash;
+
+    public Instant resetTokenExpires;
 }

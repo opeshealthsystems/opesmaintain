@@ -100,7 +100,10 @@ export function ResourceList({ def }: { def: ResourceDef }) {
         actions={
           <>
             <button className="btn" onClick={() => download(`/${def.path}/export.csv?${params}`, `${def.path}.csv`)}><Icon name="Download" size={16} />{t("Export")}</button>
-            {canWrite(def.path) && !def.readonly && (
+            {def.path === "inspection-results" && canWrite(def.path) && (
+              <Link className="btn btn-primary" href="/inspect"><Icon name="ClipboardCheck" size={16} />Perform inspection</Link>
+            )}
+            {canWrite(def.path) && !def.readonly && def.path !== "inspection-results" && (
               <Link className="btn btn-primary" href={`/m/${def.path}/new`}><Icon name="Plus" size={16} />{t("New")} {def.singular.toLowerCase()}</Link>
             )}
           </>
@@ -114,7 +117,7 @@ export function ResourceList({ def }: { def: ResourceDef }) {
           </div>
           {filterFields.map((f) => (
             <select key={f.name} className="select" value={filters[f.name] ?? ""} onChange={(e) => setFilters((x) => ({ ...x, [f.name]: e.target.value }))} aria-label={`Filter by ${f.label}`}>
-              <option value="">{f.label}: all</option>
+              <option value="">{f.label}: {t("all")}</option>
               {f.options.map((o) => <option key={o} value={o}>{humanize(o)}</option>)}
             </select>
           ))}
@@ -126,7 +129,7 @@ export function ResourceList({ def }: { def: ResourceDef }) {
           <button className="btn btn-ghost icon-btn" onClick={load} aria-label={t("Refresh")} title={t("Refresh")}><Icon name="RefreshCw" size={16} /></button>
         </div>
         {loading && !data ? <Loading /> : error ? <ErrorState error={error} onRetry={load} /> : data && data.items.length === 0 ? (
-          <Empty title={t("No records found")} hint={debounced || Object.keys(filters).length ? "Try clearing the search or filters." : def.readonly ? "Records appear here as the domain creates them." : `Create the first ${def.singular.toLowerCase()} to get started.`}
+          <Empty title={t("No records found")} hint={debounced || Object.keys(filters).length ? t("Try clearing the search or filters.") : def.readonly ? "Records appear here as the domain creates them." : `Create the first ${def.singular.toLowerCase()} to get started.`}
             icon={def.icon} action={canWrite(def.path) && !def.readonly ? <Link className="btn btn-primary btn-sm" href={`/m/${def.path}/new`}><Icon name="Plus" size={14} />{t("New")}</Link> : undefined} />
         ) : data && (
           <div className="table-wrap" style={{ opacity: loading ? 0.6 : 1 }}>
@@ -156,7 +159,7 @@ export function ResourceList({ def }: { def: ResourceDef }) {
         )}
         {data && data.total > 0 && (
           <div className="card-foot">
-            <span className="small muted">{data.total.toLocaleString()} record{data.total === 1 ? "" : "s"} · page {page + 1} of {pages}</span>
+            <span className="small muted">{data.total.toLocaleString()} {t(data.total === 1 ? "record" : "records")} · {t("page")} {page + 1} {t("of")} {pages}</span>
             <div className="row">
               <button className="btn btn-sm" disabled={page === 0} onClick={() => setPage((p) => p - 1)}><Icon name="ChevronLeft" size={14} />{t("Previous")}</button>
               <button className="btn btn-sm" disabled={page + 1 >= pages} onClick={() => setPage((p) => p + 1)}>{t("Next")}<Icon name="ChevronRight" size={14} /></button>

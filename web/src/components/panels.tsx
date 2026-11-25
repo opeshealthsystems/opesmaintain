@@ -97,9 +97,10 @@ export function WorkOrderExecution({ wo, onChanged }: { wo: R; onChanged: () => 
             {!locked && <Link className="btn btn-sm" href={`/m/time-entries/new?workOrderId=${id}${wo.assigneeId ? `&technicianId=${wo.assigneeId}` : ""}`}><Icon name="Timer" size={14} />Log time</Link>}
           </div>
           {time.data && time.data.items.length === 0 ? <Empty title="No time logged" icon="Timer" /> : (
-            <div className="table-wrap"><table className="table"><thead><tr><th>Technician</th><th>Start</th><th className="num">Hours</th><th className="num">Cost</th><th>Approved</th></tr></thead>
+            <div className="table-wrap"><table className="table"><thead><tr><th>Technician</th><th>Start</th><th className="num">Hours</th><th className="num">Cost</th><th>Approved</th><th /></tr></thead>
               <tbody>{(time.data?.items ?? []).map((t) => (
-                <tr key={t.id}><td><Link href={`/m/time-entries/${t.id}`}>{String(t.technicianIdLabel)}</Link></td><td>{dateTime(t.startedAt)}</td><td className="num">{num(t.hours)}</td><td className="num">{money(t.cost)}</td><td><Badge value={t.approved ? "YES" : "PENDING"} /></td></tr>
+                <tr key={t.id}><td><Link href={`/m/time-entries/${t.id}`}>{String(t.technicianIdLabel)}</Link></td><td>{dateTime(t.startedAt)}</td><td className="num">{num(t.hours)}</td><td className="num">{money(t.cost)}</td><td><Badge value={t.approved ? "YES" : "PENDING"} /></td>
+                  <td>{!t.approved && hasRole("MANAGER", "PLANNER", "DISPATCHER") && <button className="btn btn-sm" onClick={async () => { try { await api(`/time-entries/${t.id}:approve`, { method: "POST" }); toast("Time approved"); reload(); } catch (e) { toast((e as Error).message, "err"); } }}>Approve</button>}</td></tr>
               ))}</tbody></table></div>
           )}
         </div>
@@ -260,3 +261,22 @@ export function AuditTrail({ entityId }: { entityId: string }) {
 }
 
 export const fmtDate = date;
+
+export function AssetReliability({ id }: { id: string }) {
+  const { data, error, loading } = useData(() => api<Record<string, unknown>>(`/assets/${id}/reliability`), [id]);
+  if (loading) return <Loading />;
+  if (error) return <ErrorState error={error} />;
+  const d = data!;
+  return (
+    <div className="card-body stack">
+      <div className="grid grid-4">
+        <div className="card stat"><div className="label">Unplanned failures</div><div className="value">{num(d.unplannedFailures, 0)}</div></div>
+        <div className="card stat"><div className="label">MTBF</div><div className="value">{d.mtbfDays === null ? "—" : `${num(d.mtbfDays, 1)} d`}</div></div>
+        <div className="card stat"><div className="label">Next expected failure</div><div className="value" style={{ fontSize: 18 }}>{d.predictedNextFailure ? date(d.predictedNextFailure) : "—"}</div>
+          <div className="meta">{d.predictedNextFailure ? `${Math.round(Number(d.confidence) * 100)}% confidence` : "Needs at least 3 failures"}</div></div>
+        <div className="card stat"><div className="label">Total downtime</div><div className="value">{num(d.totalDowntimeHours, 1)} h</div></div>
+      </div>
+      <Alert tone="info">{String(d.method)}. Forecasts are guidance for planning and do not trigger work automatically.</Alert>
+    </div>
+  );
+}

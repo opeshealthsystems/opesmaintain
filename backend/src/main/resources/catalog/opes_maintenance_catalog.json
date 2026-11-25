@@ -1,0 +1,3987 @@
+{
+  "schema_metadata": {
+    "platform": "Opes Maintenance",
+    "organization": "Opes Health Systems / Opesware",
+    "version": "2.0.0-ENTERPRISE",
+    "generated_at": "2026-11-25T00:20:00Z",
+    "standards": [
+      "ISO 14224:2016 (9-Level Taxonomy & Failure Mode/Mechanism/Cause/Detection)",
+      "ISO 55001:2024 (Asset Management System)",
+      "SAP PM / IBM Maximo EAM Master Data Architecture",
+      "WHO Medical Equipment Maintenance & ECRI UMDNS",
+      "CEMAC / Cameroon Statutory Regulations (MINT, MINSANTE, MINMIDT, ART, ANOR)",
+      "SYSCOHADA Chart of Accounts"
+    ],
+    "supported_languages": [
+      "en",
+      "fr"
+    ],
+    "default_currency": "XAF",
+    "ingestion_order": [
+      "sectors",
+      "functional_systems",
+      "crafts_and_roles",
+      "special_tools",
+      "safety_protocols",
+      "iso14224_failure_dictionaries",
+      "asset_classes",
+      "spare_parts",
+      "pm_templates",
+      "asset_failure_matrices"
+    ]
+  },
+  "sectors": [
+    {
+      "sector_id": "SEC-HEALTH",
+      "code": "HEALTHCARE_BIOMEDICAL",
+      "name_en": "Hospitals, Clinics & Biomedical Facilities",
+      "name_fr": "Hôpitaux, Cliniques et Établissements Biomédicaux",
+      "regulatory_bodies": [
+        "WHO HTM",
+        "MINSANTE Cameroon",
+        "ISO 13485",
+        "IEC 60601"
+      ],
+      "kpi_benchmarks": {
+        "critical_pm_compliance_pct": 100.0,
+        "general_pm_compliance_pct": 95.0,
+        "target_availability_pct": 99.5,
+        "max_mttr_hours": 4.0
+      }
+    },
+    {
+      "sector_id": "SEC-TELECOM",
+      "code": "TELECOM_TOWERS",
+      "name_en": "Telecom Towers & Network Infrastructure",
+      "name_fr": "Tours Télécoms et Infrastructures Réseau",
+      "regulatory_bodies": [
+        "ART Cameroon",
+        "CCAA Aviation",
+        "ISO 14224",
+        "ITU-T"
+      ],
+      "kpi_benchmarks": {
+        "critical_pm_compliance_pct": 100.0,
+        "general_pm_compliance_pct": 98.0,
+        "target_availability_pct": 99.95,
+        "max_mttr_hours": 2.0
+      }
+    },
+    {
+      "sector_id": "SEC-MANUF",
+      "code": "MANUFACTURING_AGRO",
+      "name_en": "Factories & Agro-Food Processing Plants",
+      "name_fr": "Usines et Industries Agroalimentaires",
+      "regulatory_bodies": [
+        "ANOR Cameroon",
+        "MINMIDT Pressure Vessels",
+        "HACCP / ISO 22000",
+        "ISO 14224"
+      ],
+      "kpi_benchmarks": {
+        "critical_pm_compliance_pct": 100.0,
+        "general_pm_compliance_pct": 95.0,
+        "target_availability_pct": 97.5,
+        "max_mttr_hours": 3.0
+      }
+    },
+    {
+      "sector_id": "SEC-FLEET",
+      "code": "FLEET_LOGISTICS",
+      "name_en": "Fleets, Heavy Transport & Logistics",
+      "name_fr": "Flottes Automobiles, Transport Lourd et Logistique",
+      "regulatory_bodies": [
+        "MINT Cameroon Visite Technique",
+        "CEMAC Transit Code",
+        "CIMA Insurance",
+        "ADR"
+      ],
+      "kpi_benchmarks": {
+        "critical_pm_compliance_pct": 100.0,
+        "general_pm_compliance_pct": 96.0,
+        "target_availability_pct": 96.0,
+        "max_mttr_hours": 6.0
+      }
+    },
+    {
+      "sector_id": "SEC-FACILITY",
+      "code": "FACILITIES_PUBLIC",
+      "name_en": "Hotels, Commercial Real Estate & Public Institutions",
+      "name_fr": "Hôtels, Immobilier Commercial et Institutions Publiques",
+      "regulatory_bodies": [
+        "MINHDU",
+        "National Fire Brigade Code",
+        "EN 81-20",
+        "ISO 41001"
+      ],
+      "kpi_benchmarks": {
+        "critical_pm_compliance_pct": 100.0,
+        "general_pm_compliance_pct": 94.0,
+        "target_availability_pct": 98.5,
+        "max_mttr_hours": 4.0
+      }
+    }
+  ],
+  "functional_systems": [
+    {
+      "system_id": "SYS-HLTH-01",
+      "sector_id": "SEC-HEALTH",
+      "code": "LIFE_SUPPORT",
+      "name_en": "Critical Care & Life Support",
+      "name_fr": "Réanimation et Maintien des Fonctions Vitales"
+    },
+    {
+      "system_id": "SYS-HLTH-02",
+      "sector_id": "SEC-HEALTH",
+      "code": "OPERATING_THEATER",
+      "name_en": "Operating Theater & Surgical Equipment",
+      "name_fr": "Bloc Opératoire et Équipements Chirurgicaux"
+    },
+    {
+      "system_id": "SYS-HLTH-03",
+      "sector_id": "SEC-HEALTH",
+      "code": "DIAG_IMAGING",
+      "name_en": "Diagnostic Imaging & Radiology",
+      "name_fr": "Imagerie Diagnostique et Radiologie"
+    },
+    {
+      "system_id": "SYS-HLTH-04",
+      "sector_id": "SEC-HEALTH",
+      "code": "CLINICAL_LAB",
+      "name_en": "Clinical Laboratory & Cold Chain",
+      "name_fr": "Laboratoire Clinique et Chaîne du Froid"
+    },
+    {
+      "system_id": "SYS-HLTH-05",
+      "sector_id": "SEC-HEALTH",
+      "code": "CSSD_MEDGAS",
+      "name_en": "Sterilization (CSSD) & Medical Gases",
+      "name_fr": "Stérilisation Centrale et Gaz Médicaux"
+    },
+    {
+      "system_id": "SYS-TEL-01",
+      "sector_id": "SEC-TELECOM",
+      "code": "BTS_POWER",
+      "name_en": "BTS Power Generation, Solar & DC Storage",
+      "name_fr": "Production Électrique BTS, Solaire et Stockage DC"
+    },
+    {
+      "system_id": "SYS-TEL-02",
+      "sector_id": "SEC-TELECOM",
+      "code": "TOWER_COOLING",
+      "name_en": "Tower Structure, Shelter Cooling & Security",
+      "name_fr": "Structure Pylône, Refroidissement Shelter et Sécurité"
+    },
+    {
+      "system_id": "SYS-MFG-01",
+      "sector_id": "SEC-MANUF",
+      "code": "THERMAL_PNEUMATIC",
+      "name_en": "Steam, Compressed Air & Industrial Refrigeration",
+      "name_fr": "Vapeur, Air Comprimé et Froid Industriel"
+    },
+    {
+      "system_id": "SYS-MFG-02",
+      "sector_id": "SEC-MANUF",
+      "code": "PROCESS_PACKAGING",
+      "name_en": "Process Lines, Conveyors & Packaging",
+      "name_fr": "Lignes de Production, Convoyeurs et Conditionnement"
+    },
+    {
+      "system_id": "SYS-MFG-03",
+      "sector_id": "SEC-MANUF",
+      "code": "PLANT_ELEC_WATER",
+      "name_en": "HV/LV Electrical Distribution & Water Treatment",
+      "name_fr": "Distribution Électrique HT/BT et Traitement des Eaux"
+    },
+    {
+      "system_id": "SYS-FLT-01",
+      "sector_id": "SEC-FLEET",
+      "code": "ROAD_VEHICLES",
+      "name_en": "Commercial Trucks, Vans & Refrigerated Transport",
+      "name_fr": "Poids Lourds, Utilitaires et Transport Frigorifique"
+    },
+    {
+      "system_id": "SYS-FLT-02",
+      "sector_id": "SEC-FLEET",
+      "code": "MATERIAL_HANDLING",
+      "name_en": "Warehouse & Yard Handling Equipment",
+      "name_fr": "Engins de Manutention et d'Entrepôt"
+    },
+    {
+      "system_id": "SYS-FAC-01",
+      "sector_id": "SEC-FACILITY",
+      "code": "HVAC_VERTICAL",
+      "name_en": "HVAC Chillers, Splits & Vertical Transport",
+      "name_fr": "CVC Centralisée, Splits et Ascenseurs"
+    },
+    {
+      "system_id": "SYS-FAC-02",
+      "sector_id": "SEC-FACILITY",
+      "code": "LIFE_SAFETY_UTIL",
+      "name_en": "Fire Safety, Standby Power & Water Supply",
+      "name_fr": "Sécurité Incendie, Énergie de Secours et Eau"
+    }
+  ],
+  "crafts_and_roles": [
+    {
+      "craft_id": "CRF-BIOMED-ENG",
+      "code": "BIOMED_ENG",
+      "name_en": "Clinical / Biomedical Engineer",
+      "name_fr": "Ingénieur Biomédical",
+      "certification_required": "Biomedical Engineering Degree / OEM Cert",
+      "standard_hourly_rate_xaf": 15000
+    },
+    {
+      "craft_id": "CRF-BIOMED-TCH",
+      "code": "BIOMED_TECH",
+      "name_en": "Biomedical Equipment Technician",
+      "name_fr": "Technicien Biomédical",
+      "certification_required": "BTech / BTS Biomedical",
+      "standard_hourly_rate_xaf": 8500
+    },
+    {
+      "craft_id": "CRF-RAD-SPEC",
+      "code": "RAD_SPECIALIST",
+      "name_en": "Medical Imaging & Radiation Specialist",
+      "name_fr": "Spécialiste Imagerie Médicale & Radioprotection",
+      "certification_required": "OEM X-Ray/CT & Radiation Safety Cert",
+      "standard_hourly_rate_xaf": 22000
+    },
+    {
+      "craft_id": "CRF-ELEC-HV",
+      "code": "HV_ELECTRICIAN",
+      "name_en": "High/Low Voltage Industrial Electrician",
+      "name_fr": "Électricien Industriel HT/BT",
+      "certification_required": "Habilitation Électrique H2V / B2V",
+      "standard_hourly_rate_xaf": 9000
+    },
+    {
+      "craft_id": "CRF-ELECTROMECH",
+      "code": "ELECTROMECH",
+      "name_en": "Electromechanical & Generator Technician",
+      "name_fr": "Technicien Électromécanicien & Groupes",
+      "certification_required": "Electromechanical Diploma",
+      "standard_hourly_rate_xaf": 8000
+    },
+    {
+      "craft_id": "CRF-TELECOM-PWR",
+      "code": "TELECOM_PWR",
+      "name_en": "Telecom DC Power & Solar Hybrid Tech",
+      "name_fr": "Technicien Énergie Télécom DC & Solaire",
+      "certification_required": "Telecom Power & Working at Height",
+      "standard_hourly_rate_xaf": 9500
+    },
+    {
+      "craft_id": "CRF-RIGGER",
+      "code": "TOWER_RIGGER",
+      "name_en": "Certified Telecom Tower Rigger",
+      "name_fr": "Monteur Pylôniste Certifié",
+      "certification_required": "GWO / Working at Height Rescue Cert",
+      "standard_hourly_rate_xaf": 10000
+    },
+    {
+      "craft_id": "CRF-BOILER-ENG",
+      "code": "BOILER_ENG",
+      "name_en": "Certified Steam Boiler & Pressure Specialist",
+      "name_fr": "Chauffagiste / Spécialiste Appareils à Pression",
+      "certification_required": "MINMIDT Pressure Vessel Habilitation",
+      "standard_hourly_rate_xaf": 14000
+    },
+    {
+      "craft_id": "CRF-MECH-IND",
+      "code": "IND_MECHANIC",
+      "name_en": "Industrial Millwright & Rotating Equipment Tech",
+      "name_fr": "Mécanicien Industriel & Machines Tournantes",
+      "certification_required": "Industrial Mechanics Diploma",
+      "standard_hourly_rate_xaf": 8000
+    },
+    {
+      "craft_id": "CRF-HVAC-REF",
+      "code": "HVAC_REFRIG",
+      "name_en": "HVAC & Industrial Refrigeration Technician",
+      "name_fr": "Technicien Frigoriste & CVC",
+      "certification_required": "Refrigerant Handling Cert",
+      "standard_hourly_rate_xaf": 8500
+    },
+    {
+      "craft_id": "CRF-AUTO-HVY",
+      "code": "HEAVY_MECH",
+      "name_en": "Heavy-Duty Diesel & Air-Brake Mechanic",
+      "name_fr": "Mécanicien Poids Lourds & Freinage Pneumatique",
+      "certification_required": "Heavy Vehicle Diagnostics Cert",
+      "standard_hourly_rate_xaf": 8500
+    },
+    {
+      "craft_id": "CRF-ELEV-TECH",
+      "code": "ELEVATOR_TECH",
+      "name_en": "Certified Elevator & Lift Technician",
+      "name_fr": "Technicien Ascensoriste Certifié",
+      "certification_required": "EN 81 Lift Safety Habilitation",
+      "standard_hourly_rate_xaf": 13000
+    },
+    {
+      "craft_id": "CRF-HSE-OFF",
+      "code": "HSE_OFFICER",
+      "name_en": "HSE & Fire Safety Inspector",
+      "name_fr": "Inspecteur HSE et Sécurité Incendie",
+      "certification_required": "NFPA / Fire Safety Cert",
+      "standard_hourly_rate_xaf": 9000
+    }
+  ],
+  "special_tools": [
+    {
+      "tool_id": "TL-ESA-615",
+      "code": "ELEC_SAFETY_ANALYZER",
+      "name_en": "Biomedical Electrical Safety Analyzer (IEC 60601)",
+      "name_fr": "Analyseur de Sécurité Électrique Biomédical (CEI 60601)",
+      "calibration_required": true,
+      "calibration_interval_days": 365
+    },
+    {
+      "tool_id": "TL-GAS-FLOW",
+      "code": "VENT_FLOW_ANALYZER",
+      "name_en": "Ventilator & Anesthesia Gas Flow / O2 Analyzer",
+      "name_fr": "Analyseur de Débit Gazeux et Pureté O2",
+      "calibration_required": true,
+      "calibration_interval_days": 365
+    },
+    {
+      "tool_id": "TL-PAT-SIM",
+      "code": "MULTIPARAM_SIMULATOR",
+      "name_en": "Patient Simulator (ECG, NIBP, SpO2, Temp)",
+      "name_fr": "Simulateur Patient Multiparamétrique (ECG, PNI, SpO2)",
+      "calibration_required": true,
+      "calibration_interval_days": 365
+    },
+    {
+      "tool_id": "TL-DEFIB-ANL",
+      "code": "DEFIB_ENERGY_ANALYZER",
+      "name_en": "Defibrillator & Pacemaker Energy Analyzer",
+      "name_fr": "Analyseur d'Énergie Défibrillateur",
+      "calibration_required": true,
+      "calibration_interval_days": 365
+    },
+    {
+      "tool_id": "TL-RAD-DOS",
+      "code": "XRAY_MULTIMETER",
+      "name_en": "Non-Invasive X-Ray kVp / Dose / Time Meter",
+      "name_fr": "Multimètre Rayons X (kVp / Dose / Temps)",
+      "calibration_required": true,
+      "calibration_interval_days": 365
+    },
+    {
+      "tool_id": "TL-EARTH-TST",
+      "code": "EARTH_GROUND_TESTER",
+      "name_en": "Digital Earth Ground Resistance Clamp/Tester",
+      "name_fr": "Telluromètre / Contrôleur de Résistance de Terre",
+      "calibration_required": true,
+      "calibration_interval_days": 365
+    },
+    {
+      "tool_id": "TL-THERM-CAM",
+      "code": "IR_THERMOGRAPHY",
+      "name_en": "Infrared Thermographic Camera",
+      "name_fr": "Caméra Thermographique Infrarouge",
+      "calibration_required": true,
+      "calibration_interval_days": 365
+    },
+    {
+      "tool_id": "TL-VIB-PEN",
+      "code": "VIBRATION_ANALYZER",
+      "name_en": "FFT Vibration Analyzer & Laser Shaft Aligner",
+      "name_fr": "Analyseur de Vibrations FFT et Aligneur Laser",
+      "calibration_required": true,
+      "calibration_interval_days": 365
+    },
+    {
+      "tool_id": "TL-FLUE-GAS",
+      "code": "COMBUSTION_ANALYZER",
+      "name_en": "Flue Gas Combustion Analyzer (O2, CO, CO2)",
+      "name_fr": "Analyseur de Gaz de Combustion (O2, CO, CO2)",
+      "calibration_required": true,
+      "calibration_interval_days": 180
+    },
+    {
+      "tool_id": "TL-MANIFOLD",
+      "code": "DIGITAL_MANIFOLD",
+      "name_en": "Digital Refrigerant Manifold & Vacuum Pump",
+      "name_fr": "Manifold Frigorifique Numérique et Pompe à Vide",
+      "calibration_required": false,
+      "calibration_interval_days": 0
+    },
+    {
+      "tool_id": "TL-OBD-HD",
+      "code": "HEAVY_DUTY_SCANNER",
+      "name_en": "Heavy-Duty Truck OBD-II / J1939 Diagnostic Scanner",
+      "name_fr": "Valise Diagnostic Poids Lourds OBD-II / J1939",
+      "calibration_required": false,
+      "calibration_interval_days": 0
+    }
+  ],
+  "safety_protocols": [
+    {
+      "protocol_id": "SAF-LOTO-ELEC",
+      "code": "LOTO_ELECTRICAL",
+      "permit_type": "ELECTRICAL_ISOLATION",
+      "name_en": "Electrical Lockout-Tagout (LOTO) & Zero-Energy Verification",
+      "name_fr": "Consignation Électrique (LOTO) et Vérification d'Absence de Tension (VAT)",
+      "mandatory_ppe_en": [
+        "Insulated Gloves (1000V)",
+        "Arc-Flash Face Shield",
+        "Dielectric Safety Boots"
+      ],
+      "mandatory_ppe_fr": [
+        "Gants Isolants (1000V)",
+        "Écran Facial Anti-Arc",
+        "Chaussures Diélectriques"
+      ],
+      "isolation_steps_en": [
+        "Notify operations & shut down equipment normally",
+        "Open main circuit breaker/isolator",
+        "Apply personal padlock & LOTO danger tag",
+        "Verify zero voltage (VAT) phase-to-phase and phase-to-ground"
+      ],
+      "isolation_steps_fr": [
+        "Informer l'exploitation et arrêter l'équipement",
+        "Ouvrir le disjoncteur/sectionneur principal",
+        "Poser le cadenas personnel et l'étiquette de consignation",
+        "Effectuer la Vérification d'Absence de Tension (VAT)"
+      ]
+    },
+    {
+      "protocol_id": "SAF-LOTO-PRES",
+      "code": "LOTO_PRESSURE_THERMAL",
+      "permit_type": "PRESSURE_VESSEL_WORK",
+      "name_en": "Pressurized & High-Temperature Steam/Air Isolation",
+      "name_fr": "Consignation Appareils sous Pression et Haute Température",
+      "mandatory_ppe_en": [
+        "Heat-Resistant Gloves",
+        "Safety Goggles",
+        "Protective Apron"
+      ],
+      "mandatory_ppe_fr": [
+        "Gants Anti-Chaleur",
+        "Lunettes de Sécurité",
+        "Tablier de Protection"
+      ],
+      "isolation_steps_en": [
+        "Cool vessel below 40°C",
+        "Close inlet/outlet isolation valves & chain-lock",
+        "Open atmospheric vent/bleed valve and confirm 0 Bar on gauge"
+      ],
+      "isolation_steps_fr": [
+        "Refroidir l'équipement sous 40 °C",
+        "Fermer et cadenasser les vannes d'isolement",
+        "Ouvrir la purge atmosphérique et vérifier 0 Bar au manomètre"
+      ]
+    },
+    {
+      "protocol_id": "SAF-BIO-DECON",
+      "code": "BIO_HAZARD_DECON",
+      "permit_type": "CLINICAL_CLEARANCE",
+      "name_en": "Biomedical Equipment Decontamination & Infection Control",
+      "name_fr": "Décontamination Biomédicale et Prévention des Infections",
+      "mandatory_ppe_en": [
+        "Nitrile Gloves",
+        "Surgical/FFP2 Mask",
+        "Fluid-Resistant Gown"
+      ],
+      "mandatory_ppe_fr": [
+        "Gants Nitrile",
+        "Masque Chirurgical/FFP2",
+        "Blouse Imperméable"
+      ],
+      "isolation_steps_en": [
+        "Confirm clinical handover & wipe external surfaces with hospital-grade disinfectant",
+        "Replace single-use patient filters before opening chassis"
+      ],
+      "isolation_steps_fr": [
+        "Valider la mise à disposition clinique et désinfecter les surfaces externes",
+        "Retirer les filtres patients à usage unique avant ouverture"
+      ]
+    },
+    {
+      "protocol_id": "SAF-RAD-PROT",
+      "code": "IONIZING_RADIATION",
+      "permit_type": "RADIATION_SAFETY",
+      "name_en": "Ionizing Radiation Area Control & Dosimetry",
+      "name_fr": "Contrôle Zone Rayonnements Ionisants et Dosimétrie",
+      "mandatory_ppe_en": [
+        "Personal TLD Dosimeter Badge",
+        "Lead Apron (0.5mm Pb)",
+        "Thyroid Shield"
+      ],
+      "mandatory_ppe_fr": [
+        "Dosimètre Passif Personnel",
+        "Tablier Plombé (0,5 mm Pb)",
+        "Protège-Thyroïde"
+      ],
+      "isolation_steps_en": [
+        "Activate X-ray room warning beacon",
+        "Ensure all non-essential personnel exit shielded barrier before test exposures"
+      ],
+      "isolation_steps_fr": [
+        "Activer le voyant lumineux d'émission RX",
+        "Évacuer toute personne non essentielle derrière le paravent plombé"
+      ]
+    },
+    {
+      "protocol_id": "SAF-HEIGHT-TWR",
+      "code": "WORKING_AT_HEIGHT",
+      "permit_type": "AT_HEIGHT_PERMIT",
+      "name_en": "Telecom Tower Climbing & Fall Arrest Protocol",
+      "name_fr": "Protocole d'Ascension Pylône et Antichute",
+      "mandatory_ppe_en": [
+        "Full-Body Fall Arrest Harness",
+        "Double Energy-Absorbing Lanyard",
+        "Chin-Strap Helmet"
+      ],
+      "mandatory_ppe_fr": [
+        "Harnais Antichute Complet",
+        "Longe Double avec Absorbeur",
+        "Casque à Jugulaire"
+      ],
+      "isolation_steps_en": [
+        "Check wind speed (< 40 km/h) and storm forecast",
+        "Inspect harness & lifeline; ensure minimum 2-person climbing team"
+      ],
+      "isolation_steps_fr": [
+        "Vérifier la vitesse du vent (< 40 km/h) et l'absence d'orage",
+        "Inspecter harnais et ligne de vie ; équipe minimale de 2 techniciens"
+      ]
+    }
+  ],
+  "iso14224_failure_dictionaries": {
+    "failure_modes": [
+      {
+        "mode_code": "FTS",
+        "name_en": "Fail to Start on Demand",
+        "name_fr": "Échec au Démarrage sur Sollicitation"
+      },
+      {
+        "mode_code": "STP",
+        "name_en": "Spurious / Unplanned Stop",
+        "name_fr": "Arrêt Intempestif / Imprévu"
+      },
+      {
+        "mode_code": "ELP",
+        "name_en": "External Leakage (Process Medium/Fluid)",
+        "name_fr": "Fuite Externe (Fluide / Produit)"
+      },
+      {
+        "mode_code": "INL",
+        "name_en": "Internal Leakage / Bypass",
+        "name_fr": "Fuite Interne / By-pass"
+      },
+      {
+        "mode_code": "OHE",
+        "name_en": "Overheating / High Temperature",
+        "name_fr": "Surchauffe / Haute Température"
+      },
+      {
+        "mode_code": "VIB",
+        "name_en": "Abnormal Vibration / Noise",
+        "name_fr": "Vibration ou Bruit Anormal"
+      },
+      {
+        "mode_code": "LOO",
+        "name_en": "Low Output / Degraded Performance",
+        "name_fr": "Débit/Puissance Insuffisant(e) / Performance Dégradée"
+      },
+      {
+        "mode_code": "HIO",
+        "name_en": "High Output / Overpressure / Overvoltage",
+        "name_fr": "Surpression / Surtension / Sortie Élevée"
+      },
+      {
+        "mode_code": "ERO",
+        "name_en": "Erratic Output / Calibration Drift",
+        "name_fr": "Signal Erratique / Dérive de Calibration"
+      },
+      {
+        "mode_code": "ELF",
+        "name_en": "Electrical Failure / Short / Open Circuit",
+        "name_fr": "Défaillance Électrique / Court-Circuit"
+      },
+      {
+        "mode_code": "BRD",
+        "name_en": "Structural Breakdown / Fracture",
+        "name_fr": "Rupture Mécanique / Structurelle"
+      },
+      {
+        "mode_code": "AIR",
+        "name_en": "Abnormal Instrument Reading / False Alarm",
+        "name_fr": "Lecture Instrument Anormale / Fausse Alarme"
+      }
+    ],
+    "failure_mechanisms": [
+      {
+        "mech_code": "MEC-1.1",
+        "category": "MECHANICAL",
+        "name_en": "Wear / Abrasion",
+        "name_fr": "Usure / Abrasion"
+      },
+      {
+        "mech_code": "MEC-1.2",
+        "category": "MECHANICAL",
+        "name_en": "Fatigue / Fracture",
+        "name_fr": "Fatigue / Fissuration"
+      },
+      {
+        "mech_code": "MEC-1.3",
+        "category": "MECHANICAL",
+        "name_en": "Seizure / Jamming",
+        "name_fr": "Grippage / Blocage"
+      },
+      {
+        "mech_code": "MEC-1.4",
+        "category": "MECHANICAL",
+        "name_en": "Deformation / Seal Degradation",
+        "name_fr": "Déformation / Dégradation de Joint"
+      },
+      {
+        "mech_code": "MEC-2.1",
+        "category": "MATERIAL",
+        "name_en": "Corrosion / Rust",
+        "name_fr": "Corrosion / Rouille"
+      },
+      {
+        "mech_code": "MEC-2.2",
+        "category": "MATERIAL",
+        "name_en": "Cavitation / Erosion",
+        "name_fr": "Cavitation / Érosion"
+      },
+      {
+        "mech_code": "MEC-3.1",
+        "category": "INSTRUMENT",
+        "name_en": "Sensor Drift / Out of Calibration",
+        "name_fr": "Dérive Capteur / Hors Calibration"
+      },
+      {
+        "mech_code": "MEC-4.1",
+        "category": "ELECTRICAL",
+        "name_en": "Insulation Breakdown / Short Circuit",
+        "name_fr": "Claquage Isolement / Court-Circuit"
+      },
+      {
+        "mech_code": "MEC-4.2",
+        "category": "ELECTRICAL",
+        "name_en": "Open Circuit / Loose Connection",
+        "name_fr": "Circuit Ouvert / Connexion Desserrée"
+      },
+      {
+        "mech_code": "MEC-4.3",
+        "category": "ELECTRICAL",
+        "name_en": "Battery Sulfation / Cell Depletion",
+        "name_fr": "Sulfatation Batterie / Épuisement Cellule"
+      },
+      {
+        "mech_code": "MEC-5.1",
+        "category": "EXTERNAL",
+        "name_en": "Blockage / Plugging / Fouling",
+        "name_fr": "Colmatage / Encrassement / Bouchage"
+      },
+      {
+        "mech_code": "MEC-5.2",
+        "category": "EXTERNAL",
+        "name_en": "Contamination (Dust, Water, Fuel)",
+        "name_fr": "Contamination (Poussière, Eau, Carburant)"
+      }
+    ],
+    "failure_causes": [
+      {
+        "cause_code": "CAU-1.0",
+        "group": "DESIGN",
+        "name_en": "Inadequate Design / Under-sizing",
+        "name_fr": "Conception Inadaptée / Sous-dimensionnement"
+      },
+      {
+        "cause_code": "CAU-2.0",
+        "group": "INSTALLATION",
+        "name_en": "Improper Installation / Misalignment",
+        "name_fr": "Installation Incorrecte / Défaut d'Alignement"
+      },
+      {
+        "cause_code": "CAU-3.1",
+        "group": "OPERATION",
+        "name_en": "Operation Outside Design Limits / Overload",
+        "name_fr": "Exploitation Hors Limites / Surcharge"
+      },
+      {
+        "cause_code": "CAU-3.2",
+        "group": "OPERATION",
+        "name_en": "Operator Error / Incorrect Handling",
+        "name_fr": "Erreur Opérateur / Mauvaise Manipulation"
+      },
+      {
+        "cause_code": "CAU-4.1",
+        "group": "MAINTENANCE",
+        "name_en": "Improper / Insufficient Lubrication",
+        "name_fr": "Lubrification Insuffisante ou Inadaptée"
+      },
+      {
+        "cause_code": "CAU-4.2",
+        "group": "MAINTENANCE",
+        "name_en": "Delayed Preventive Maintenance / Age Wear-Out",
+        "name_fr": "Retard Maintenance Préventive / Vieillissement Normal"
+      },
+      {
+        "cause_code": "CAU-5.1",
+        "group": "UTILITY_ENV",
+        "name_en": "Grid Power Surge / Voltage Instability",
+        "name_fr": "Surtension Réseau / Instabilité Électrique"
+      },
+      {
+        "cause_code": "CAU-5.2",
+        "group": "UTILITY_ENV",
+        "name_en": "Ambient Heat, Humidity or Dust Ingress",
+        "name_fr": "Chaleur Ambiante, Humidité ou Poussière"
+      }
+    ],
+    "detection_methods": [
+      {
+        "det_code": "DET-01",
+        "name_en": "Preventive Maintenance Inspection",
+        "name_fr": "Inspection de Maintenance Préventive"
+      },
+      {
+        "det_code": "DET-02",
+        "name_en": "Condition Monitoring / Telemetry Alarm",
+        "name_fr": "Surveillance Conditionnelle / Alarme Télémétrie"
+      },
+      {
+        "det_code": "DET-03",
+        "name_en": "Operator Observation During Routine Use",
+        "name_fr": "Observation Opérateur en Exploitation"
+      },
+      {
+        "det_code": "DET-04",
+        "name_en": "Unplanned Breakdown / Functional Failure",
+        "name_fr": "Panne Imprévue / Défaillance Fonctionnelle"
+      },
+      {
+        "det_code": "DET-05",
+        "name_en": "Statutory / Regulatory Audit",
+        "name_fr": "Audit Réglementaire / Contrôle Statutaire"
+      }
+    ]
+  },
+  "asset_classes": [
+    {
+      "asset_class_id": "AC-HLTH-001",
+      "sector_id": "SEC-HEALTH",
+      "system_id": "SYS-HLTH-01",
+      "standard_code": "UMDNS-14361",
+      "risk_category": "LIFE_SUPPORT",
+      "criticality": "CRITICAL",
+      "aem_eligible": false,
+      "expected_lifespan_years": 10,
+      "syscohada_account": "2411",
+      "name_en": "ICU Mechanical Ventilator",
+      "name_fr": "Respirateur Artificiel de Réanimation",
+      "sub_components": [
+        {
+          "code": "CMP-O2-SENS",
+          "name_en": "Oxygen Sensor Cell",
+          "name_fr": "Cellule Capteur O2"
+        },
+        {
+          "code": "CMP-FLOW-VLV",
+          "name_en": "Expiratory Flow Valve",
+          "name_fr": "Valve Expiratoire"
+        },
+        {
+          "code": "CMP-INT-BAT",
+          "name_en": "Internal Backup Battery",
+          "name_fr": "Batterie Interne"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "manufacturer",
+          "label_en": "Manufacturer",
+          "label_fr": "Fabricant",
+          "type": "string",
+          "required": true
+        },
+        {
+          "key": "model",
+          "label_en": "Model",
+          "label_fr": "Modèle",
+          "type": "string",
+          "required": true
+        },
+        {
+          "key": "operating_hours",
+          "label_en": "Operating Hours",
+          "label_fr": "Heures de Fonctionnement",
+          "type": "number",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-HLTH-002",
+      "sector_id": "SEC-HEALTH",
+      "system_id": "SYS-HLTH-01",
+      "standard_code": "UMDNS-12873",
+      "risk_category": "LIFE_SUPPORT",
+      "criticality": "CRITICAL",
+      "aem_eligible": false,
+      "expected_lifespan_years": 8,
+      "syscohada_account": "2411",
+      "name_en": "Oxygen Concentrator (Medical Grade)",
+      "name_fr": "Concentrateur d'Oxygène Médical",
+      "sub_components": [
+        {
+          "code": "CMP-SIEVE-BED",
+          "name_en": "Zeolite Sieve Beds",
+          "name_fr": "Colonnes de Zéolithe"
+        },
+        {
+          "code": "CMP-COMP-UNIT",
+          "name_en": "Oil-Free Compressor",
+          "name_fr": "Compresseur Sans Huile"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "flow_rate_lpm",
+          "label_en": "Max Flow Rate (L/min)",
+          "label_fr": "Débit Max (L/min)",
+          "type": "number",
+          "required": true
+        },
+        {
+          "key": "operating_hours",
+          "label_en": "Operating Hours",
+          "label_fr": "Compteur Horaire",
+          "type": "number",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-HLTH-003",
+      "sector_id": "SEC-HEALTH",
+      "system_id": "SYS-HLTH-01",
+      "standard_code": "UMDNS-12636",
+      "risk_category": "LIFE_SUPPORT",
+      "criticality": "HIGH",
+      "aem_eligible": true,
+      "expected_lifespan_years": 8,
+      "syscohada_account": "2411",
+      "name_en": "Multiparameter Patient Monitor",
+      "name_fr": "Moniteur Multiparamétrique Patient",
+      "sub_components": [
+        {
+          "code": "CMP-NIBP-PUMP",
+          "name_en": "NIBP Pneumatic Pump",
+          "name_fr": "Pompe PNI"
+        },
+        {
+          "code": "CMP-SPO2-MOD",
+          "name_en": "SpO2 Sensor Module",
+          "name_fr": "Module Capteur SpO2"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "parameters",
+          "label_en": "Monitored Parameters",
+          "label_fr": "Paramètres Surveillés",
+          "type": "string",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-HLTH-004",
+      "sector_id": "SEC-HEALTH",
+      "system_id": "SYS-HLTH-01",
+      "standard_code": "UMDNS-11132",
+      "risk_category": "LIFE_SUPPORT",
+      "criticality": "CRITICAL",
+      "aem_eligible": false,
+      "expected_lifespan_years": 10,
+      "syscohada_account": "2411",
+      "name_en": "Biphasic Defibrillator / AED",
+      "name_fr": "Défibrillateur Biphasique / DAE",
+      "sub_components": [
+        {
+          "code": "CMP-HV-CAP",
+          "name_en": "High-Voltage Capacitor & Paddles",
+          "name_fr": "Condensateur Haute Tension et Palettes"
+        },
+        {
+          "code": "CMP-DEF-BAT",
+          "name_en": "High-Discharge Battery Pack",
+          "name_fr": "Batterie Haute Décharge"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "max_energy_j",
+          "label_en": "Max Energy (Joules)",
+          "label_fr": "Énergie Max (Joules)",
+          "type": "number",
+          "required": true
+        },
+        {
+          "key": "aed_mode",
+          "label_en": "AED Advisory Mode",
+          "label_fr": "Mode DAE",
+          "type": "boolean",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-HLTH-005",
+      "sector_id": "SEC-HEALTH",
+      "system_id": "SYS-HLTH-01",
+      "standard_code": "UMDNS-13215",
+      "risk_category": "LIFE_SUPPORT",
+      "criticality": "HIGH",
+      "aem_eligible": true,
+      "expected_lifespan_years": 8,
+      "syscohada_account": "2411",
+      "name_en": "Volumetric Infusion & Syringe Pump",
+      "name_fr": "Pompe à Perfusion Volumétrique / Pousse-Seringue",
+      "sub_components": [
+        {
+          "code": "CMP-PERIST-MCH",
+          "name_en": "Peristaltic Finger Mechanism",
+          "name_fr": "Mécanisme Péristaltique"
+        },
+        {
+          "code": "CMP-OCCL-SENS",
+          "name_en": "Air-in-Line & Occlusion Sensor",
+          "name_fr": "Capteur Bulles d'Air et Occlusion"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "pump_type",
+          "label_en": "Type (Volumetric / Syringe)",
+          "label_fr": "Type (Volumétrique / Pousse-Seringue)",
+          "type": "string",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-HLTH-006",
+      "sector_id": "SEC-HEALTH",
+      "system_id": "SYS-HLTH-02",
+      "standard_code": "UMDNS-10134",
+      "risk_category": "LIFE_SUPPORT",
+      "criticality": "CRITICAL",
+      "aem_eligible": false,
+      "expected_lifespan_years": 12,
+      "syscohada_account": "2411",
+      "name_en": "Anesthesia Workstation",
+      "name_fr": "Station d'Anesthésie",
+      "sub_components": [
+        {
+          "code": "CMP-VAPORIZER",
+          "name_en": "Anesthetic Agent Vaporizer",
+          "name_fr": "Évaporateur Halogéné"
+        },
+        {
+          "code": "CMP-CO2-ABS",
+          "name_en": "CO2 Absorber Canister",
+          "name_fr": "Bac Absorbeur CO2"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "gas_inputs",
+          "label_en": "Gas Inputs (O2/N2O/Air)",
+          "label_fr": "Alimentation Gaz (O2/N2O/Air)",
+          "type": "string",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-HLTH-007",
+      "sector_id": "SEC-HEALTH",
+      "system_id": "SYS-HLTH-02",
+      "standard_code": "UMDNS-11490",
+      "risk_category": "OEM_MANDATED",
+      "criticality": "HIGH",
+      "aem_eligible": false,
+      "expected_lifespan_years": 10,
+      "syscohada_account": "2411",
+      "name_en": "Electrosurgical Unit (ESU / Diathermy)",
+      "name_fr": "Bistouri Électrique (Électrochirurgie)",
+      "sub_components": [
+        {
+          "code": "CMP-RF-GEN",
+          "name_en": "RF Output Stage & REM Return Monitor",
+          "name_fr": "Étage Puissance RF et Moniteur Plaque Neutre"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "max_cut_w",
+          "label_en": "Max Cut Power (Watts)",
+          "label_fr": "Puissance Coupe Max (Watts)",
+          "type": "number",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-HLTH-008",
+      "sector_id": "SEC-HEALTH",
+      "system_id": "SYS-HLTH-03",
+      "standard_code": "UMDNS-18058",
+      "risk_category": "OEM_MANDATED",
+      "criticality": "CRITICAL",
+      "aem_eligible": false,
+      "expected_lifespan_years": 12,
+      "syscohada_account": "2411",
+      "name_en": "Diagnostic Ultrasound System",
+      "name_fr": "Échographe Diagnostique",
+      "sub_components": [
+        {
+          "code": "CMP-US-PROBE",
+          "name_en": "Ultrasound Transducer Probes",
+          "name_fr": "Sondes Échographiques"
+        },
+        {
+          "code": "CMP-UPS-DED",
+          "name_en": "Dedicated Online UPS",
+          "name_fr": "Onduleur Online Dédié"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "probe_count",
+          "label_en": "Number of Probes",
+          "label_fr": "Nombre de Sondes",
+          "type": "number",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-HLTH-009",
+      "sector_id": "SEC-HEALTH",
+      "system_id": "SYS-HLTH-03",
+      "standard_code": "UMDNS-18430",
+      "risk_category": "OEM_MANDATED",
+      "criticality": "CRITICAL",
+      "aem_eligible": false,
+      "expected_lifespan_years": 15,
+      "syscohada_account": "2411",
+      "name_en": "Digital X-Ray System (Fixed / Mobile C-Arm)",
+      "name_fr": "Système de Radiologie Numérique (Fixe / Arceau Mobile)",
+      "sub_components": [
+        {
+          "code": "CMP-XRAY-TUBE",
+          "name_en": "X-Ray Tube Assembly & Collimator",
+          "name_fr": "Tube Radiogène et Collimateur"
+        },
+        {
+          "code": "CMP-FPD-DET",
+          "name_en": "Flat Panel Digital Detector",
+          "name_fr": "Capteur Plan Numérique"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "max_kvp",
+          "label_en": "Max Tube Voltage (kVp)",
+          "label_fr": "Haute Tension Max (kVp)",
+          "type": "number",
+          "required": true
+        },
+        {
+          "key": "generator_kw",
+          "label_en": "Generator Power (kW)",
+          "label_fr": "Puissance Générateur (kW)",
+          "type": "number",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-HLTH-010",
+      "sector_id": "SEC-HEALTH",
+      "system_id": "SYS-HLTH-04",
+      "standard_code": "UMDNS-15108",
+      "risk_category": "AEM_ELIGIBLE",
+      "criticality": "HIGH",
+      "aem_eligible": true,
+      "expected_lifespan_years": 8,
+      "syscohada_account": "2411",
+      "name_en": "Automated Hematology & Biochemistry Analyzer",
+      "name_fr": "Automate d'Hématologie et Biochimie",
+      "sub_components": [
+        {
+          "code": "CMP-ASP-NEEDLE",
+          "name_en": "Sample Aspiration Probe",
+          "name_fr": "Aiguille d'Aspiration"
+        },
+        {
+          "code": "CMP-OPT-LAMP",
+          "name_en": "Photometer Halogen Lamp",
+          "name_fr": "Lampe Halogène Photomètre"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "analyzer_type",
+          "label_en": "Discipline (Hematology / Chemistry)",
+          "label_fr": "Discipline (Hématologie / Biochimie)",
+          "type": "string",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-HLTH-011",
+      "sector_id": "SEC-HEALTH",
+      "system_id": "SYS-HLTH-04",
+      "standard_code": "UMDNS-13320",
+      "risk_category": "LIFE_SUPPORT",
+      "criticality": "CRITICAL",
+      "aem_eligible": false,
+      "expected_lifespan_years": 10,
+      "syscohada_account": "2411",
+      "name_en": "Cold-Chain Vaccine & Blood Bank Refrigerator",
+      "name_fr": "Réfrigérateur Chaîne du Froid (Vaccins / Banque de Sang)",
+      "sub_components": [
+        {
+          "code": "CMP-HERM-COMP",
+          "name_en": "Hermetic Refrigeration Compressor",
+          "name_fr": "Compresseur Frigorifique Hermétique"
+        },
+        {
+          "code": "CMP-TEMP-LOG",
+          "name_en": "Digital Temperature Logger",
+          "name_fr": "Enregistreur Numérique Température"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "storage_volume_l",
+          "label_en": "Net Volume (Liters)",
+          "label_fr": "Volume Net (Litres)",
+          "type": "number",
+          "required": true
+        },
+        {
+          "key": "target_temp_c",
+          "label_en": "Target Temp (°C)",
+          "label_fr": "Température Cible (°C)",
+          "type": "string",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-HLTH-012",
+      "sector_id": "SEC-HEALTH",
+      "system_id": "SYS-HLTH-05",
+      "standard_code": "UMDNS-13737",
+      "risk_category": "OEM_MANDATED",
+      "criticality": "CRITICAL",
+      "aem_eligible": false,
+      "expected_lifespan_years": 12,
+      "syscohada_account": "2411",
+      "name_en": "Steam Sterilizer / Autoclave & Medical Gas Manifold",
+      "name_fr": "Stérilisateur Autoclave et Centrale Gaz Médicaux",
+      "sub_components": [
+        {
+          "code": "CMP-DOOR-GSK",
+          "name_en": "Silicone Chamber Door Gasket",
+          "name_fr": "Joint de Porte Silicone"
+        },
+        {
+          "code": "CMP-SAFE-VLV",
+          "name_en": "Overpressure Safety Valve",
+          "name_fr": "Soupape de Sécurité"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "chamber_volume_l",
+          "label_en": "Chamber Capacity (Liters)",
+          "label_fr": "Capacité Chambre (Litres)",
+          "type": "number",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-TEL-001",
+      "sector_id": "SEC-TELECOM",
+      "system_id": "SYS-TEL-01",
+      "standard_code": "ISO14224-EG",
+      "risk_category": "OEM_MANDATED",
+      "criticality": "CRITICAL",
+      "aem_eligible": false,
+      "expected_lifespan_years": 12,
+      "syscohada_account": "2411",
+      "name_en": "Prime/Standby Diesel Generator (Telecom BTS)",
+      "name_fr": "Groupe Électrogène Diesel (Site BTS Télécom)",
+      "sub_components": [
+        {
+          "code": "CMP-ENG-BLK",
+          "name_en": "Diesel Engine & Fuel Injection",
+          "name_fr": "Moteur Diesel et Injection"
+        },
+        {
+          "code": "CMP-ATS-PNL",
+          "name_en": "Automatic Transfer Switch (ATS)",
+          "name_fr": "Inverseur Automatique ATS"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "prime_kva",
+          "label_en": "Prime Rating (kVA)",
+          "label_fr": "Puissance Continue (kVA)",
+          "type": "number",
+          "required": true
+        },
+        {
+          "key": "engine_hours",
+          "label_en": "Engine Run Hours",
+          "label_fr": "Compteur Horaire",
+          "type": "number",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-TEL-002",
+      "sector_id": "SEC-TELECOM",
+      "system_id": "SYS-TEL-01",
+      "standard_code": "ISO14224-UPS",
+      "risk_category": "AEM_ELIGIBLE",
+      "criticality": "CRITICAL",
+      "aem_eligible": true,
+      "expected_lifespan_years": 7,
+      "syscohada_account": "2411",
+      "name_en": "48V DC Rectifier & Deep-Cycle Battery Bank",
+      "name_fr": "Redresseur 48V DC et Parc de Batteries Stationnaires",
+      "sub_components": [
+        {
+          "code": "CMP-RECT-MOD",
+          "name_en": "Hot-Swappable Rectifier Modules",
+          "name_fr": "Modules Redresseurs"
+        },
+        {
+          "code": "CMP-BAT-CELL",
+          "name_en": "LiFePO4 / VRLA Battery Strings",
+          "name_fr": "Branches Batteries LiFePO4 / VRLA"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "battery_chemistry",
+          "label_en": "Chemistry (LiFePO4 / VRLA)",
+          "label_fr": "Technologie (LiFePO4 / VRLA)",
+          "type": "string",
+          "required": true
+        },
+        {
+          "key": "total_capacity_ah",
+          "label_en": "Total Bank Capacity (Ah)",
+          "label_fr": "Capacité Totale (Ah)",
+          "type": "number",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-TEL-003",
+      "sector_id": "SEC-TELECOM",
+      "system_id": "SYS-TEL-01",
+      "standard_code": "IEC61215-PV",
+      "risk_category": "AEM_ELIGIBLE",
+      "criticality": "HIGH",
+      "aem_eligible": true,
+      "expected_lifespan_years": 20,
+      "syscohada_account": "2411",
+      "name_en": "Solar PV Hybrid Array & MPPT Charge Controller",
+      "name_fr": "Champ Solaire Photovoltaïque Hybride et Régulateur MPPT",
+      "sub_components": [
+        {
+          "code": "CMP-PV-MOD",
+          "name_en": "Monocrystalline Solar Panels",
+          "name_fr": "Panneaux Solaires Monocristallins"
+        },
+        {
+          "code": "CMP-MPPT-CTL",
+          "name_en": "MPPT Solar Charge Controller",
+          "name_fr": "Régulateur Solaire MPPT"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "array_kwp",
+          "label_en": "Array Capacity (kWp)",
+          "label_fr": "Puissance Crête (kWc)",
+          "type": "number",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-TEL-004",
+      "sector_id": "SEC-TELECOM",
+      "system_id": "SYS-TEL-01",
+      "standard_code": "ISO14224-TNK",
+      "risk_category": "OEM_MANDATED",
+      "criticality": "HIGH",
+      "aem_eligible": false,
+      "expected_lifespan_years": 15,
+      "syscohada_account": "2411",
+      "name_en": "Bulk Diesel Fuel Tank & Ultrasonic Level Sensor",
+      "name_fr": "Cuve Carburant Diesel et Sonde de Niveau Ultrasonique",
+      "sub_components": [
+        {
+          "code": "CMP-FUEL-SENS",
+          "name_en": "Capacitive/Ultrasonic Fuel Probe",
+          "name_fr": "Sonde Niveau Carburant"
+        },
+        {
+          "code": "CMP-BUND-VLV",
+          "name_en": "Anti-Siphon & Fuel Filtration",
+          "name_fr": "Système Anti-Siphonnage et Filtration"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "tank_volume_l",
+          "label_en": "Tank Capacity (Liters)",
+          "label_fr": "Capacité Cuve (Litres)",
+          "type": "number",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-TEL-005",
+      "sector_id": "SEC-TELECOM",
+      "system_id": "SYS-TEL-02",
+      "standard_code": "ISO14224-STR",
+      "risk_category": "OEM_MANDATED",
+      "criticality": "HIGH",
+      "aem_eligible": false,
+      "expected_lifespan_years": 25,
+      "syscohada_account": "2313",
+      "name_en": "Lattice / Guyed Telecom Tower & Aviation Lights",
+      "name_fr": "Pylône Treillis / Haubané et Balisage Aéronautique",
+      "sub_components": [
+        {
+          "code": "CMP-OBST-LGT",
+          "name_en": "LED Aviation Obstruction Beacons",
+          "name_fr": "Feux Balisage Aéronautique LED"
+        },
+        {
+          "code": "CMP-EARTHING",
+          "name_en": "Lightning Arrestor & Earth Grid",
+          "name_fr": "Paratonnerre et Terre"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "tower_height_m",
+          "label_en": "Tower Height (m)",
+          "label_fr": "Hauteur Pylône (m)",
+          "type": "number",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-TEL-006",
+      "sector_id": "SEC-TELECOM",
+      "system_id": "SYS-TEL-02",
+      "standard_code": "ISO14224-HVAC",
+      "risk_category": "AEM_ELIGIBLE",
+      "criticality": "HIGH",
+      "aem_eligible": true,
+      "expected_lifespan_years": 10,
+      "syscohada_account": "2411",
+      "name_en": "BTS Shelter Precision Cooling / Free-Cooling Unit",
+      "name_fr": "Climatisation de Précision Shelter BTS / Free-Cooling",
+      "sub_components": [
+        {
+          "code": "CMP-DC-FAN",
+          "name_en": "48V DC Free-Cooling Blower & Damper",
+          "name_fr": "Ventilateur Free-Cooling 48V DC"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "cooling_kw",
+          "label_en": "Cooling Capacity (kW)",
+          "label_fr": "Puissance Frigorifique (kW)",
+          "type": "number",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-MFG-001",
+      "sector_id": "SEC-MANUF",
+      "system_id": "SYS-MFG-01",
+      "standard_code": "ISO14224-BLR",
+      "risk_category": "OEM_MANDATED",
+      "criticality": "CRITICAL",
+      "aem_eligible": false,
+      "expected_lifespan_years": 20,
+      "syscohada_account": "2411",
+      "name_en": "Industrial Fire-Tube Steam Boiler",
+      "name_fr": "Chaudière Industrielle à Vapeur (Tubes de Fumée)",
+      "sub_components": [
+        {
+          "code": "CMP-BRN-UNIT",
+          "name_en": "Heavy Fuel / Gas Burner",
+          "name_fr": "Brûleur Fioul / Gaz"
+        },
+        {
+          "code": "CMP-LVL-CTRL",
+          "name_en": "Low-Water Cutoff Probes",
+          "name_fr": "Sondes Sécurité Manque d'Eau"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "steam_capacity_kgh",
+          "label_en": "Steam Output (kg/h)",
+          "label_fr": "Débit Vapeur (kg/h)",
+          "type": "number",
+          "required": true
+        },
+        {
+          "key": "design_pressure_bar",
+          "label_en": "Design Pressure (Bar)",
+          "label_fr": "Pression de Timbre (Bar)",
+          "type": "number",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-MFG-002",
+      "sector_id": "SEC-MANUF",
+      "system_id": "SYS-MFG-01",
+      "standard_code": "ISO14224-CMP",
+      "risk_category": "AEM_ELIGIBLE",
+      "criticality": "HIGH",
+      "aem_eligible": true,
+      "expected_lifespan_years": 15,
+      "syscohada_account": "2411",
+      "name_en": "Rotary Screw Air Compressor & Air Dryer",
+      "name_fr": "Compresseur d'Air à Vis et Sécheur Frigorifique",
+      "sub_components": [
+        {
+          "code": "CMP-AIR-END",
+          "name_en": "Rotary Screw Airend",
+          "name_fr": "Bloc Vis Compression"
+        },
+        {
+          "code": "CMP-OIL-SEP",
+          "name_en": "Air/Oil Separator Element",
+          "name_fr": "Séparateur Air/Huile"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "motor_kw",
+          "label_en": "Motor Power (kW)",
+          "label_fr": "Puissance Moteur (kW)",
+          "type": "number",
+          "required": true
+        },
+        {
+          "key": "running_hours",
+          "label_en": "Running Hours",
+          "label_fr": "Heures de Marche",
+          "type": "number",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-MFG-003",
+      "sector_id": "SEC-MANUF",
+      "system_id": "SYS-MFG-01",
+      "standard_code": "ISO14224-REF",
+      "risk_category": "OEM_MANDATED",
+      "criticality": "CRITICAL",
+      "aem_eligible": false,
+      "expected_lifespan_years": 15,
+      "syscohada_account": "2411",
+      "name_en": "Industrial Cold Storage & Blast Chiller Room",
+      "name_fr": "Chambre Froide Industrielle et Tunnel de Surgélation",
+      "sub_components": [
+        {
+          "code": "CMP-COND-UNIT",
+          "name_en": "Semi-Hermetic Condensing Unit",
+          "name_fr": "Groupe Condensation"
+        },
+        {
+          "code": "CMP-EVAP-FAN",
+          "name_en": "Evaporator Coils & Defrost",
+          "name_fr": "Évaporateurs et Dégivrage"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "refrigerant_type",
+          "label_en": "Refrigerant (R404A / R449A / NH3)",
+          "label_fr": "Fluide Frigorigène",
+          "type": "string",
+          "required": true
+        },
+        {
+          "key": "setpoint_temp_c",
+          "label_en": "Setpoint Temp (°C)",
+          "label_fr": "Température Consigne (°C)",
+          "type": "number",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-MFG-004",
+      "sector_id": "SEC-MANUF",
+      "system_id": "SYS-MFG-02",
+      "standard_code": "ISO14224-PMP",
+      "risk_category": "AEM_ELIGIBLE",
+      "criticality": "HIGH",
+      "aem_eligible": true,
+      "expected_lifespan_years": 15,
+      "syscohada_account": "2411",
+      "name_en": "Centrifugal / Sanitary Process Pump",
+      "name_fr": "Pompe Centrifuge / Sanitaire de Procédé",
+      "sub_components": [
+        {
+          "code": "CMP-MECH-SEAL",
+          "name_en": "Mechanical Shaft Seal",
+          "name_fr": "Garniture Mécanique"
+        },
+        {
+          "code": "CMP-PMP-BRG",
+          "name_en": "Drive-End & Non-Drive Bearings",
+          "name_fr": "Roulements d'Arbre"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "flow_m3h",
+          "label_en": "Rated Flow (m³/h)",
+          "label_fr": "Débit Nominal (m³/h)",
+          "type": "number",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-MFG-005",
+      "sector_id": "SEC-MANUF",
+      "system_id": "SYS-MFG-02",
+      "standard_code": "ISO14224-CNV",
+      "risk_category": "AEM_ELIGIBLE",
+      "criticality": "HIGH",
+      "aem_eligible": true,
+      "expected_lifespan_years": 15,
+      "syscohada_account": "2411",
+      "name_en": "Industrial Belt / Chain Conveyor & Gearbox Drive",
+      "name_fr": "Convoyeur Industriel à Bande / Chaîne et Motoréducteur",
+      "sub_components": [
+        {
+          "code": "CMP-GEARBOX",
+          "name_en": "Helical Gear Reducer & VFD",
+          "name_fr": "Motoréducteur et Variateur"
+        },
+        {
+          "code": "CMP-CNV-BELT",
+          "name_en": "Food-Grade Conveyor Belt & Rollers",
+          "name_fr": "Bande Transporteuse et Rouleaux"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "belt_length_m",
+          "label_en": "Conveyor Length (m)",
+          "label_fr": "Longueur Convoyeur (m)",
+          "type": "number",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-MFG-006",
+      "sector_id": "SEC-MANUF",
+      "system_id": "SYS-MFG-02",
+      "standard_code": "ISO14224-PKG",
+      "risk_category": "OEM_MANDATED",
+      "criticality": "CRITICAL",
+      "aem_eligible": false,
+      "expected_lifespan_years": 12,
+      "syscohada_account": "2411",
+      "name_en": "Automated Filling, Capping & Labeling Line",
+      "name_fr": "Ligne Automatisée de Remplissage, Bouchage et Étiquetage",
+      "sub_components": [
+        {
+          "code": "CMP-FILL-NOZ",
+          "name_en": "Volumetric Filling Nozzles & Valves",
+          "name_fr": "Becs de Remplissage et Vannes"
+        },
+        {
+          "code": "CMP-PLC-HMI",
+          "name_en": "PLC Controller & Photo-Eye Sensors",
+          "name_fr": "Automate PLC et Cellules Photoélectriques"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "speed_bph",
+          "label_en": "Rated Speed (Units/Hr)",
+          "label_fr": "Cadence Nominale (Unités/h)",
+          "type": "number",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-MFG-007",
+      "sector_id": "SEC-MANUF",
+      "system_id": "SYS-MFG-03",
+      "standard_code": "IEC60076-TRF",
+      "risk_category": "OEM_MANDATED",
+      "criticality": "CRITICAL",
+      "aem_eligible": false,
+      "expected_lifespan_years": 30,
+      "syscohada_account": "2411",
+      "name_en": "HV/LV Oil-Immersed / Dry-Type Power Transformer",
+      "name_fr": "Transformateur de Puissance HT/BT (Huile / Sec)",
+      "sub_components": [
+        {
+          "code": "CMP-BUCHHOLZ",
+          "name_en": "Buchholz Gas Relay & Silica Breather",
+          "name_fr": "Relais Buchholz et Assécheur Silicagel"
+        },
+        {
+          "code": "CMP-HV-BUSH",
+          "name_en": "HV/LV Bushings & Tap Changer",
+          "name_fr": "Traversées HT/BT et Changeur de Prises"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "rating_kva",
+          "label_en": "Rated Power (kVA)",
+          "label_fr": "Puissance Nominale (kVA)",
+          "type": "number",
+          "required": true
+        },
+        {
+          "key": "primary_kv",
+          "label_en": "Primary Voltage (kV)",
+          "label_fr": "Tension Primaire (kV)",
+          "type": "number",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-MFG-008",
+      "sector_id": "SEC-MANUF",
+      "system_id": "SYS-MFG-03",
+      "standard_code": "IEC61439-SWG",
+      "risk_category": "OEM_MANDATED",
+      "criticality": "CRITICAL",
+      "aem_eligible": false,
+      "expected_lifespan_years": 25,
+      "syscohada_account": "2411",
+      "name_en": "Main Low-Voltage Switchgear & Capacitor Bank",
+      "name_fr": "Tableau Général Basse Tension (TGBT) et Batterie Condensateurs",
+      "sub_components": [
+        {
+          "code": "CMP-ACB-BRK",
+          "name_en": "Air Circuit Breakers (ACB) & Busbars",
+          "name_fr": "Disjoncteurs Ouverts (ACB) et Jeux de Barres"
+        },
+        {
+          "code": "CMP-PFC-CAP",
+          "name_en": "Power Factor Correction Capacitors",
+          "name_fr": "Gradins de Condensateurs Cos Phi"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "rated_amps",
+          "label_en": "Main Busbar Rating (A)",
+          "label_fr": "Calibre Jeu de Barres (A)",
+          "type": "number",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-MFG-009",
+      "sector_id": "SEC-MANUF",
+      "system_id": "SYS-MFG-03",
+      "standard_code": "ISO14224-WTP",
+      "risk_category": "AEM_ELIGIBLE",
+      "criticality": "HIGH",
+      "aem_eligible": true,
+      "expected_lifespan_years": 15,
+      "syscohada_account": "2411",
+      "name_en": "Industrial Water Treatment & Effluent Plant (WWTP)",
+      "name_fr": "Station de Traitement des Eaux et Effluents (STEP)",
+      "sub_components": [
+        {
+          "code": "CMP-DOS-PMP",
+          "name_en": "Chemical Dosing Pumps & pH/Turbidity Probes",
+          "name_fr": "Pompes Doseuses et Sondes pH/Turbidité"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "capacity_m3d",
+          "label_en": "Treatment Capacity (m³/day)",
+          "label_fr": "Capacité Traitement (m³/jour)",
+          "type": "number",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-FLT-001",
+      "sector_id": "SEC-FLEET",
+      "system_id": "SYS-FLT-01",
+      "standard_code": "ISO14224-TRK",
+      "risk_category": "OEM_MANDATED",
+      "criticality": "CRITICAL",
+      "aem_eligible": false,
+      "expected_lifespan_years": 10,
+      "syscohada_account": "2451",
+      "name_en": "Heavy-Duty Commercial Truck (CEMAC Corridor)",
+      "name_fr": "Camion Poids Lourd (Corridor CEMAC)",
+      "sub_components": [
+        {
+          "code": "CMP-TRK-ENG",
+          "name_en": "Turbo-Diesel Engine & Cooling",
+          "name_fr": "Moteur Turbo-Diesel"
+        },
+        {
+          "code": "CMP-TRK-BRK",
+          "name_en": "Air Brake System & ABS",
+          "name_fr": "Freinage Pneumatique et ABS"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "plate_number",
+          "label_en": "Registration Plate",
+          "label_fr": "Immatriculation",
+          "type": "string",
+          "required": true
+        },
+        {
+          "key": "odometer_km",
+          "label_en": "Odometer (km)",
+          "label_fr": "Kilométrage (km)",
+          "type": "number",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-FLT-002",
+      "sector_id": "SEC-FLEET",
+      "system_id": "SYS-FLT-01",
+      "standard_code": "ISO14224-LUV",
+      "risk_category": "AEM_ELIGIBLE",
+      "criticality": "HIGH",
+      "aem_eligible": true,
+      "expected_lifespan_years": 8,
+      "syscohada_account": "2451",
+      "name_en": "Light Utility Vehicle (4x4 Pickup / Delivery Van)",
+      "name_fr": "Véhicule Utilitaire Léger (Pick-up 4x4 / Fourgon)",
+      "sub_components": [
+        {
+          "code": "CMP-LUV-DRV",
+          "name_en": "4WD Transfer Case, Clutch & Suspension",
+          "name_fr": "Boîte de Transfert 4x4, Embrayage et Suspension"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "plate_number",
+          "label_en": "Registration Plate",
+          "label_fr": "Immatriculation",
+          "type": "string",
+          "required": true
+        },
+        {
+          "key": "odometer_km",
+          "label_en": "Odometer (km)",
+          "label_fr": "Kilométrage (km)",
+          "type": "number",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-FLT-003",
+      "sector_id": "SEC-FLEET",
+      "system_id": "SYS-FLT-01",
+      "standard_code": "ATP-REEFER",
+      "risk_category": "OEM_MANDATED",
+      "criticality": "CRITICAL",
+      "aem_eligible": false,
+      "expected_lifespan_years": 10,
+      "syscohada_account": "2452",
+      "name_en": "Refrigerated Semi-Trailer / Reefer Unit",
+      "name_fr": "Semi-Remorque Frigorifique / Groupe Froid",
+      "sub_components": [
+        {
+          "code": "CMP-RFR-ENG",
+          "name_en": "Autonomous Reefer Diesel/Electric Unit",
+          "name_fr": "Groupe Frigorifique Autonome"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "min_temp_c",
+          "label_en": "Min Rated Temp (°C)",
+          "label_fr": "Température Min (°C)",
+          "type": "number",
+          "required": true
+        },
+        {
+          "key": "reefer_hours",
+          "label_en": "Reefer Engine Hours",
+          "label_fr": "Heures Groupe Froid",
+          "type": "number",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-FLT-004",
+      "sector_id": "SEC-FLEET",
+      "system_id": "SYS-FLT-02",
+      "standard_code": "ISO14224-FLK",
+      "risk_category": "AEM_ELIGIBLE",
+      "criticality": "HIGH",
+      "aem_eligible": true,
+      "expected_lifespan_years": 12,
+      "syscohada_account": "2454",
+      "name_en": "Counterbalance Forklift (Diesel / Electric)",
+      "name_fr": "Chariot Élévateur Frontal (Diesel / Électrique)",
+      "sub_components": [
+        {
+          "code": "CMP-HYD-MAST",
+          "name_en": "Hydraulic Lift Cylinders & Mast Chains",
+          "name_fr": "Vérins Hydrauliques et Chaînes Mât"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "lift_capacity_kg",
+          "label_en": "Rated Load (kg)",
+          "label_fr": "Capacité Nominale (kg)",
+          "type": "number",
+          "required": true
+        },
+        {
+          "key": "operating_hours",
+          "label_en": "Operating Hours",
+          "label_fr": "Compteur Horaire",
+          "type": "number",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-FLT-005",
+      "sector_id": "SEC-FLEET",
+      "system_id": "SYS-FLT-02",
+      "standard_code": "EN13001-CRN",
+      "risk_category": "OEM_MANDATED",
+      "criticality": "CRITICAL",
+      "aem_eligible": false,
+      "expected_lifespan_years": 20,
+      "syscohada_account": "2411",
+      "name_en": "Overhead Bridge Crane / Container Reach Stacker",
+      "name_fr": "Pont Roulant / Reach Stacker Conteneurs",
+      "sub_components": [
+        {
+          "code": "CMP-HOIST-ROP",
+          "name_en": "Wire Rope Hoist, Drum & Load Limiter",
+          "name_fr": "Treuil à Câble, Tambour et Limiteur de Charge"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "swl_tons",
+          "label_en": "Safe Working Load (Tons)",
+          "label_fr": "Charge Maximale d'Utilisation (Tonnes)",
+          "type": "number",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-FLT-006",
+      "sector_id": "SEC-FLEET",
+      "system_id": "SYS-FLT-02",
+      "standard_code": "OIML-R117",
+      "risk_category": "OEM_MANDATED",
+      "criticality": "HIGH",
+      "aem_eligible": false,
+      "expected_lifespan_years": 15,
+      "syscohada_account": "2411",
+      "name_en": "Depot Fuel Dispenser & Underground Storage Tank",
+      "name_fr": "Distributeur de Carburant Dépôt et Cuve Enterrée",
+      "sub_components": [
+        {
+          "code": "CMP-FLOW-MTR",
+          "name_en": "Positive Displacement Flow Meter & Nozzle",
+          "name_fr": "Volucompteur et Pistolet de Distribution"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "fuel_grade",
+          "label_en": "Fuel Type (Diesel / Petrol)",
+          "label_fr": "Carburant (Gasoil / Super)",
+          "type": "string",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-FAC-001",
+      "sector_id": "SEC-FACILITY",
+      "system_id": "SYS-FAC-01",
+      "standard_code": "ISO14224-HVAC",
+      "risk_category": "AEM_ELIGIBLE",
+      "criticality": "HIGH",
+      "aem_eligible": true,
+      "expected_lifespan_years": 10,
+      "syscohada_account": "2411",
+      "name_en": "Split / VRF Air Conditioning Unit",
+      "name_fr": "Climatiseur Split / Système DRV (VRF)",
+      "sub_components": [
+        {
+          "code": "CMP-INDR-EVAP",
+          "name_en": "Indoor Filter & Condensate Drain",
+          "name_fr": "Filtres Unité Intérieure et Condensats"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "cooling_btu",
+          "label_en": "Cooling Capacity (BTU/h)",
+          "label_fr": "Puissance Frigorifique (BTU/h)",
+          "type": "number",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-FAC-002",
+      "sector_id": "SEC-FACILITY",
+      "system_id": "SYS-FAC-01",
+      "standard_code": "AHRI-550",
+      "risk_category": "OEM_MANDATED",
+      "criticality": "CRITICAL",
+      "aem_eligible": false,
+      "expected_lifespan_years": 20,
+      "syscohada_account": "2411",
+      "name_en": "Central Water-Cooled / Air-Cooled Chiller & AHU",
+      "name_fr": "Groupe d'Eau Glacée (Chiller) et Centrale Traitement d'Air",
+      "sub_components": [
+        {
+          "code": "CMP-CHL-COMP",
+          "name_en": "Screw/Scroll Chiller Compressors & Chilled Pumps",
+          "name_fr": "Compresseurs Chiller et Pompes Eau Glacée"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "cooling_tons",
+          "label_en": "Cooling Capacity (Tons / kW)",
+          "label_fr": "Puissance Frigorifique (kW)",
+          "type": "number",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-FAC-003",
+      "sector_id": "SEC-FACILITY",
+      "system_id": "SYS-FAC-01",
+      "standard_code": "EN81-20",
+      "risk_category": "OEM_MANDATED",
+      "criticality": "CRITICAL",
+      "aem_eligible": false,
+      "expected_lifespan_years": 25,
+      "syscohada_account": "2313",
+      "name_en": "Passenger / Service Elevator",
+      "name_fr": "Ascenseur / Monte-Charge",
+      "sub_components": [
+        {
+          "code": "CMP-TRAC-MCH",
+          "name_en": "Traction Hoist Machine & Brake",
+          "name_fr": "Treuil de Traction et Frein"
+        },
+        {
+          "code": "CMP-DOOR-INT",
+          "name_en": "Landing Door Interlocks",
+          "name_fr": "Verrouillages Portes Palières"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "stops_count",
+          "label_en": "Number of Floors",
+          "label_fr": "Nombre de Niveaux",
+          "type": "number",
+          "required": true
+        },
+        {
+          "key": "rated_load_kg",
+          "label_en": "Rated Load (kg)",
+          "label_fr": "Charge Nominale (kg)",
+          "type": "number",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-FAC-004",
+      "sector_id": "SEC-FACILITY",
+      "system_id": "SYS-FAC-02",
+      "standard_code": "NFPA-10",
+      "risk_category": "OEM_MANDATED",
+      "criticality": "CRITICAL",
+      "aem_eligible": false,
+      "expected_lifespan_years": 10,
+      "syscohada_account": "2441",
+      "name_en": "Fire Extinguisher & Hose Reel Station",
+      "name_fr": "Extincteur d'Incendie et Robinet d'Incendie Armé (RIA)",
+      "sub_components": [
+        {
+          "code": "CMP-PRES-GAU",
+          "name_en": "Pressure Gauge, Pin & Seal",
+          "name_fr": "Manomètre, Goupille et Plomb"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "agent_type",
+          "label_en": "Agent (ABC / CO2 / Foam)",
+          "label_fr": "Agent Extincteur (Poudre ABC / CO2)",
+          "type": "string",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-FAC-005",
+      "sector_id": "SEC-FACILITY",
+      "system_id": "SYS-FAC-02",
+      "standard_code": "NFPA-72",
+      "risk_category": "OEM_MANDATED",
+      "criticality": "CRITICAL",
+      "aem_eligible": false,
+      "expected_lifespan_years": 15,
+      "syscohada_account": "2441",
+      "name_en": "Addressable Fire Alarm Control Panel & Detectors",
+      "name_fr": "Centrale de Détection Incendie (SSI) et Détecteurs",
+      "sub_components": [
+        {
+          "code": "CMP-SMK-DET",
+          "name_en": "Optical Smoke/Heat Detectors & Sounders",
+          "name_fr": "Détecteurs Optiques Fumée/Chaleur et Sirènes"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "zones_count",
+          "label_en": "Number of Detection Loops/Zones",
+          "label_fr": "Nombre de Boucles/Zones",
+          "type": "number",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-FAC-006",
+      "sector_id": "SEC-FACILITY",
+      "system_id": "SYS-FAC-02",
+      "standard_code": "NFPA-20",
+      "risk_category": "OEM_MANDATED",
+      "criticality": "CRITICAL",
+      "aem_eligible": false,
+      "expected_lifespan_years": 20,
+      "syscohada_account": "2411",
+      "name_en": "Fire Suppression Sprinkler Pump Set (Electric + Diesel)",
+      "name_fr": "Motopompe et Électropompe Surpresseur Incendie",
+      "sub_components": [
+        {
+          "code": "CMP-JOCKEY-PMP",
+          "name_en": "Jockey Pump & Fire Controller Panel",
+          "name_fr": "Pompe Jockey et Coffret Commande Incendie"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "rated_flow_m3h",
+          "label_en": "Rated Fire Flow (m³/h)",
+          "label_fr": "Débit Nominal Incendie (m³/h)",
+          "type": "number",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-FAC-007",
+      "sector_id": "SEC-FACILITY",
+      "system_id": "SYS-FAC-02",
+      "standard_code": "ISO8528-GEN",
+      "risk_category": "OEM_MANDATED",
+      "criticality": "CRITICAL",
+      "aem_eligible": false,
+      "expected_lifespan_years": 15,
+      "syscohada_account": "2411",
+      "name_en": "Building Standby Diesel Generator & ATS",
+      "name_fr": "Groupe Électrogène de Secours Bâtiment et ATS",
+      "sub_components": [
+        {
+          "code": "CMP-GEN-ALT",
+          "name_en": "Diesel Engine, Alternator & ATS",
+          "name_fr": "Moteur Diesel, Alternateur et ATS"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "standby_kva",
+          "label_en": "Standby Rating (kVA)",
+          "label_fr": "Puissance Secours (kVA)",
+          "type": "number",
+          "required": true
+        },
+        {
+          "key": "engine_hours",
+          "label_en": "Engine Hours",
+          "label_fr": "Heures Moteur",
+          "type": "number",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-FAC-008",
+      "sector_id": "SEC-FACILITY",
+      "system_id": "SYS-FAC-02",
+      "standard_code": "IEC62040-UPS",
+      "risk_category": "AEM_ELIGIBLE",
+      "criticality": "HIGH",
+      "aem_eligible": true,
+      "expected_lifespan_years": 10,
+      "syscohada_account": "2411",
+      "name_en": "Central Online Double-Conversion UPS (Server/Facility)",
+      "name_fr": "Onduleur Central Online Double Conversion",
+      "sub_components": [
+        {
+          "code": "CMP-UPS-INV",
+          "name_en": "IGBT Inverter & VRLA/Li-Ion Battery Cabinet",
+          "name_fr": "Onduleur IGBT et Armoire Batteries"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "rating_kva",
+          "label_en": "UPS Capacity (kVA)",
+          "label_fr": "Puissance Onduleur (kVA)",
+          "type": "number",
+          "required": true
+        }
+      ]
+    },
+    {
+      "asset_class_id": "AC-FAC-009",
+      "sector_id": "SEC-FACILITY",
+      "system_id": "SYS-FAC-02",
+      "standard_code": "ISO14224-WTR",
+      "risk_category": "AEM_ELIGIBLE",
+      "criticality": "HIGH",
+      "aem_eligible": true,
+      "expected_lifespan_years": 12,
+      "syscohada_account": "2411",
+      "name_en": "Domestic Water Booster Pump Set & Borehole Submersible",
+      "name_fr": "Surpresseur Eau Potable et Pompe Immergée Forage",
+      "sub_components": [
+        {
+          "code": "CMP-BST-PMP",
+          "name_en": "Multi-Stage Booster Pumps & Pressure Vessel",
+          "name_fr": "Pompes Multicellulaires et Ballon Vessie"
+        }
+      ],
+      "specs_schema": [
+        {
+          "key": "head_m",
+          "label_en": "Total Dynamic Head (m)",
+          "label_fr": "Hauteur Manométrique Totale (m)",
+          "type": "number",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "spare_parts": [
+    {
+      "part_id": "PRT-HLTH-001",
+      "asset_class_id": "AC-HLTH-001",
+      "sku": "BIO-O2-CELL-01",
+      "syscohada_account": "6042",
+      "name_en": "Galvanic Medical Oxygen Sensor Cell",
+      "name_fr": "Cellule Capteur d'Oxygène Médical Galvanique",
+      "unit": "PIECE",
+      "recommended_min_stock": 2,
+      "estimated_unit_cost_xaf": 85000
+    },
+    {
+      "part_id": "PRT-HLTH-002",
+      "asset_class_id": "AC-HLTH-001",
+      "sku": "BIO-HEPA-BACT-02",
+      "syscohada_account": "6042",
+      "name_en": "Disposable Bacterial/Viral Breathing Circuit Filter",
+      "name_fr": "Filtre Bactérien/Viral Circuit Respiratoire",
+      "unit": "PIECE",
+      "recommended_min_stock": 20,
+      "estimated_unit_cost_xaf": 4500
+    },
+    {
+      "part_id": "PRT-HLTH-003",
+      "asset_class_id": "AC-HLTH-002",
+      "sku": "BIO-O2C-FLT-KIT",
+      "syscohada_account": "6042",
+      "name_en": "Oxygen Concentrator Intake & HEPA Filter Kit",
+      "name_fr": "Kit Filtres Admission et HEPA Concentrateur O2",
+      "unit": "KIT",
+      "recommended_min_stock": 5,
+      "estimated_unit_cost_xaf": 15000
+    },
+    {
+      "part_id": "PRT-HLTH-004",
+      "asset_class_id": "AC-HLTH-004",
+      "sku": "BIO-DEF-PAD-01",
+      "syscohada_account": "6042",
+      "name_en": "Adult/Pediatric Multifunction Defibrillator Pads",
+      "name_fr": "Électrodes Multifonctions Défibrillateur Adulte/Pédiatrique",
+      "unit": "PAIR",
+      "recommended_min_stock": 6,
+      "estimated_unit_cost_xaf": 32000
+    },
+    {
+      "part_id": "PRT-HLTH-005",
+      "asset_class_id": "AC-HLTH-006",
+      "sku": "BIO-SODA-LIME-5K",
+      "syscohada_account": "6042",
+      "name_en": "Medical Grade Soda Lime CO2 Absorbent (5 kg)",
+      "name_fr": "Chaux Sodée Absorbeur CO2 Médical (5 kg)",
+      "unit": "CANISTER",
+      "recommended_min_stock": 4,
+      "estimated_unit_cost_xaf": 28000
+    },
+    {
+      "part_id": "PRT-HLTH-006",
+      "asset_class_id": "AC-HLTH-010",
+      "sku": "LAB-ENZ-CLN-500",
+      "syscohada_account": "6042",
+      "name_en": "Enzymatic Hematology/Chemistry Cleanser (500 mL)",
+      "name_fr": "Solution de Nettoyage Enzymatique Automate (500 mL)",
+      "unit": "BOTTLE",
+      "recommended_min_stock": 4,
+      "estimated_unit_cost_xaf": 22000
+    },
+    {
+      "part_id": "PRT-HLTH-007",
+      "asset_class_id": "AC-HLTH-012",
+      "sku": "BIO-AUT-GSK-SIL",
+      "syscohada_account": "6042",
+      "name_en": "High-Temp Silicone Autoclave Door Gasket",
+      "name_fr": "Joint de Porte Silicone Haute Température Autoclave",
+      "unit": "PIECE",
+      "recommended_min_stock": 2,
+      "estimated_unit_cost_xaf": 45000
+    },
+    {
+      "part_id": "PRT-TEL-001",
+      "asset_class_id": "AC-TEL-001",
+      "sku": "GEN-OIL-FLT-250",
+      "syscohada_account": "6042",
+      "name_en": "Spin-On Heavy Duty Engine Oil Filter",
+      "name_fr": "Filtre à Huile Moteur Groupe Électrogène",
+      "unit": "PIECE",
+      "recommended_min_stock": 6,
+      "estimated_unit_cost_xaf": 12000
+    },
+    {
+      "part_id": "PRT-TEL-002",
+      "asset_class_id": "AC-TEL-001",
+      "sku": "GEN-FUEL-SEP-250",
+      "syscohada_account": "6042",
+      "name_en": "Primary Fuel Filter & Water Separator Element",
+      "name_fr": "Filtre à Gasoil Primaire et Séparateur d'Eau",
+      "unit": "PIECE",
+      "recommended_min_stock": 6,
+      "estimated_unit_cost_xaf": 16500
+    },
+    {
+      "part_id": "PRT-TEL-003",
+      "asset_class_id": "AC-TEL-001",
+      "sku": "LUB-15W40-CI4",
+      "syscohada_account": "6042",
+      "name_en": "Heavy-Duty Diesel Engine Oil 15W-40 (Liter)",
+      "name_fr": "Huile Moteur Diesel 15W-40 (Litre)",
+      "unit": "LITER",
+      "recommended_min_stock": 40,
+      "estimated_unit_cost_xaf": 3200
+    },
+    {
+      "part_id": "PRT-MFG-001",
+      "asset_class_id": "AC-MFG-002",
+      "sku": "CMP-SEP-KIT-2K",
+      "syscohada_account": "6042",
+      "name_en": "Rotary Screw Compressor 2000h Filter & Separator Kit",
+      "name_fr": "Kit Filtres et Séparateur 2000h Compresseur à Vis",
+      "unit": "KIT",
+      "recommended_min_stock": 2,
+      "estimated_unit_cost_xaf": 145000
+    },
+    {
+      "part_id": "PRT-MFG-002",
+      "asset_class_id": "AC-MFG-004",
+      "sku": "PMP-SEAL-SIC-35",
+      "syscohada_account": "6042",
+      "name_en": "Silicon Carbide Mechanical Shaft Seal (35mm)",
+      "name_fr": "Garniture Mécanique Carbure de Silicium (35mm)",
+      "unit": "PIECE",
+      "recommended_min_stock": 2,
+      "estimated_unit_cost_xaf": 65000
+    },
+    {
+      "part_id": "PRT-MFG-003",
+      "asset_class_id": "AC-MFG-007",
+      "sku": "TRF-SILICA-GEL-2K",
+      "syscohada_account": "6042",
+      "name_en": "Transformer Breather Silica Gel Desiccant (2 kg)",
+      "name_fr": "Gel de Silice Assécheur Transformateur (2 kg)",
+      "unit": "PACK",
+      "recommended_min_stock": 3,
+      "estimated_unit_cost_xaf": 18000
+    },
+    {
+      "part_id": "PRT-FLT-001",
+      "asset_class_id": "AC-FLT-001",
+      "sku": "TRK-AIR-DRY-CRT",
+      "syscohada_account": "6042",
+      "name_en": "Pneumatic Brake Air Dryer Cartridge",
+      "name_fr": "Cartouche Dessiccateur Freinage Pneumatique",
+      "unit": "PIECE",
+      "recommended_min_stock": 4,
+      "estimated_unit_cost_xaf": 28000
+    },
+    {
+      "part_id": "PRT-FLT-002",
+      "asset_class_id": "AC-FLT-001",
+      "sku": "LUB-15W40-TRK",
+      "syscohada_account": "6042",
+      "name_en": "Commercial Fleet Diesel Oil 15W-40 (Liter)",
+      "name_fr": "Huile Moteur Poids Lourd 15W-40 (Litre)",
+      "unit": "LITER",
+      "recommended_min_stock": 100,
+      "estimated_unit_cost_xaf": 3000
+    },
+    {
+      "part_id": "PRT-FAC-001",
+      "asset_class_id": "AC-FAC-007",
+      "sku": "GEN-AVB-12V-100",
+      "syscohada_account": "6042",
+      "name_en": "12V 100Ah Heavy-Duty Starter Battery",
+      "name_fr": "Batterie de Démarrage 12V 100Ah",
+      "unit": "PIECE",
+      "recommended_min_stock": 2,
+      "estimated_unit_cost_xaf": 75000
+    }
+  ],
+  "pm_templates": [
+    {
+      "pm_id": "PM-HLTH-001A",
+      "asset_class_id": "AC-HLTH-001",
+      "pm_hierarchy_level": "A_SERVICE",
+      "supersedes_pm_ids": [],
+      "title_en": "ICU Ventilator Semi-Annual Calibration & Electrical Safety",
+      "title_fr": "Calibration Semestrielle et Sécurité Électrique Respirateur",
+      "trigger_type": "CALENDAR_DAYS",
+      "interval_value": 180,
+      "estimated_duration_mins": 90,
+      "craft_id": "CRF-BIOMED-ENG",
+      "required_tool_ids": [
+        "TL-ESA-615",
+        "TL-GAS-FLOW"
+      ],
+      "safety_protocol_ids": [
+        "SAF-BIO-DECON"
+      ],
+      "regulatory_mandatory": true,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "IEC 60601-1 earth resistance (< 0.2 Ohms) and chassis leakage test",
+          "text_fr": "Test résistance de terre CEI 60601-1 (< 0,2 Ohm) et courant de fuite"
+        },
+        {
+          "step": 2,
+          "code": "CHK-02",
+          "input_type": "NUMERIC",
+          "unit": "%",
+          "min": 20.5,
+          "max": 21.5,
+          "text_en": "Calibrate O2 sensor at 21% room air and 100% O2",
+          "text_fr": "Calibrer le capteur O2 à 21 % et 100 %"
+        },
+        {
+          "step": 3,
+          "code": "CHK-03",
+          "input_type": "PASS_FAIL",
+          "text_en": "Verify tidal volume (+/- 10%) and PEEP accuracy with gas flow analyzer",
+          "text_fr": "Vérifier précision volume courant (+/- 10 %) et PEP"
+        }
+      ],
+      "required_parts": [
+        {
+          "part_id": "PRT-HLTH-002",
+          "qty": 2
+        }
+      ]
+    },
+    {
+      "pm_id": "PM-HLTH-001B",
+      "asset_class_id": "AC-HLTH-001",
+      "pm_hierarchy_level": "B_SERVICE",
+      "supersedes_pm_ids": [
+        "PM-HLTH-001A"
+      ],
+      "title_en": "ICU Ventilator Annual O2 Cell & Expiratory Valve Overhaul",
+      "title_fr": "Révision Annuelle Cellule O2 et Valve Expiratoire Respirateur",
+      "trigger_type": "CALENDAR_DAYS",
+      "interval_value": 365,
+      "estimated_duration_mins": 150,
+      "craft_id": "CRF-BIOMED-ENG",
+      "required_tool_ids": [
+        "TL-ESA-615",
+        "TL-GAS-FLOW"
+      ],
+      "safety_protocol_ids": [
+        "SAF-BIO-DECON"
+      ],
+      "regulatory_mandatory": true,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "Execute full A-Service calibration plus replace galvanic O2 cell and expiratory diaphragm",
+          "text_fr": "Exécuter calibration complète + remplacer cellule O2 et membrane expiratoire"
+        },
+        {
+          "step": 2,
+          "code": "CHK-02",
+          "input_type": "PASS_FAIL",
+          "text_en": "Run 30-min internal battery discharge test and alarm verification",
+          "text_fr": "Test autonomie batterie 30 min et contrôle des alarmes"
+        }
+      ],
+      "required_parts": [
+        {
+          "part_id": "PRT-HLTH-001",
+          "qty": 1
+        },
+        {
+          "part_id": "PRT-HLTH-002",
+          "qty": 2
+        }
+      ]
+    },
+    {
+      "pm_id": "PM-HLTH-002",
+      "asset_class_id": "AC-HLTH-002",
+      "pm_hierarchy_level": "A_SERVICE",
+      "supersedes_pm_ids": [],
+      "title_en": "Oxygen Concentrator 1,000-Hour Filter & O2 Purity Service",
+      "title_fr": "Entretien 1 000 Heures Filtres et Pureté Concentrateur O2",
+      "trigger_type": "ENGINE_HOURS",
+      "interval_value": 1000,
+      "estimated_duration_mins": 45,
+      "craft_id": "CRF-BIOMED-TCH",
+      "required_tool_ids": [
+        "TL-GAS-FLOW"
+      ],
+      "safety_protocol_ids": [
+        "SAF-BIO-DECON"
+      ],
+      "regulatory_mandatory": true,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "NUMERIC",
+          "unit": "%",
+          "min": 87.0,
+          "max": 96.0,
+          "text_en": "Measure O2 purity at max flow rate",
+          "text_fr": "Mesurer la pureté O2 au débit maximal"
+        },
+        {
+          "step": 2,
+          "code": "CHK-02",
+          "input_type": "PASS_FAIL",
+          "text_en": "Replace intake HEPA/felt filters and clean cabinet pre-filter",
+          "text_fr": "Remplacer les filtres HEPA/feutre et nettoyer le préfiltre"
+        }
+      ],
+      "required_parts": [
+        {
+          "part_id": "PRT-HLTH-003",
+          "qty": 1
+        }
+      ]
+    },
+    {
+      "pm_id": "PM-HLTH-003",
+      "asset_class_id": "AC-HLTH-003",
+      "pm_hierarchy_level": "A_SERVICE",
+      "supersedes_pm_ids": [],
+      "title_en": "Patient Monitor Annual NIBP, SpO2 & ECG Verification",
+      "title_fr": "Vérification Annuelle PNI, SpO2 et ECG Moniteur Patient",
+      "trigger_type": "CALENDAR_DAYS",
+      "interval_value": 365,
+      "estimated_duration_mins": 40,
+      "craft_id": "CRF-BIOMED-TCH",
+      "required_tool_ids": [
+        "TL-ESA-615",
+        "TL-PAT-SIM"
+      ],
+      "safety_protocol_ids": [
+        "SAF-BIO-DECON"
+      ],
+      "regulatory_mandatory": false,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "Verify NIBP static calibration (+/- 3 mmHg) and simulate ECG/SpO2 waveforms",
+          "text_fr": "Vérifier calibration PNI (+/- 3 mmHg) et simuler signaux ECG/SpO2"
+        }
+      ],
+      "required_parts": []
+    },
+    {
+      "pm_id": "PM-HLTH-004",
+      "asset_class_id": "AC-HLTH-004",
+      "pm_hierarchy_level": "A_SERVICE",
+      "supersedes_pm_ids": [],
+      "title_en": "Defibrillator Semi-Annual Energy Discharge & Battery Readiness Check",
+      "title_fr": "Contrôle Semestriel Énergie de Décharge et Batterie Défibrillateur",
+      "trigger_type": "CALENDAR_DAYS",
+      "interval_value": 180,
+      "estimated_duration_mins": 45,
+      "craft_id": "CRF-BIOMED-ENG",
+      "required_tool_ids": [
+        "TL-ESA-615",
+        "TL-DEFIB-ANL"
+      ],
+      "safety_protocol_ids": [
+        "SAF-BIO-DECON"
+      ],
+      "regulatory_mandatory": true,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "NUMERIC",
+          "unit": "J",
+          "min": 190.0,
+          "max": 210.0,
+          "text_en": "Measure delivered energy at 200J setting on defibrillator analyzer",
+          "text_fr": "Mesurer l'énergie délivrée à 200J sur l'analyseur"
+        },
+        {
+          "step": 2,
+          "code": "CHK-02",
+          "input_type": "PASS_FAIL",
+          "text_en": "Verify charge time (< 7 sec to 200J) and check electrode pad expiry date",
+          "text_fr": "Vérifier le temps de charge (< 7 s à 200J) et la péremption des électrodes"
+        }
+      ],
+      "required_parts": [
+        {
+          "part_id": "PRT-HLTH-004",
+          "qty": 1
+        }
+      ]
+    },
+    {
+      "pm_id": "PM-HLTH-005",
+      "asset_class_id": "AC-HLTH-005",
+      "pm_hierarchy_level": "A_SERVICE",
+      "supersedes_pm_ids": [],
+      "title_en": "Infusion / Syringe Pump Annual Flow Accuracy & Occlusion Calibration",
+      "title_fr": "Calibration Annuelle Précision Débit et Occlusion Pompe à Perfusion",
+      "trigger_type": "CALENDAR_DAYS",
+      "interval_value": 365,
+      "estimated_duration_mins": 40,
+      "craft_id": "CRF-BIOMED-TCH",
+      "required_tool_ids": [
+        "TL-ESA-615"
+      ],
+      "safety_protocol_ids": [
+        "SAF-BIO-DECON"
+      ],
+      "regulatory_mandatory": false,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "Verify volumetric flow accuracy (+/- 5%), occlusion alarm pressure, and air-in-line sensor",
+          "text_fr": "Vérifier précision débit (+/- 5 %), alarme occlusion et capteur bulles d'air"
+        }
+      ],
+      "required_parts": []
+    },
+    {
+      "pm_id": "PM-HLTH-006",
+      "asset_class_id": "AC-HLTH-006",
+      "pm_hierarchy_level": "A_SERVICE",
+      "supersedes_pm_ids": [],
+      "title_en": "Anesthesia Workstation Semi-Annual Vaporizer, Leak & Scavenging Check",
+      "title_fr": "Contrôle Semestriel Évaporateurs, Étanchéité et Évacuation Gaz Anesthésie",
+      "trigger_type": "CALENDAR_DAYS",
+      "interval_value": 180,
+      "estimated_duration_mins": 120,
+      "craft_id": "CRF-BIOMED-ENG",
+      "required_tool_ids": [
+        "TL-ESA-615",
+        "TL-GAS-FLOW"
+      ],
+      "safety_protocol_ids": [
+        "SAF-BIO-DECON"
+      ],
+      "regulatory_mandatory": true,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "Perform breathing circuit pressure leak test (< 150 mL/min at 30 cmH2O) and verify O2/N2O hypoxic guard",
+          "text_fr": "Test étanchéité circuit (< 150 mL/min à 30 cmH2O) et sécurité hypoxique O2/N2O"
+        }
+      ],
+      "required_parts": [
+        {
+          "part_id": "PRT-HLTH-005",
+          "qty": 1
+        }
+      ]
+    },
+    {
+      "pm_id": "PM-HLTH-007",
+      "asset_class_id": "AC-HLTH-007",
+      "pm_hierarchy_level": "A_SERVICE",
+      "supersedes_pm_ids": [],
+      "title_en": "Electrosurgical Unit (ESU) Semi-Annual RF Output & Return Electrode Test",
+      "title_fr": "Contrôle Semestriel Puissance RF et Sécurité Plaque Neutre Bistouri Électrique",
+      "trigger_type": "CALENDAR_DAYS",
+      "interval_value": 180,
+      "estimated_duration_mins": 60,
+      "craft_id": "CRF-BIOMED-ENG",
+      "required_tool_ids": [
+        "TL-ESA-615"
+      ],
+      "safety_protocol_ids": [
+        "SAF-BIO-DECON"
+      ],
+      "regulatory_mandatory": true,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "Verify Cut/Coag RF power output (+/- 15%) and REM contact quality alarm",
+          "text_fr": "Vérifier puissance RF Coupe/Coag (+/- 15 %) et alarme contact plaque neutre"
+        }
+      ],
+      "required_parts": []
+    },
+    {
+      "pm_id": "PM-HLTH-008",
+      "asset_class_id": "AC-HLTH-008",
+      "pm_hierarchy_level": "A_SERVICE",
+      "supersedes_pm_ids": [],
+      "title_en": "Ultrasound System Quarterly Probe Acoustic Lens & UPS Check",
+      "title_fr": "Contrôle Trimestriel Sondes Échographiques et Onduleur",
+      "trigger_type": "CALENDAR_DAYS",
+      "interval_value": 90,
+      "estimated_duration_mins": 45,
+      "craft_id": "CRF-BIOMED-ENG",
+      "required_tool_ids": [
+        "TL-ESA-615"
+      ],
+      "safety_protocol_ids": [
+        "SAF-BIO-DECON"
+      ],
+      "regulatory_mandatory": false,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "Inspect probe acoustic membranes for delamination, clean air filters, and test online UPS",
+          "text_fr": "Inspecter lentilles acoustiques des sondes, nettoyer filtres et tester l'onduleur"
+        }
+      ],
+      "required_parts": []
+    },
+    {
+      "pm_id": "PM-HLTH-009",
+      "asset_class_id": "AC-HLTH-009",
+      "pm_hierarchy_level": "STATUTORY",
+      "supersedes_pm_ids": [],
+      "title_en": "Digital X-Ray Semi-Annual kVp Calibration, Collimator & Radiation Audit",
+      "title_fr": "Calibration Semestrielle kVp, Collimateur et Radioprotection Radiologie",
+      "trigger_type": "CALENDAR_DAYS",
+      "interval_value": 180,
+      "estimated_duration_mins": 120,
+      "craft_id": "CRF-RAD-SPEC",
+      "required_tool_ids": [
+        "TL-RAD-DOS",
+        "TL-ESA-615"
+      ],
+      "safety_protocol_ids": [
+        "SAF-RAD-PROT",
+        "SAF-LOTO-ELEC"
+      ],
+      "regulatory_mandatory": true,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "Measure kVp accuracy (+/- 5%), exposure timer reproducibility, and light-to-X-ray field alignment",
+          "text_fr": "Mesurer précision kVp (+/- 5 %), temps de pose et congruence champ lumineux/RX"
+        }
+      ],
+      "required_parts": []
+    },
+    {
+      "pm_id": "PM-HLTH-010",
+      "asset_class_id": "AC-HLTH-010",
+      "pm_hierarchy_level": "A_SERVICE",
+      "supersedes_pm_ids": [],
+      "title_en": "Hematology/Biochemistry Analyzer Monthly Hydraulic Decontamination & QC",
+      "title_fr": "Décontamination Hydraulique Mensuelle et CQ Automate Laboratoire",
+      "trigger_type": "CALENDAR_DAYS",
+      "interval_value": 30,
+      "estimated_duration_mins": 60,
+      "craft_id": "CRF-BIOMED-TCH",
+      "required_tool_ids": [],
+      "safety_protocol_ids": [
+        "SAF-BIO-DECON"
+      ],
+      "regulatory_mandatory": true,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "Run enzymatic probe wash, verify zero background count, and validate 3-level QC",
+          "text_fr": "Lancer lavage enzymatique, vérifier bruit de fond nul et valider CQ 3 niveaux"
+        }
+      ],
+      "required_parts": [
+        {
+          "part_id": "PRT-HLTH-006",
+          "qty": 1
+        }
+      ]
+    },
+    {
+      "pm_id": "PM-HLTH-011",
+      "asset_class_id": "AC-HLTH-011",
+      "pm_hierarchy_level": "A_SERVICE",
+      "supersedes_pm_ids": [],
+      "title_en": "Vaccine / Blood Bank Refrigerator Monthly Temp Calibration & Condenser Service",
+      "title_fr": "Contrôle Mensuel Température et Condenseur Réfrigérateur Chaîne du Froid",
+      "trigger_type": "CALENDAR_DAYS",
+      "interval_value": 30,
+      "estimated_duration_mins": 30,
+      "craft_id": "CRF-HVAC-REF",
+      "required_tool_ids": [],
+      "safety_protocol_ids": [],
+      "regulatory_mandatory": true,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "NUMERIC",
+          "unit": "°C",
+          "min": 2.0,
+          "max": 8.0,
+          "text_en": "Verify calibrated data logger reading (2°C to 8°C) and test audible door/temp alarm",
+          "text_fr": "Vérifier température enregistreur (2 °C à 8 °C) et tester l'alarme porte/température"
+        }
+      ],
+      "required_parts": []
+    },
+    {
+      "pm_id": "PM-HLTH-012",
+      "asset_class_id": "AC-HLTH-012",
+      "pm_hierarchy_level": "STATUTORY",
+      "supersedes_pm_ids": [],
+      "title_en": "Autoclave & Medical Gas Quarterly Safety Valve, Gasket & Spore Validation",
+      "title_fr": "Contrôle Trimestriel Soupape, Joint et Validation Biologique Autoclave",
+      "trigger_type": "CALENDAR_DAYS",
+      "interval_value": 90,
+      "estimated_duration_mins": 75,
+      "craft_id": "CRF-BIOMED-ENG",
+      "required_tool_ids": [],
+      "safety_protocol_ids": [
+        "SAF-LOTO-PRES",
+        "SAF-BIO-DECON"
+      ],
+      "regulatory_mandatory": true,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "Inspect door gasket, lift safety valve, check medical gas manifold pressure alarms, and run Bowie-Dick + spore test",
+          "text_fr": "Inspecter joint porte, actionner soupape, vérifier alarmes centrale gaz et exécuter test Bowie-Dick + spores"
+        }
+      ],
+      "required_parts": [
+        {
+          "part_id": "PRT-HLTH-007",
+          "qty": 1
+        }
+      ]
+    },
+    {
+      "pm_id": "PM-TEL-001A",
+      "asset_class_id": "AC-TEL-001",
+      "pm_hierarchy_level": "A_SERVICE",
+      "supersedes_pm_ids": [],
+      "title_en": "BTS Diesel Generator 250-Hour Oil, Filter & ATS Service",
+      "title_fr": "Vidange 250 Heures, Filtres et Test ATS Groupe Électrogène BTS",
+      "trigger_type": "ENGINE_HOURS",
+      "interval_value": 250,
+      "estimated_duration_mins": 90,
+      "craft_id": "CRF-ELECTROMECH",
+      "required_tool_ids": [],
+      "safety_protocol_ids": [
+        "SAF-LOTO-ELEC"
+      ],
+      "regulatory_mandatory": false,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "Change engine oil, oil filter, primary fuel filter, and water separator",
+          "text_fr": "Vidanger huile moteur et remplacer filtre huile, filtre gasoil et décanteur"
+        },
+        {
+          "step": 2,
+          "code": "CHK-02",
+          "input_type": "PASS_FAIL",
+          "text_en": "Simulate grid failure to verify ATS auto-start and load transfer (< 15 sec)",
+          "text_fr": "Simuler coupure réseau pour valider démarrage auto et basculement ATS (< 15 s)"
+        }
+      ],
+      "required_parts": [
+        {
+          "part_id": "PRT-TEL-001",
+          "qty": 1
+        },
+        {
+          "part_id": "PRT-TEL-002",
+          "qty": 1
+        },
+        {
+          "part_id": "PRT-TEL-003",
+          "qty": 10
+        }
+      ]
+    },
+    {
+      "pm_id": "PM-TEL-001B",
+      "asset_class_id": "AC-TEL-001",
+      "pm_hierarchy_level": "B_SERVICE",
+      "supersedes_pm_ids": [
+        "PM-TEL-001A"
+      ],
+      "title_en": "BTS Diesel Generator 1,000-Hour Valve Clearance, Belts & Coolant Flush",
+      "title_fr": "Révision 1 000 Heures Jeu aux Soupapes, Courroies et Refroidissement",
+      "trigger_type": "ENGINE_HOURS",
+      "interval_value": 1000,
+      "estimated_duration_mins": 180,
+      "craft_id": "CRF-ELECTROMECH",
+      "required_tool_ids": [
+        "TL-THERM-CAM"
+      ],
+      "safety_protocol_ids": [
+        "SAF-LOTO-ELEC"
+      ],
+      "regulatory_mandatory": false,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "Execute full 250h A-Service plus adjust valve lash, replace V-belts, flush radiator coolant, and IR scan alternator terminals",
+          "text_fr": "Exécuter révision A + régler culbuteurs, remplacer courroies, rincer radiateur et thermographie bornes"
+        }
+      ],
+      "required_parts": [
+        {
+          "part_id": "PRT-TEL-001",
+          "qty": 1
+        },
+        {
+          "part_id": "PRT-TEL-002",
+          "qty": 1
+        },
+        {
+          "part_id": "PRT-TEL-003",
+          "qty": 10
+        }
+      ]
+    },
+    {
+      "pm_id": "PM-TEL-002",
+      "asset_class_id": "AC-TEL-002",
+      "pm_hierarchy_level": "A_SERVICE",
+      "supersedes_pm_ids": [],
+      "title_en": "48V DC Rectifier & Battery Bank Quarterly Impedance & Float Check",
+      "title_fr": "Contrôle Trimestriel Redresseurs 48V DC et Impédance Batteries",
+      "trigger_type": "CALENDAR_DAYS",
+      "interval_value": 90,
+      "estimated_duration_mins": 60,
+      "craft_id": "CRF-TELECOM-PWR",
+      "required_tool_ids": [
+        "TL-THERM-CAM"
+      ],
+      "safety_protocol_ids": [
+        "SAF-LOTO-ELEC"
+      ],
+      "regulatory_mandatory": false,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "NUMERIC",
+          "unit": "V",
+          "min": 53.0,
+          "max": 54.8,
+          "text_en": "Measure float bus voltage, rectifier module current sharing, and torque battery busbars",
+          "text_fr": "Mesurer tension floating bus, équilibrage redresseurs et serrage barres batteries"
+        }
+      ],
+      "required_parts": []
+    },
+    {
+      "pm_id": "PM-TEL-003",
+      "asset_class_id": "AC-TEL-003",
+      "pm_hierarchy_level": "A_SERVICE",
+      "supersedes_pm_ids": [],
+      "title_en": "Solar PV Array & MPPT Controller Quarterly Cleaning & String Voltage Check",
+      "title_fr": "Nettoyage Trimestriel Panneaux Solaires et Contrôle Chaînes MPPT",
+      "trigger_type": "CALENDAR_DAYS",
+      "interval_value": 90,
+      "estimated_duration_mins": 60,
+      "craft_id": "CRF-TELECOM-PWR",
+      "required_tool_ids": [],
+      "safety_protocol_ids": [
+        "SAF-LOTO-ELEC"
+      ],
+      "regulatory_mandatory": false,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "Clean dust/soiling from PV modules, inspect DC surge arrestors, and verify MPPT charging current",
+          "text_fr": "Nettoyer la poussière sur modules PV, inspecter parafoudres DC et courant charge MPPT"
+        }
+      ],
+      "required_parts": []
+    },
+    {
+      "pm_id": "PM-TEL-004",
+      "asset_class_id": "AC-TEL-004",
+      "pm_hierarchy_level": "A_SERVICE",
+      "supersedes_pm_ids": [],
+      "title_en": "Bulk Diesel Tank Quarterly Water Drain & Level Sensor Calibration",
+      "title_fr": "Purge d'Eau Trimestrielle Cuve Gasoil et Calibration Sonde Niveau",
+      "trigger_type": "CALENDAR_DAYS",
+      "interval_value": 90,
+      "estimated_duration_mins": 45,
+      "craft_id": "CRF-ELECTROMECH",
+      "required_tool_ids": [],
+      "safety_protocol_ids": [],
+      "regulatory_mandatory": false,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "Drain bottom water/sludge from bulk tank, inspect bund containment, and verify telemetry fuel level accuracy",
+          "text_fr": "Purger eau/boues fond de cuve, inspecter rétention et vérifier précision sonde télémétrie"
+        }
+      ],
+      "required_parts": []
+    },
+    {
+      "pm_id": "PM-TEL-005",
+      "asset_class_id": "AC-TEL-005",
+      "pm_hierarchy_level": "STATUTORY",
+      "supersedes_pm_ids": [],
+      "title_en": "Telecom Tower Semi-Annual Aviation Lighting, Guy Tension & Earth Audit",
+      "title_fr": "Audit Semestriel Balisage Aéronautique, Haubans et Terre Pylône",
+      "trigger_type": "CALENDAR_DAYS",
+      "interval_value": 180,
+      "estimated_duration_mins": 120,
+      "craft_id": "CRF-RIGGER",
+      "required_tool_ids": [
+        "TL-EARTH-TST"
+      ],
+      "safety_protocol_ids": [
+        "SAF-HEIGHT-TWR"
+      ],
+      "regulatory_mandatory": true,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "NUMERIC",
+          "unit": "Ohms",
+          "min": 0.1,
+          "max": 5.0,
+          "text_en": "Measure tower earth grid resistance (< 5 Ohms) and test aviation obstruction beacons",
+          "text_fr": "Mesurer résistance de terre (< 5 Ohms) et tester feux de balisage aérien"
+        }
+      ],
+      "required_parts": []
+    },
+    {
+      "pm_id": "PM-TEL-006",
+      "asset_class_id": "AC-TEL-006",
+      "pm_hierarchy_level": "A_SERVICE",
+      "supersedes_pm_ids": [],
+      "title_en": "BTS Shelter Cooling / Free-Cooling Monthly Filter & Damper Service",
+      "title_fr": "Entretien Mensuel Filtres et Registres Free-Cooling Shelter BTS",
+      "trigger_type": "CALENDAR_DAYS",
+      "interval_value": 30,
+      "estimated_duration_mins": 30,
+      "craft_id": "CRF-HVAC-REF",
+      "required_tool_ids": [],
+      "safety_protocol_ids": [
+        "SAF-LOTO-ELEC"
+      ],
+      "regulatory_mandatory": false,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "Clean intake dust filters, verify 48V DC fan operation, and test high-temp shelter alarm",
+          "text_fr": "Nettoyer filtres à poussière, vérifier ventilateurs 48V DC et alarme haute température"
+        }
+      ],
+      "required_parts": []
+    },
+    {
+      "pm_id": "PM-MFG-001",
+      "asset_class_id": "AC-MFG-001",
+      "pm_hierarchy_level": "STATUTORY",
+      "supersedes_pm_ids": [],
+      "title_en": "Steam Boiler Annual Statutory Pressure, Safety Valve & Flue Gas Inspection",
+      "title_fr": "Contrôle Réglementaire Annuel Chaudière Vapeur et Analyse Combustion",
+      "trigger_type": "CALENDAR_DAYS",
+      "interval_value": 365,
+      "estimated_duration_mins": 240,
+      "craft_id": "CRF-BOILER-ENG",
+      "required_tool_ids": [
+        "TL-FLUE-GAS"
+      ],
+      "safety_protocol_ids": [
+        "SAF-LOTO-PRES"
+      ],
+      "regulatory_mandatory": true,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "Test low-water fuel cutoff, safety relief valves, and measure flue gas O2/CO efficiency",
+          "text_fr": "Tester sécurité manque d'eau, soupapes de sûreté et rendement combustion O2/CO"
+        }
+      ],
+      "required_parts": []
+    },
+    {
+      "pm_id": "PM-MFG-002",
+      "asset_class_id": "AC-MFG-002",
+      "pm_hierarchy_level": "A_SERVICE",
+      "supersedes_pm_ids": [],
+      "title_en": "Rotary Screw Air Compressor 2,000-Hour Filter & Separator Service",
+      "title_fr": "Entretien 2 000 Heures Filtres et Séparateur Compresseur à Vis",
+      "trigger_type": "ENGINE_HOURS",
+      "interval_value": 2000,
+      "estimated_duration_mins": 90,
+      "craft_id": "CRF-MECH-IND",
+      "required_tool_ids": [
+        "TL-VIB-PEN"
+      ],
+      "safety_protocol_ids": [
+        "SAF-LOTO-ELEC",
+        "SAF-LOTO-PRES"
+      ],
+      "regulatory_mandatory": false,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "Replace air filter, oil filter, air/oil separator, and verify airend bearing vibration",
+          "text_fr": "Remplacer filtre à air, filtre huile, séparateur air/huile et contrôler vibrations"
+        }
+      ],
+      "required_parts": [
+        {
+          "part_id": "PRT-MFG-001",
+          "qty": 1
+        }
+      ]
+    },
+    {
+      "pm_id": "PM-MFG-003",
+      "asset_class_id": "AC-MFG-003",
+      "pm_hierarchy_level": "STATUTORY",
+      "supersedes_pm_ids": [],
+      "title_en": "Industrial Cold Room Monthly HACCP & Refrigeration Pressure Check",
+      "title_fr": "Contrôle Mensuel HACCP et Frigorifique Chambre Froide Industrielle",
+      "trigger_type": "CALENDAR_DAYS",
+      "interval_value": 30,
+      "estimated_duration_mins": 60,
+      "craft_id": "CRF-HVAC-REF",
+      "required_tool_ids": [
+        "TL-MANIFOLD"
+      ],
+      "safety_protocol_ids": [
+        "SAF-LOTO-ELEC"
+      ],
+      "regulatory_mandatory": true,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "Verify suction/discharge pressures, defrost cycle, drain heater, and trapped-person safety alarm",
+          "text_fr": "Vérifier pressions BP/HP, dégivrage, cordon chauffant et alarme personne enfermée"
+        }
+      ],
+      "required_parts": []
+    },
+    {
+      "pm_id": "PM-MFG-004",
+      "asset_class_id": "AC-MFG-004",
+      "pm_hierarchy_level": "A_SERVICE",
+      "supersedes_pm_ids": [],
+      "title_en": "Process Pump Quarterly Mechanical Seal, Vibration & Alignment Check",
+      "title_fr": "Contrôle Trimestriel Garniture Mécanique, Vibrations et Alignement Pompe",
+      "trigger_type": "CALENDAR_DAYS",
+      "interval_value": 90,
+      "estimated_duration_mins": 45,
+      "craft_id": "CRF-MECH-IND",
+      "required_tool_ids": [
+        "TL-VIB-PEN"
+      ],
+      "safety_protocol_ids": [
+        "SAF-LOTO-ELEC"
+      ],
+      "regulatory_mandatory": false,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "Inspect mechanical seal for weeping, grease bearings, and record RMS vibration velocity",
+          "text_fr": "Inspecter garniture mécanique, graisser roulements et mesurer vitesse vibratoire RMS"
+        }
+      ],
+      "required_parts": [
+        {
+          "part_id": "PRT-MFG-002",
+          "qty": 1
+        }
+      ]
+    },
+    {
+      "pm_id": "PM-MFG-005",
+      "asset_class_id": "AC-MFG-005",
+      "pm_hierarchy_level": "A_SERVICE",
+      "supersedes_pm_ids": [],
+      "title_en": "Conveyor & Gearbox Monthly Belt Tracking, Tension & Oil Level Check",
+      "title_fr": "Contrôle Mensuel Alignement Bande, Tension et Niveau Huile Réducteur",
+      "trigger_type": "CALENDAR_DAYS",
+      "interval_value": 30,
+      "estimated_duration_mins": 40,
+      "craft_id": "CRF-MECH-IND",
+      "required_tool_ids": [],
+      "safety_protocol_ids": [
+        "SAF-LOTO-ELEC"
+      ],
+      "regulatory_mandatory": false,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "Check conveyor belt tracking/splices, inspect idler rollers, and verify gearbox oil sight glass",
+          "text_fr": "Vérifier centrage/agrafes bande, rouleaux porteurs et niveau d'huile réducteur"
+        }
+      ],
+      "required_parts": []
+    },
+    {
+      "pm_id": "PM-MFG-006",
+      "asset_class_id": "AC-MFG-006",
+      "pm_hierarchy_level": "A_SERVICE",
+      "supersedes_pm_ids": [],
+      "title_en": "Filling & Packaging Line Weekly CIP Hygiene & Pneumatic Valve Service",
+      "title_fr": "Hygiène Hebdomadaire NEP (CIP) et Contrôle Pneumatique Ligne Conditionnement",
+      "trigger_type": "CALENDAR_DAYS",
+      "interval_value": 7,
+      "estimated_duration_mins": 60,
+      "craft_id": "CRF-ELECTROMECH",
+      "required_tool_ids": [],
+      "safety_protocol_ids": [
+        "SAF-LOTO-ELEC"
+      ],
+      "regulatory_mandatory": true,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "Verify CIP nozzle sanitization, clean optical sensors, and drain FRL pneumatic air filters",
+          "text_fr": "Valider nettoyage NEP des becs, nettoyer cellules optiques et purger filtres pneumatiques"
+        }
+      ],
+      "required_parts": []
+    },
+    {
+      "pm_id": "PM-MFG-007",
+      "asset_class_id": "AC-MFG-007",
+      "pm_hierarchy_level": "STATUTORY",
+      "supersedes_pm_ids": [],
+      "title_en": "HV/LV Power Transformer Annual Oil Dielectric (DGA) & Thermography Audit",
+      "title_fr": "Analyse Diélectrique Huile et Thermographie Annuelle Transformateur HT/BT",
+      "trigger_type": "CALENDAR_DAYS",
+      "interval_value": 365,
+      "estimated_duration_mins": 120,
+      "craft_id": "CRF-ELEC-HV",
+      "required_tool_ids": [
+        "TL-THERM-CAM",
+        "TL-EARTH-TST"
+      ],
+      "safety_protocol_ids": [
+        "SAF-LOTO-ELEC"
+      ],
+      "regulatory_mandatory": true,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "Perform IR thermography on HV/LV bushings, inspect Buchholz relay, and replace silica gel breather",
+          "text_fr": "Thermographie IR traversées HT/BT, contrôle relais Buchholz et remplacement silicagel"
+        }
+      ],
+      "required_parts": [
+        {
+          "part_id": "PRT-MFG-003",
+          "qty": 1
+        }
+      ]
+    },
+    {
+      "pm_id": "PM-MFG-008",
+      "asset_class_id": "AC-MFG-008",
+      "pm_hierarchy_level": "STATUTORY",
+      "supersedes_pm_ids": [],
+      "title_en": "Main LV Switchgear & Capacitor Bank Semi-Annual IR Thermography & Torque Check",
+      "title_fr": "Thermographie Semestrielle TGBT et Batterie de Condensateurs",
+      "trigger_type": "CALENDAR_DAYS",
+      "interval_value": 180,
+      "estimated_duration_mins": 90,
+      "craft_id": "CRF-ELEC-HV",
+      "required_tool_ids": [
+        "TL-THERM-CAM"
+      ],
+      "safety_protocol_ids": [
+        "SAF-LOTO-ELEC"
+      ],
+      "regulatory_mandatory": true,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "Scan busbars/breakers under load for thermal hotspots and test ACB trip units & PFC stages",
+          "text_fr": "Scanner jeux de barres/disjoncteurs en charge et tester déclencheurs ACB et gradins Cos Phi"
+        }
+      ],
+      "required_parts": []
+    },
+    {
+      "pm_id": "PM-MFG-009",
+      "asset_class_id": "AC-MFG-009",
+      "pm_hierarchy_level": "A_SERVICE",
+      "supersedes_pm_ids": [],
+      "title_en": "Water Treatment & Effluent Plant (WWTP) Monthly Probe Calibration & Dosing Check",
+      "title_fr": "Calibration Mensuelle Sondes pH/Turbidité et Pompes Doseuses STEP",
+      "trigger_type": "CALENDAR_DAYS",
+      "interval_value": 30,
+      "estimated_duration_mins": 60,
+      "craft_id": "CRF-ELECTROMECH",
+      "required_tool_ids": [],
+      "safety_protocol_ids": [],
+      "regulatory_mandatory": true,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "Calibrate pH/conductivity sensors with buffer solutions and verify chemical dosing pump stroke",
+          "text_fr": "Calibrer sondes pH/conductivité et vérifier débit des pompes doseuses"
+        }
+      ],
+      "required_parts": []
+    },
+    {
+      "pm_id": "PM-FLT-001A",
+      "asset_class_id": "AC-FLT-001",
+      "pm_hierarchy_level": "A_SERVICE",
+      "supersedes_pm_ids": [],
+      "title_en": "Heavy Truck 10,000 km Engine Oil, Fuel Filter & Air Brake Safety Service",
+      "title_fr": "Révision 10 000 km Vidange, Filtres et Sécurité Freinage Poids Lourd",
+      "trigger_type": "KILOMETERS",
+      "interval_value": 10000,
+      "estimated_duration_mins": 150,
+      "craft_id": "CRF-AUTO-HVY",
+      "required_tool_ids": [
+        "TL-OBD-HD"
+      ],
+      "safety_protocol_ids": [],
+      "regulatory_mandatory": false,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "Change engine oil/filters, drain air brake tanks, inspect brake linings, and grease chassis",
+          "text_fr": "Vidanger huile/filtres, purger bouteilles d'air, contrôler garnitures freins et graisser châssis"
+        }
+      ],
+      "required_parts": [
+        {
+          "part_id": "PRT-FLT-001",
+          "qty": 1
+        },
+        {
+          "part_id": "PRT-FLT-002",
+          "qty": 25
+        }
+      ]
+    },
+    {
+      "pm_id": "PM-FLT-001B",
+      "asset_class_id": "AC-FLT-001",
+      "pm_hierarchy_level": "STATUTORY",
+      "supersedes_pm_ids": [],
+      "title_en": "Cameroon/CEMAC Annual Statutory Visite Technique & CIMA/Transit Audit",
+      "title_fr": "Préparation Visite Technique Annuelle et Contrôle Assurances/Titres CEMAC",
+      "trigger_type": "CALENDAR_DAYS",
+      "interval_value": 365,
+      "estimated_duration_mins": 120,
+      "craft_id": "CRF-AUTO-HVY",
+      "required_tool_ids": [],
+      "safety_protocol_ids": [],
+      "regulatory_mandatory": true,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "Verify lighting, braking balance, suspension play, fire extinguisher, CIMA insurance & CEMAC transit dossier",
+          "text_fr": "Vérifier éclairage, freinage, jeux suspension, extincteur, attestation CIMA et dossier CEMAC"
+        }
+      ],
+      "required_parts": []
+    },
+    {
+      "pm_id": "PM-FLT-002",
+      "asset_class_id": "AC-FLT-002",
+      "pm_hierarchy_level": "A_SERVICE",
+      "supersedes_pm_ids": [],
+      "title_en": "Light Utility Vehicle (Pickup / Van) 5,000 km Service & 4WD Check",
+      "title_fr": "Révision 5 000 km Véhicule Utilitaire Léger et Contrôle 4x4",
+      "trigger_type": "KILOMETERS",
+      "interval_value": 5000,
+      "estimated_duration_mins": 90,
+      "craft_id": "CRF-AUTO-HVY",
+      "required_tool_ids": [],
+      "safety_protocol_ids": [],
+      "regulatory_mandatory": false,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "Replace engine oil/filter, inspect brake pads, ball joints, 4WD transfer case, and tire pressure",
+          "text_fr": "Vidanger huile/filtre, contrôler plaquettes, rotules, boîte transfert 4x4 et pneus"
+        }
+      ],
+      "required_parts": []
+    },
+    {
+      "pm_id": "PM-FLT-003",
+      "asset_class_id": "AC-FLT-003",
+      "pm_hierarchy_level": "A_SERVICE",
+      "supersedes_pm_ids": [],
+      "title_en": "Refrigerated Semi-Trailer Reefer 500-Hour Engine & Cold-Chain Check",
+      "title_fr": "Entretien 500 Heures Groupe Froid Semi-Remorque et Enregistreur Température",
+      "trigger_type": "ENGINE_HOURS",
+      "interval_value": 500,
+      "estimated_duration_mins": 90,
+      "craft_id": "CRF-HVAC-REF",
+      "required_tool_ids": [
+        "TL-MANIFOLD"
+      ],
+      "safety_protocol_ids": [],
+      "regulatory_mandatory": true,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "Service reefer diesel engine oil/belts, verify refrigerant charge, defrost cycle, and door seals",
+          "text_fr": "Entretien moteur groupe froid, contrôle charge gaz, cycle dégivrage et joints portes"
+        }
+      ],
+      "required_parts": []
+    },
+    {
+      "pm_id": "PM-FLT-004",
+      "asset_class_id": "AC-FLT-004",
+      "pm_hierarchy_level": "STATUTORY",
+      "supersedes_pm_ids": [],
+      "title_en": "Forklift 500-Hour Hydraulic Mast, Chain Elongation & Fork Inspection",
+      "title_fr": "Inspection 500 Heures Mât Hydraulique, Chaînes et Fourches Chariot Élévateur",
+      "trigger_type": "ENGINE_HOURS",
+      "interval_value": 500,
+      "estimated_duration_mins": 60,
+      "craft_id": "CRF-MECH-IND",
+      "required_tool_ids": [],
+      "safety_protocol_ids": [],
+      "regulatory_mandatory": true,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "Measure lift chain wear (< 2%), inspect hydraulic hoses/cylinders, and check fork heel thickness",
+          "text_fr": "Mesurer usure chaînes (< 2 %), inspecter flexibles/vérins et épaisseur talon fourches"
+        }
+      ],
+      "required_parts": []
+    },
+    {
+      "pm_id": "PM-FLT-005",
+      "asset_class_id": "AC-FLT-005",
+      "pm_hierarchy_level": "STATUTORY",
+      "supersedes_pm_ids": [],
+      "title_en": "Overhead Crane / Reach Stacker Quarterly Wire Rope & Load Limiter Inspection",
+      "title_fr": "Contrôle Trimestriel Câbles, Crochets et Limiteur de Charge Engin Levage",
+      "trigger_type": "CALENDAR_DAYS",
+      "interval_value": 90,
+      "estimated_duration_mins": 120,
+      "craft_id": "CRF-MECH-IND",
+      "required_tool_ids": [],
+      "safety_protocol_ids": [
+        "SAF-LOTO-ELEC"
+      ],
+      "regulatory_mandatory": true,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "Inspect wire rope for broken strands, test hoist brake, upper limit switch, and overload cutout",
+          "text_fr": "Inspecter câbles métalliques, tester frein de levage, fin de course haut et limiteur charge"
+        }
+      ],
+      "required_parts": []
+    },
+    {
+      "pm_id": "PM-FLT-006",
+      "asset_class_id": "AC-FLT-006",
+      "pm_hierarchy_level": "STATUTORY",
+      "supersedes_pm_ids": [],
+      "title_en": "Depot Fuel Dispenser Semi-Annual Flow Meter Calibration & Leak Check",
+      "title_fr": "Étalonnage Semestriel Volucompteur Carburant et Contrôle Étanchéité",
+      "trigger_type": "CALENDAR_DAYS",
+      "interval_value": 180,
+      "estimated_duration_mins": 60,
+      "craft_id": "CRF-ELECTROMECH",
+      "required_tool_ids": [],
+      "safety_protocol_ids": [],
+      "regulatory_mandatory": true,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "Verify meter accuracy with 20L calibrated proving can, replace dispenser filter, and inspect hoses",
+          "text_fr": "Vérifier précision jauge 20L étalon, remplacer filtre distributeur et inspecter flexibles"
+        }
+      ],
+      "required_parts": []
+    },
+    {
+      "pm_id": "PM-FAC-001",
+      "asset_class_id": "AC-FAC-001",
+      "pm_hierarchy_level": "A_SERVICE",
+      "supersedes_pm_ids": [],
+      "title_en": "Split / VRF AC Quarterly Filter Wash & Condensate Drain Service",
+      "title_fr": "Nettoyage Trimestriel Filtres et Évacuation Condensats Climatiseur",
+      "trigger_type": "CALENDAR_DAYS",
+      "interval_value": 90,
+      "estimated_duration_mins": 30,
+      "craft_id": "CRF-HVAC-REF",
+      "required_tool_ids": [],
+      "safety_protocol_ids": [
+        "SAF-LOTO-ELEC"
+      ],
+      "regulatory_mandatory": false,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "Wash indoor filters, sanitize evaporator coil, flush condensate drain, and check compressor amps",
+          "text_fr": "Laver filtres, désinfecter évaporateur, déboucher condensats et mesurer intensité compresseur"
+        }
+      ],
+      "required_parts": []
+    },
+    {
+      "pm_id": "PM-FAC-002",
+      "asset_class_id": "AC-FAC-002",
+      "pm_hierarchy_level": "A_SERVICE",
+      "supersedes_pm_ids": [],
+      "title_en": "Central Chiller & AHU Quarterly Refrigerant, Chilled Water & Belt Service",
+      "title_fr": "Entretien Trimestriel Groupe Eau Glacée (Chiller) et Centrale Traitement d'Air",
+      "trigger_type": "CALENDAR_DAYS",
+      "interval_value": 90,
+      "estimated_duration_mins": 120,
+      "craft_id": "CRF-HVAC-REF",
+      "required_tool_ids": [
+        "TL-MANIFOLD"
+      ],
+      "safety_protocol_ids": [
+        "SAF-LOTO-ELEC"
+      ],
+      "regulatory_mandatory": false,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "Log evaporator/condenser approach temps, clean AHU filters, check chilled water differential pressure",
+          "text_fr": "Relever températures approche évap/condenseur, nettoyer filtres CTA et pression différentielle"
+        }
+      ],
+      "required_parts": []
+    },
+    {
+      "pm_id": "PM-FAC-003",
+      "asset_class_id": "AC-FAC-003",
+      "pm_hierarchy_level": "STATUTORY",
+      "supersedes_pm_ids": [],
+      "title_en": "Passenger Elevator Monthly Safety Interlock, Brake & ARD Rescue Check",
+      "title_fr": "Contrôle Mensuel Sécurités Portes, Frein et Sauvetage ARD Ascenseur",
+      "trigger_type": "CALENDAR_DAYS",
+      "interval_value": 30,
+      "estimated_duration_mins": 60,
+      "craft_id": "CRF-ELEV-TECH",
+      "required_tool_ids": [],
+      "safety_protocol_ids": [
+        "SAF-LOTO-ELEC"
+      ],
+      "regulatory_mandatory": true,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "Test landing door interlocks, light curtain, hoist brake gap, and Automatic Rescue Device (ARD)",
+          "text_fr": "Tester verrouillages portes palières, barrière infrarouge, frein treuil et dispositif ARD"
+        }
+      ],
+      "required_parts": []
+    },
+    {
+      "pm_id": "PM-FAC-004",
+      "asset_class_id": "AC-FAC-004",
+      "pm_hierarchy_level": "STATUTORY",
+      "supersedes_pm_ids": [],
+      "title_en": "Fire Extinguisher & Hose Reel Semi-Annual Pressure & Seal Inspection",
+      "title_fr": "Vérification Semestrielle Pression et Scellés Extincteurs et RIA",
+      "trigger_type": "CALENDAR_DAYS",
+      "interval_value": 180,
+      "estimated_duration_mins": 15,
+      "craft_id": "CRF-HSE-OFF",
+      "required_tool_ids": [],
+      "safety_protocol_ids": [],
+      "regulatory_mandatory": true,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "Check gauge in green zone, intact tamper seal, nozzle clearance, and hose reel valve",
+          "text_fr": "Vérifier aiguille en zone verte, plomb intact, diffuseur libre et vanne RIA"
+        }
+      ],
+      "required_parts": []
+    },
+    {
+      "pm_id": "PM-FAC-005",
+      "asset_class_id": "AC-FAC-005",
+      "pm_hierarchy_level": "STATUTORY",
+      "supersedes_pm_ids": [],
+      "title_en": "Fire Alarm Panel & Smoke Detectors Quarterly Loop & Backup Battery Test",
+      "title_fr": "Test Trimestriel Boucles Détection Incendie et Batteries Secours SSI",
+      "trigger_type": "CALENDAR_DAYS",
+      "interval_value": 90,
+      "estimated_duration_mins": 90,
+      "craft_id": "CRF-HSE-OFF",
+      "required_tool_ids": [],
+      "safety_protocol_ids": [],
+      "regulatory_mandatory": true,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "Simulate smoke detector activation per zone, test sounders/strobes, and verify 24V backup batteries",
+          "text_fr": "Simuler déclenchement détecteurs par zone, tester sirènes/flashs et batteries 24V"
+        }
+      ],
+      "required_parts": []
+    },
+    {
+      "pm_id": "PM-FAC-006",
+      "asset_class_id": "AC-FAC-006",
+      "pm_hierarchy_level": "STATUTORY",
+      "supersedes_pm_ids": [],
+      "title_en": "Fire Sprinkler Pump Set Monthly Weekly-Churn Run & Diesel Start Test",
+      "title_fr": "Essai Mensuel Démarrage Motopompe Diesel et Électropompe Incendie",
+      "trigger_type": "CALENDAR_DAYS",
+      "interval_value": 30,
+      "estimated_duration_mins": 45,
+      "craft_id": "CRF-ELECTROMECH",
+      "required_tool_ids": [],
+      "safety_protocol_ids": [],
+      "regulatory_mandatory": true,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "Verify jockey pump cut-in/out pressure and run diesel fire pump for 30 minutes under flow",
+          "text_fr": "Vérifier seuils pompe jockey et faire tourner la motopompe diesel 30 minutes"
+        }
+      ],
+      "required_parts": []
+    },
+    {
+      "pm_id": "PM-FAC-007",
+      "asset_class_id": "AC-FAC-007",
+      "pm_hierarchy_level": "A_SERVICE",
+      "supersedes_pm_ids": [],
+      "title_en": "Building Standby Generator Monthly Load Test & 250-Hour Oil Service",
+      "title_fr": "Essai Mensuel en Charge et Entretien 250 Heures Groupe Secours Bâtiment",
+      "trigger_type": "CALENDAR_DAYS",
+      "interval_value": 30,
+      "estimated_duration_mins": 60,
+      "craft_id": "CRF-ELECTROMECH",
+      "required_tool_ids": [],
+      "safety_protocol_ids": [
+        "SAF-LOTO-ELEC"
+      ],
+      "regulatory_mandatory": false,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "Check coolant/oil levels, starter battery voltage, and execute 20-min ATS building load transfer",
+          "text_fr": "Vérifier niveaux huile/liquide refroidissement, tension batterie et transfert ATS 20 min"
+        }
+      ],
+      "required_parts": [
+        {
+          "part_id": "PRT-FAC-001",
+          "qty": 1
+        }
+      ]
+    },
+    {
+      "pm_id": "PM-FAC-008",
+      "asset_class_id": "AC-FAC-008",
+      "pm_hierarchy_level": "A_SERVICE",
+      "supersedes_pm_ids": [],
+      "title_en": "Central Online UPS Quarterly Battery Bank & Inverter Thermography Check",
+      "title_fr": "Contrôle Trimestriel Batteries Onduleur Central et Thermographie",
+      "trigger_type": "CALENDAR_DAYS",
+      "interval_value": 90,
+      "estimated_duration_mins": 60,
+      "craft_id": "CRF-ELEC-HV",
+      "required_tool_ids": [
+        "TL-THERM-CAM"
+      ],
+      "safety_protocol_ids": [
+        "SAF-LOTO-ELEC"
+      ],
+      "regulatory_mandatory": false,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "Measure battery string float voltages, clean cooling fans, and verify static bypass transfer",
+          "text_fr": "Mesurer tensions floating batteries, nettoyer ventilateurs et tester by-pass statique"
+        }
+      ],
+      "required_parts": []
+    },
+    {
+      "pm_id": "PM-FAC-009",
+      "asset_class_id": "AC-FAC-009",
+      "pm_hierarchy_level": "A_SERVICE",
+      "supersedes_pm_ids": [],
+      "title_en": "Water Booster Pump Set Quarterly Pressure Vessel & Seal Inspection",
+      "title_fr": "Contrôle Trimestriel Surpresseur Eau Potable et Pression Ballon Vessie",
+      "trigger_type": "CALENDAR_DAYS",
+      "interval_value": 90,
+      "estimated_duration_mins": 45,
+      "craft_id": "CRF-MECH-IND",
+      "required_tool_ids": [],
+      "safety_protocol_ids": [
+        "SAF-LOTO-ELEC"
+      ],
+      "regulatory_mandatory": false,
+      "checklist": [
+        {
+          "step": 1,
+          "code": "CHK-01",
+          "input_type": "PASS_FAIL",
+          "text_en": "Check bladder tank air pre-charge pressure, pump alternation relay, and non-return valves",
+          "text_fr": "Vérifier pression gonflage vessie, permutation automatique pompes et clapets anti-retour"
+        }
+      ],
+      "required_parts": []
+    }
+  ],
+  "asset_failure_matrices": [
+    {
+      "matrix_id": "AFM-01",
+      "asset_class_id": "AC-HLTH-001",
+      "mode_code": "ERO",
+      "mech_code": "MEC-3.1",
+      "cause_code": "CAU-4.2",
+      "det_code": "DET-02",
+      "remedy_en": "Replace depleted galvanic O2 sensor cell and recalibrate at 21% and 100% O2",
+      "remedy_fr": "Remplacer la cellule capteur O2 épuisée et recalibrer à 21 % et 100 %"
+    },
+    {
+      "matrix_id": "AFM-02",
+      "asset_class_id": "AC-HLTH-002",
+      "mode_code": "LOO",
+      "mech_code": "MEC-5.2",
+      "cause_code": "CAU-5.2",
+      "det_code": "DET-02",
+      "remedy_en": "Rebuild oil-free compressor piston seals and replace moisture-saturated zeolite sieve beds",
+      "remedy_fr": "Remplacer les joints du compresseur et les colonnes de zéolithe saturées d'humidité"
+    },
+    {
+      "matrix_id": "AFM-03",
+      "asset_class_id": "AC-HLTH-004",
+      "mode_code": "FTS",
+      "mech_code": "MEC-4.3",
+      "cause_code": "CAU-4.2",
+      "det_code": "DET-01",
+      "remedy_en": "Replace high-discharge battery pack and run 200J energy verification test",
+      "remedy_fr": "Remplacer la batterie haute décharge et exécuter un test d'énergie à 200J"
+    },
+    {
+      "matrix_id": "AFM-04",
+      "asset_class_id": "AC-HLTH-009",
+      "mode_code": "ELF",
+      "mech_code": "MEC-4.1",
+      "cause_code": "CAU-5.1",
+      "det_code": "DET-04",
+      "remedy_en": "Inspect HV tank cables, reset inverter fault, and verify dedicated voltage stabilizer",
+      "remedy_fr": "Inspecter câbles haute tension, réarmer générateur et contrôler stabilisateur réseau"
+    },
+    {
+      "matrix_id": "AFM-05",
+      "asset_class_id": "AC-HLTH-011",
+      "mode_code": "OHE",
+      "mech_code": "MEC-5.1",
+      "cause_code": "CAU-5.2",
+      "det_code": "DET-02",
+      "remedy_en": "Clean dust-blocked condenser fins, check magnetic door seal, and verify compressor start relay",
+      "remedy_fr": "Nettoyer ailettes condenseur encrassées, contrôler joint de porte et relais démarrage"
+    },
+    {
+      "matrix_id": "AFM-06",
+      "asset_class_id": "AC-HLTH-012",
+      "mode_code": "LOO",
+      "mech_code": "MEC-1.4",
+      "cause_code": "CAU-4.2",
+      "det_code": "DET-03",
+      "remedy_en": "Replace worn silicone door gasket or faulty immersion heater and run Bowie-Dick validation",
+      "remedy_fr": "Remplacer le joint de porte silicone ou la résistance et lancer un cycle Bowie-Dick"
+    },
+    {
+      "matrix_id": "AFM-07",
+      "asset_class_id": "AC-TEL-001",
+      "mode_code": "FTS",
+      "mech_code": "MEC-4.3",
+      "cause_code": "CAU-4.2",
+      "det_code": "DET-04",
+      "remedy_en": "Replace dead 12V starter battery, bleed fuel injection line, and test ATS auto-start",
+      "remedy_fr": "Remplacer la batterie démarrage HS, purger le circuit gasoil et tester le démarrage ATS"
+    },
+    {
+      "matrix_id": "AFM-08",
+      "asset_class_id": "AC-TEL-002",
+      "mode_code": "LOO",
+      "mech_code": "MEC-4.3",
+      "cause_code": "CAU-3.1",
+      "det_code": "DET-02",
+      "remedy_en": "Isolate sulfated/imbalanced battery string, replace failed cells, and verify rectifier float voltage",
+      "remedy_fr": "Isoler la branche batteries défectueuse, remplacer les éléments HS et vérifier tension floating"
+    },
+    {
+      "matrix_id": "AFM-09",
+      "asset_class_id": "AC-MFG-001",
+      "mode_code": "STP",
+      "mech_code": "MEC-5.1",
+      "cause_code": "CAU-4.2",
+      "det_code": "DET-02",
+      "remedy_en": "Clean fouled burner flame photocell and fuel nozzle; verify feedwater level probes",
+      "remedy_fr": "Nettoyer cellule photoélectrique et gicleur brûleur ; contrôler sondes niveau d'eau"
+    },
+    {
+      "matrix_id": "AFM-10",
+      "asset_class_id": "AC-MFG-002",
+      "mode_code": "OHE",
+      "mech_code": "MEC-5.1",
+      "cause_code": "CAU-5.2",
+      "det_code": "DET-02",
+      "remedy_en": "Blow out dust-clogged oil cooler matrix and top up synthetic compressor lubricant",
+      "remedy_fr": "Souffler le refroidisseur d'huile colmaté et compléter l'huile synthétique compresseur"
+    },
+    {
+      "matrix_id": "AFM-11",
+      "asset_class_id": "AC-MFG-004",
+      "mode_code": "ELP",
+      "mech_code": "MEC-1.4",
+      "cause_code": "CAU-2.0",
+      "det_code": "DET-03",
+      "remedy_en": "Replace worn mechanical shaft seal and perform laser shaft alignment",
+      "remedy_fr": "Remplacer la garniture mécanique usée et effectuer un lignage laser d'arbre"
+    },
+    {
+      "matrix_id": "AFM-12",
+      "asset_class_id": "AC-MFG-007",
+      "mode_code": "OHE",
+      "mech_code": "MEC-4.1",
+      "cause_code": "CAU-3.1",
+      "det_code": "DET-02",
+      "remedy_en": "Reduce phase load imbalance, filter/top up transformer dielectric oil, and replace silica gel",
+      "remedy_fr": "Rééquilibrer les phases, filtrer/compléter l'huile diélectrique et remplacer le silicagel"
+    },
+    {
+      "matrix_id": "AFM-13",
+      "asset_class_id": "AC-FLT-001",
+      "mode_code": "LOO",
+      "mech_code": "MEC-5.2",
+      "cause_code": "CAU-4.2",
+      "det_code": "DET-03",
+      "remedy_en": "Replace saturated pneumatic air dryer cartridge and repair leaking brake air line",
+      "remedy_fr": "Remplacer la cartouche dessiccateur saturée et réparer la fuite sur circuit pneumatique"
+    },
+    {
+      "matrix_id": "AFM-14",
+      "asset_class_id": "AC-FAC-001",
+      "mode_code": "ELP",
+      "mech_code": "MEC-5.1",
+      "cause_code": "CAU-5.2",
+      "det_code": "DET-03",
+      "remedy_en": "Flush algae/dust blockage from indoor condensate drain line and sanitize evaporator pan",
+      "remedy_fr": "Déboucher la conduite d'évacuation des condensats et nettoyer le bac évaporateur"
+    },
+    {
+      "matrix_id": "AFM-15",
+      "asset_class_id": "AC-FAC-003",
+      "mode_code": "FTS",
+      "mech_code": "MEC-4.2",
+      "cause_code": "CAU-5.2",
+      "det_code": "DET-03",
+      "remedy_en": "Clean and adjust landing door interlock contacts and verify infrared door safety curtain",
+      "remedy_fr": "Nettoyer et régler les contacts de serrure porte palière et vérifier la barrière infrarouge"
+    }
+  ]
+}

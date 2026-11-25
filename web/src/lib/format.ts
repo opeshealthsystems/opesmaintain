@@ -1,15 +1,21 @@
 import type { FieldDef } from "./registry";
 
+import { FR_VALUES } from "./fr";
+
+let lang = "EN";
+
 export function humanize(v: string): string {
   if (!v) return "";
+  if (lang === "FR" && FR_VALUES[v]) return FR_VALUES[v];
   const s = v.replace(/_/g, " ").toLowerCase();
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 let currency = "XAF";
 let locale = "en-GB";
-export function setLocaleSettings(c: string, lang: string) {
+export function setLocaleSettings(c: string, language: string) {
   currency = c || "XAF";
+  lang = language === "FR" ? "FR" : "EN";
   locale = lang === "FR" ? "fr-FR" : "en-GB";
 }
 export function currentLocale() {
@@ -68,7 +74,7 @@ export function formatValue(f: FieldDef, row: Record<string, unknown>): string {
     case "enum":
       return humanize(String(v));
     case "bool":
-      return v ? "Yes" : "No";
+      return v ? (lang === "FR" ? "Oui" : "Yes") : lang === "FR" ? "Non" : "No";
     case "money":
       return money(v);
     case "dec":

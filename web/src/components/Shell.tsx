@@ -9,9 +9,11 @@ import { Icon } from "@/lib/icons";
 import { GROUP_ORDER, modules, resources } from "@/lib/registry";
 import { humanize, relative } from "@/lib/format";
 import { Badge, Loading } from "./ui";
+import { SupportBanner } from "./SupportBanner";
+import { AnnouncementBanner } from "./AnnouncementBanner";
 
 const OPS = [
-  { href: "/", label: "Dashboard", icon: "LayoutDashboard" },
+  { href: "/dashboard", label: "Dashboard", icon: "LayoutDashboard" },
   { href: "/work-board", label: "Work board", icon: "SquareKanban" },
   { href: "/dispatch", label: "Dispatch calendar", icon: "CalendarRange" },
   { href: "/pm-board", label: "PM board", icon: "CalendarClock" },
@@ -33,10 +35,32 @@ const CUSTOMER_NAV = [
   { href: "/m/billing-exports", label: "Billing", icon: "FileOutput" },
 ];
 
-const RESTRICTED = new Set(["audit-events", "delegations", "devices", "settings", "outbox-events", "integrations", "webhook-subscriptions"]);
+const APP_PAGES = ["/dashboard", "/work-board", "/dispatch", "/pm-board", "/stock", "/analytics", "/reports", "/technician", "/portal"];
+
+/** True when the current URL is a page or module this role may not open (e.g. typed or bookmarked). */
+function blocked(path: string, canRead: (p: string) => boolean, canOpen: (p: string) => boolean): boolean {
+  const page = APP_PAGES.find((p) => path === p || path.startsWith(p + "/"));
+  if (page) return !canOpen(page);
+  const m = /^\/m\/([a-z-]+)/.exec(path);
+  if (m) return !canRead(m[1]);
+  if (path.startsWith("/reports")) return !canOpen("/reports");
+  return false;
+}
+
+function NotAvailable({ label, back, home }: { label: string; back: string; home: string }) {
+  return (
+    <div className="card" style={{ maxWidth: 560, margin: "48px auto" }}>
+      <div className="card-body stack" style={{ alignItems: "flex-start" }}>
+        <Icon name="Lock" size={28} style={{ color: "var(--text-3)" }} />
+        <h1 style={{ margin: 0 }}>{label}</h1>
+        <Link href={home} className="btn btn-primary">{back}</Link>
+      </div>
+    </div>
+  );
+}
 
 export function Shell({ children }: { children: React.ReactNode }) {
-  const { user, loading, logout, setLanguage, hasRole } = useAuth();
+  const { user, loading, logout, setLanguage, canRead, canOpen } = useAuth();
   const t = useT();
   const path = usePathname();
   const router = useRouter();
@@ -62,14 +86,14 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const groups = useMemo(() => {
     const m = new Map<string, typeof resources>();
     for (const r of resources) {
-      if (RESTRICTED.has(r.path) && !hasRole("MANAGER", "AUDITOR")) continue;
+      if (!canRead(r.path)) continue; // same need-to-know rule the server enforces
       const g = modules[r.module].group;
       if (!m.has(g)) m.set(g, []);
       m.get(g)!.push(r);
     }
     for (const list of m.values()) list.sort((a, b) => a.module.localeCompare(b.module));
     return GROUP_ORDER.filter((g) => m.has(g)).map((g) => ({ group: g, items: m.get(g)! }));
-  }, [hasRole]);
+  }, [canRead]);
 
   if (loading || !user) return <div className="content"><Loading /></div>;
   const isCustomer = user.role === "CUSTOMER";
@@ -92,7 +116,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           ) : (
             <>
               <div className="nav-group-title" style={{ cursor: "default" }}>{t("Operations")}</div>
-              {OPS.map((n) => <NavLink key={n.href} {...n} label={t(n.label)} active={active(n.href)} />)}
+              {OPS.filter((n) => canOpen(n.href) && !(user.scoped && ["/analytics", "/reports", "/portal"].includes(n.href))).map((n) => <NavLink key={n.href} {...n} label={t(n.label)} active={active(n.href)} />)}
               {groups.map(({ group, items }) => (
                 <div className="nav-group" key={group}>
                   <button className="nav-group-title" onClick={() => toggle(group)} aria-expanded={!collapsed[group]}>
@@ -118,13 +142,15 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <button className="btn btn-ghost icon-btn menu-btn" onClick={() => setOpen(true)} aria-label="Open menu"><Icon name="Menu" /></button>
           <GlobalSearch />
           <div className="topbar-spacer" />
-          <button className="btn btn-ghost btn-sm hide-sm" onClick={() => setLanguage(user.language === "FR" ? "EN" : "FR")} aria-label={t("Language")} title={t("Language")}>
+          <button className="btn btn-ghost btn-sm hide-sm" onClick={() => setLanguage(user.language === "FR" ? "EN" : "FR")} aria-label={`${user.language === "FR" ? "FR" : "EN"} — ${t("Language")}`} title={t("Language")}>
             <Icon name="Languages" size={16} />{user.language === "FR" ? "FR" : "EN"}
           </button>
           <NotificationBell />
           <UserMenu name={user.fullName} role={user.role} onLogout={logout} />
         </header>
-        <main className="content" id="main">{children}</main>
+        <SupportBanner />
+        <AnnouncementBanner />
+        <main className="content" id="main">{blocked(path, canRead, canOpen) ? <NotAvailable label={t("This page is not available for your role.")} back={t("Back to dashboard")} home={user.role === "CUSTOMER" ? "/portal" : "/dashboard"} /> : children}</main>
       </div>
     </div>
   );
@@ -205,7 +231,7 @@ function NotificationBell() {
       </button>
       {open && (
         <div className="search-results" style={{ left: "auto", right: 0, width: 360, maxWidth: "calc(100vw - 24px)" }}>
-          <div className="card-head"><h3>Notifications</h3><Link href="/m/notifications" className="small" onClick={() => setOpen(false)}>View all</Link></div>
+          <div className="card-head"><h3>Notifications</h3><Link href="/notifications" className="small" onClick={() => setOpen(false)}>View all</Link></div>
           {items.length === 0 ? <div className="state small">You are all caught up</div> : items.slice(0, 8).map((n) => (
             <Link key={n.id} href={n.link || "#"} className="search-item" onClick={() => { markRead(n.id); setOpen(false); }}>
               <Icon name={n.status === "UNREAD" ? "CircleDot" : "Circle"} size={14} style={{ color: n.status === "UNREAD" ? "var(--accent)" : "var(--text-3)", flex: "0 0 auto" }} />
@@ -234,7 +260,7 @@ function UserMenu({ name, role, onLogout }: { name: string; role: string; onLogo
   const initials = name.split(" ").map((p) => p[0]).slice(0, 2).join("");
   return (
     <div ref={ref} style={{ position: "relative" }}>
-      <button className="btn btn-ghost" onClick={() => setOpen(!open)} aria-expanded={open} aria-label="User menu" style={{ gap: 8, paddingRight: 6 }}>
+      <button className="btn btn-ghost" onClick={() => setOpen(!open)} aria-expanded={open} aria-haspopup="menu" style={{ gap: 8, paddingRight: 6 }}>
         <span style={{ width: 28, height: 28, borderRadius: "50%", background: "var(--accent-soft)", color: "var(--accent)", display: "grid", placeItems: "center", fontWeight: 600, fontSize: 12 }}>{initials}</span>
         <span className="hide-sm" style={{ textAlign: "left", lineHeight: 1.15 }}>
           <span style={{ display: "block", fontSize: 13 }}>{name}</span>

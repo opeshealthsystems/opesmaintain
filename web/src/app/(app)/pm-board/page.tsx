@@ -9,6 +9,14 @@ import { Icon } from "@/lib/icons";
 
 const LANES = ["DRAFT", "APPROVED", "ACTIVE", "PAUSED", "RETIRED"];
 
+/** One line describing when a plan runs next; never prints "null" for plans with missing fields. */
+function scheduleLabel(p: Record<string, unknown>): string {
+  if (p.triggerType === "METER") return p.nextMeterThreshold != null ? `At ${num(p.nextMeterThreshold as number)} (meter)` : "Meter-based";
+  if (p.nextDueAt) return `Next due ${date(p.nextDueAt as string)}`;
+  if (p.intervalValue != null && p.intervalUnit) return `Every ${p.intervalValue} ${humanize(String(p.intervalUnit)).toLowerCase()}(s)`;
+  return "Schedule not set";
+}
+
 export default function PmBoard() {
   const t = useT();
   const { canWrite } = useAuth();
@@ -36,7 +44,7 @@ export default function PmBoard() {
                           <div className="t">{String(p.name)}</div>
                           <div className="small muted"><Icon name="Boxes" size={12} /> {String(p.assetIdLabel)}</div>
                           <div className="small" style={{ color: overdue ? "var(--danger)" : "var(--text-3)" }}>
-                            <Icon name="CalendarDays" size={12} /> {p.triggerType === "METER" ? `At ${num(p.nextMeterThreshold)} (meter)` : p.nextDueAt ? `Next due ${date(p.nextDueAt)}` : `Every ${p.intervalValue} ${humanize(String(p.intervalUnit)).toLowerCase()}(s)`}
+                            <Icon name="CalendarDays" size={12} /> {scheduleLabel(p)}
                           </div>
                         </Link>
                       );

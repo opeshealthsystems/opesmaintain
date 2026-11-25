@@ -1,9 +1,11 @@
 "use client";
+import { AssetClassPicker } from "./AssetClassPicker";
 import { useEffect, useRef, useState } from "react";
 import { api, ApiError } from "@/lib/api";
 import type { FieldDef, ResourceDef } from "@/lib/registry";
 import { browserZone, fromLocalInput, humanize, toLocalInput } from "@/lib/format";
 import { Icon } from "@/lib/icons";
+import { useT } from "@/lib/i18n";
 import { Alert } from "./ui";
 
 export function RefSelect({ path, value, label, onChange, id, invalid, filter }: {
@@ -40,7 +42,7 @@ export function RefSelect({ path, value, label, onChange, id, invalid, filter }:
           aria-invalid={invalid}
           role="combobox"
           aria-expanded={open}
-          placeholder={current ?? "Search…"}
+          placeholder={current ?? "…"}
           value={open ? q : current ?? ""}
           onFocus={() => { setOpen(true); setQ(""); }}
           onChange={(e) => setQ(e.target.value)}
@@ -64,6 +66,7 @@ export function RefSelect({ path, value, label, onChange, id, invalid, filter }:
 export function FieldInput({ f, value, label, onChange, error }: {
   f: FieldDef; value: unknown; label?: string | null; onChange: (v: unknown, label?: string | null) => void; error?: string;
 }) {
+  const t = useT();
   const id = `f-${f.name}`;
   const invalid = !!error;
   let control: React.ReactNode;
@@ -74,7 +77,7 @@ export function FieldInput({ f, value, label, onChange, error }: {
     case "enum":
       control = (
         <select id={id} className="select" aria-invalid={invalid} value={(value as string) ?? ""} onChange={(e) => onChange(e.target.value || null)}>
-          <option value="">Select…</option>
+          <option value="">{t("Select…")}</option>
           {f.options.map((o) => <option key={o} value={o}>{humanize(o)}</option>)}
         </select>
       );
@@ -103,7 +106,7 @@ export function FieldInput({ f, value, label, onChange, error }: {
     <div className={`field ${f.type === "text" ? "wide" : ""}`}>
       {f.type !== "bool" && <label htmlFor={id}>{f.label}{f.required && <span className="req" aria-hidden="true">*</span>}</label>}
       {control}
-      {f.type === "datetime" && <span className="hint">Times shown in {browserZone()}</span>}
+      {f.type === "datetime" && <span className="hint">{t("Times shown in")} {browserZone()}</span>}
       {error && <span className="err" role="alert">{error}</span>}
     </div>
   );
@@ -118,8 +121,11 @@ export function RecordForm({ def, initial, onSaved, onCancel, defaults }: {
   def: ResourceDef; initial?: Record<string, unknown> | null; onSaved: (row: Record<string, unknown>) => void; onCancel: () => void;
   defaults?: Record<string, unknown>;
 }) {
+  const t = useT();
   const creating = !initial;
-  const fields = editableFields(def, creating);
+  // Asset class and its specifications have their own catalog-driven editor.
+  const fields = editableFields(def, creating).filter((f) => !(def.path === "assets" && (f.name === "assetClassId" || f.name === "specs")));
+  const catalogFields = def.path === "assets" ? ["assetClassId", "specs"] : [];
   const [values, setValues] = useState<Record<string, unknown>>(() => ({ ...(defaults ?? {}), ...(initial ?? {}) }));
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
@@ -136,11 +142,12 @@ export function RecordForm({ def, initial, onSaved, onCancel, defaults }: {
       if (f.required && f.type !== "bool" && (v === null || v === undefined || v === "")) errs[f.name] = `${f.label} is required`;
     }
     setErrors(errs);
-    if (Object.keys(errs).length) { setFormError("Please complete the highlighted fields."); return; }
+    if (Object.keys(errs).length) { setFormError(t("Please complete the highlighted fields.")); return; }
     setSaving(true);
     setFormError(null);
     const body: Record<string, unknown> = {};
     for (const f of fields) if (values[f.name] !== undefined) body[f.name] = values[f.name];
+    for (const n of catalogFields) if (values[n] !== undefined) body[n] = values[n];
     try {
       const row = creating
         ? await api<Record<string, unknown>>(`/${def.path}`, { body, headers: { "Idempotency-Key": idemKey.current } })
@@ -161,6 +168,7 @@ export function RecordForm({ def, initial, onSaved, onCancel, defaults }: {
     <form onSubmit={submit} noValidate>
       <div className="card-body stack">
         {formError && <Alert tone="danger">{formError}</Alert>}
+        {def.path === "assets" && <AssetClassPicker values={values} creating={creating} set={(n, v) => set(n, v)} />}
         <div className="form-grid">
           {fields.map((f) => (
             <FieldInput key={f.name} f={f} value={values[f.name]} label={values[`${f.name}Label`] as string | null} error={errors[f.name]} onChange={(v, l) => set(f.name, v, l)} />
@@ -168,10 +176,10 @@ export function RecordForm({ def, initial, onSaved, onCancel, defaults }: {
         </div>
       </div>
       <div className="card-foot">
-        <span className="small muted"><span style={{ color: "var(--danger)" }}>*</span> Required</span>
+        <span className="small muted"><span style={{ color: "var(--danger)" }}>*</span> {t("Required")}</span>
         <div className="row">
-          <button type="button" className="btn" onClick={onCancel}>Cancel</button>
-          <button type="submit" className="btn btn-primary" disabled={saving}><Icon name="Save" size={16} />{saving ? "Saving…" : creating ? `Create ${def.singular.toLowerCase()}` : "Save changes"}</button>
+          <button type="button" className="btn" onClick={onCancel}>{t("Cancel")}</button>
+          <button type="submit" className="btn btn-primary" disabled={saving}><Icon name="Save" size={16} />{saving ? t("Saving…") : creating ? `${t("Create")} — ${def.singular.toLowerCase()}` : t("Save changes")}</button>
         </div>
       </div>
     </form>

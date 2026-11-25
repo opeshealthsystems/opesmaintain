@@ -36,10 +36,18 @@ public class ScheduledJobs {
     private final WorkOrderRepository workOrders;
     private final ServiceGrantRepository grants;
     private final CrudService crud;
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private io.micrometer.core.instrument.MeterRegistry metrics;
+    private final com.opesware.maintain.platform.notify.NotificationService notifications;
+    private final com.opesware.maintain.documents.application.DocumentService documents;
 
     public ScheduledJobs(@Value("${opes.jobs.enabled:true}") boolean enabled, TenantRepo tenants, PmService pm, SafetyService safety,
                          InsightService insights, IntegrationService integration, WorkOrderRepository workOrders,
-                         ServiceGrantRepository grants, CrudService crud) {
+                         ServiceGrantRepository grants, CrudService crud,
+                         com.opesware.maintain.platform.notify.NotificationService notifications,
+                         com.opesware.maintain.documents.application.DocumentService documents) {
+        this.documents = documents;
+        this.notifications = notifications;
         this.enabled = enabled;
         this.tenants = tenants;
         this.pm = pm;
@@ -83,6 +91,8 @@ public class ScheduledJobs {
     @Scheduled(initialDelay = 30_000, fixedDelay = 30_000)
     public void outbox() {
         forEachTenant("outbox-dispatch", t -> integration.dispatch(t.id));
+        forEachTenant("email", t -> notifications.sendPending(t.id));
+        forEachTenant("document-rescan", t -> documents.rescanPending(t.id));
     }
 
     @Scheduled(initialDelay = 120_000, fixedDelay = 3_600_000)
@@ -98,6 +108,7 @@ public class ScheduledJobs {
                 Integer n = CurrentUser.runAsSystem(t.id, () -> work.apply(t));
                 if (n != null && n > 0) log.info("job={} tenant={} affected={}", job, t.code, n);
             } catch (RuntimeException e) {
+                if (metrics != null) metrics.counter("opes_job_failures_total", "job", job).increment();
                 log.error("job={} tenant={} failed", job, t.code, e);
             }
         }

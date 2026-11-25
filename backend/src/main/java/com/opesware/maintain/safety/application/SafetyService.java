@@ -27,8 +27,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class SafetyService {
     private final CrudService crud;
     private final WorkOrderRepository workOrders;
+    private final com.opesware.maintain.identity.application.DelegationService delegation;
 
-    public SafetyService(CrudService crud, WorkOrderRepository workOrders) {
+    public SafetyService(CrudService crud, WorkOrderRepository workOrders, com.opesware.maintain.identity.application.DelegationService delegation) {
+        this.delegation = delegation;
         this.crud = crud;
         this.workOrders = workOrders;
     }
@@ -53,7 +55,7 @@ public class SafetyService {
                 p.status = "VERIFIED";
             }
             case "issue" -> {
-                Access.requireRole("SAFETY_OFFICER");
+                delegation.requireRoleOrDelegation("ISSUE_PERMITS", "SAFETY_OFFICER");
                 expect(p, "VERIFIED");
                 if (Objects.equals(p.requestedBy, actor)) throw ApiException.guard("SEPARATION_OF_DUTIES", "The requester cannot issue their own permit");
                 if (p.validTo.isBefore(now)) throw ApiException.guard("PERMIT_EXPIRED", "Validity window has already ended");

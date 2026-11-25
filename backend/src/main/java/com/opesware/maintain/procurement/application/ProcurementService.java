@@ -24,8 +24,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProcurementService {
     private final CrudService crud;
     private final InventoryService inventory;
+    private final com.opesware.maintain.identity.application.DelegationService delegation;
 
-    public ProcurementService(CrudService crud, InventoryService inventory) {
+    public ProcurementService(CrudService crud, InventoryService inventory, com.opesware.maintain.identity.application.DelegationService delegation) {
+        this.delegation = delegation;
         this.crud = crud;
         this.inventory = inventory;
     }
@@ -53,7 +55,10 @@ public class ProcurementService {
 
     @Transactional
     public PurchaseRequisition decide(UUID id, String action) {
-        Access.requireRole("PROCUREMENT", "MANAGER");
+        if ("approve".equals(action)) delegation.requireRoleOrDelegation("APPROVE_PURCHASES", "PROCUREMENT", "MANAGER");
+        // Whoever may raise a requisition may send it for approval; approving and rejecting stay with purchasing.
+        else if ("submit".equals(action)) Access.canWrite(crud.def("purchase-requisitions"));
+        else Access.requireRole("PROCUREMENT", "MANAGER");
         PurchaseRequisition r = crud.load(PurchaseRequisition.class, id);
         String from = r.status;
         switch (action) {
@@ -87,6 +92,11 @@ public class ProcurementService {
             case "receive" -> {
                 Access.requireRole("STOREKEEPER", "PROCUREMENT", "MANAGER");
                 if (!"ISSUED".equals(from) && !"PARTIALLY_RECEIVED".equals(from)) throw bad(from);
+                // The storekeeper may choose the receiving warehouse at the door when the order does not name one.
+                if (po.warehouseId == null && body != null && body.get("warehouseId") != null) {
+                    po.warehouseId = UUID.fromString(body.get("warehouseId").toString());
+                    crud.load(com.opesware.maintain.inventory.domain.Warehouse.class, po.warehouseId); // same tenant, or 404
+                }
                 if (po.partId == null || po.warehouseId == null) throw ApiException.guard("RECEIPT_TARGET", "Part and receiving warehouse are required to receive");
                 Object q = body == null ? null : body.get("quantity");
                 BigDecimal qty = q == null ? po.quantity.subtract(Clock.nz(po.receivedQty)) : new BigDecimal(q.toString());

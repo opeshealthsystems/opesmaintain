@@ -1,0 +1,15 @@
+{
+  "name": "opes-maintain",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "web"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=opes-maintain-web",
+    "build": "npm run build --workspace=opes-maintain-web",
+    "start": "npm run start --workspace=opes-maintain-web",
+    "lint": "npm run lint --workspace=opes-maintain-web",
+    "typecheck": "npm run typecheck --workspace=opes-maintain-web"
+  }
+}

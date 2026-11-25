@@ -44,7 +44,7 @@ public class ReportService {
     @Transactional(readOnly = true)
     public Map<String, Object> run(String type, LocalDate from, LocalDate to) {
         var p = CurrentUser.require();
-        if (!p.internal()) throw ApiException.forbidden("Reports are available to internal users");
+        if (!p.internal() || CurrentUser.scope() != null) throw ApiException.forbidden("Reports are available to internal users of the organization");
         UUID t = p.tenantId();
         Instant a = from.atStartOfDay().toInstant(ZoneOffset.UTC);
         Instant b = to.plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC);

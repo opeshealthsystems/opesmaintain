@@ -26,4 +26,10 @@ public class Notification extends TenantEntity {
     public String status;
 
     public Instant createdOn;
+
+    public String category;
+
+    public String emailStatus;
+
+    public Integer emailAttempts;
 }

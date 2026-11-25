@@ -43,7 +43,9 @@ public class KpiService {
 
     @Transactional(readOnly = true)
     public Map<String, Object> kpis(int days, UUID siteId) {
-        if (CurrentUser.require().is("CUSTOMER")) throw com.opesware.maintain.platform.application.ApiException.forbidden("Not available");
+        if (CurrentUser.require().is("CUSTOMER") || CurrentUser.scope() != null) {
+            throw com.opesware.maintain.platform.application.ApiException.forbidden("Organization-wide analytics are not available to contractor or customer accounts");
+        }
         UUID t = CurrentUser.requireTenant();
         Instant to = Instant.now();
         Instant from = to.minus(Duration.ofDays(days));

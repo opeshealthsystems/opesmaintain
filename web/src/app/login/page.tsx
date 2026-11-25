@@ -1,9 +1,11 @@
 "use client";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Alert } from "@/components/ui";
 import { useAuth } from "@/lib/auth";
 import { Icon } from "@/lib/icons";
+import { landingFor } from "@/components/SetupBanner";
 
 const DEMO = [
   ["admin@opes.demo", "Administrator"], ["manager@opes.demo", "Maintenance manager"], ["planner@opes.demo", "Planner"],
@@ -19,18 +21,31 @@ function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [code, setCode] = useState("");
+  const [needCode, setNeedCode] = useState(false);
   const [busy, setBusy] = useState(false);
+  // Demo shortcuts only make sense against a local development backend seeded with demo data.
+  const [showDemo, setShowDemo] = useState(false);
+  useEffect(() => {
+    setShowDemo(["localhost", "127.0.0.1"].includes(window.location.hostname));
+    const e = sp.get("email");
+    if (e) setEmail(e);
+  }, [sp]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
     setError(null);
     try {
-      const u = await login(email, password);
+      const u = await login(email, password, needCode ? code : undefined);
+      if (u.mfaEnrollmentRequired) { router.replace("/settings?mfa=1"); return; }
       const next = sp.get("next");
-      router.replace(next && next.startsWith("/") && !next.startsWith("//") ? next : u.role === "CUSTOMER" ? "/portal" : u.role === "TECHNICIAN" ? "/technician" : "/");
+      if (next && next.startsWith("/") && !next.startsWith("//")) { router.replace(next); return; }
+      router.replace(u.role === "CUSTOMER" ? "/portal" : u.role === "TECHNICIAN" ? "/technician" : await landingFor(u.role, "/dashboard", u.platformOperator));
     } catch (err) {
-      setError((err as Error).message);
+      const e2 = err as { code?: string; message: string };
+      if (e2.code === "MFA_REQUIRED") { setNeedCode(true); setError(null); }
+      else setError(e2.message);
     } finally {
       setBusy(false);
     }
@@ -39,7 +54,7 @@ function LoginForm() {
   return (
     <div className="auth">
       <section className="auth-side">
-        <div className="row"><div className="brand-mark">OM</div><div><div className="brand-name">OPES Maintain</div><div className="brand-sub">by OPES Health Systems</div></div></div>
+        <Link href="/" className="row" style={{ color: "inherit", textDecoration: "none" }}><div className="brand-mark">OM</div><div><div className="brand-name">OPES Maintain</div><div className="brand-sub">by Opesware Technologies</div></div></Link>
         <div className="stack" style={{ maxWidth: 460 }}>
           <h1 style={{ fontSize: 26 }}>Maintenance operations, from request to sign-off.</h1>
           <p className="muted">Asset registry, work orders, preventive maintenance, spare parts, permits, calibration and reliability analytics — in one auditable platform.</p>
@@ -49,7 +64,7 @@ function LoginForm() {
             ))}
           </div>
         </div>
-        <div className="small muted">© {new Date().getFullYear()} OPES Health Systems</div>
+        <div className="small muted">© {new Date().getFullYear()} Opesware Technologies</div>
       </section>
       <section className="auth-form">
         <div className="auth-card stack">
@@ -58,16 +73,25 @@ function LoginForm() {
           <form className="stack" onSubmit={submit}>
             <div className="field"><label htmlFor="email">Email</label><input id="email" className="input" type="email" autoComplete="username" required value={email} onChange={(e) => setEmail(e.target.value)} /></div>
             <div className="field"><label htmlFor="password">Password</label><input id="password" className="input" type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} /></div>
+            {needCode && (
+              <div className="field"><label htmlFor="code">Authenticator code</label>
+                <input id="code" className="input" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]*" maxLength={6} autoFocus value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))} />
+                <span className="hint">Enter the 6-digit code from your authenticator app.</span></div>
+            )}
             <button className="btn btn-primary big-btn" disabled={busy}><Icon name="Lock" size={16} />{busy ? "Signing in…" : "Sign in"}</button>
           </form>
-          <div className="card">
+          <div className="row" style={{ justifyContent: "space-between" }}>
+            <Link href="/forgot-password" className="small">Forgot password?</Link>
+            <span className="small muted">New company? <Link href="/signup">Create an account</Link></span>
+          </div>
+          {showDemo && <div className="card">
             <div className="card-head"><h3>Demo accounts</h3><span className="small muted">Password: OpesDemo2026</span></div>
             <div className="card-body demo-users">
               {DEMO.map(([e, r]) => (
                 <button key={e} type="button" className="btn btn-sm" onClick={() => { setEmail(e); setPassword("OpesDemo2026"); }} title={e}>{r}</button>
               ))}
             </div>
-          </div>
+          </div>}
         </div>
       </section>
     </div>

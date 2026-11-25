@@ -43,6 +43,11 @@ public class ErrorHandler {
         return body(400, "MALFORMED_REQUEST", "The request could not be read.", List.of());
     }
 
+    @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
+    public ResponseEntity<Map<String, Object>> tooLarge(Exception e) {
+        return body(413, "FILE_TOO_LARGE", "The file is larger than the 25 MB limit.", List.of());
+    }
+
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<Map<String, Object>> missing(NoResourceFoundException e) {
         return body(404, "NOT_FOUND", "Endpoint not found", List.of());
@@ -50,9 +55,14 @@ public class ErrorHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> unexpected(Exception e) {
-        String id = UUID.randomUUID().toString();
+        String id = cid();
         log.error("Unhandled error {}", id, e);
         return body(500, "INTERNAL_ERROR", "Unexpected error. Reference " + id, List.of());
+    }
+
+    private static String cid() {
+        String c = org.slf4j.MDC.get("correlationId");
+        return c != null ? c : UUID.randomUUID().toString();
     }
 
     private ResponseEntity<Map<String, Object>> body(int status, String code, String detail, List<Map<String, String>> errors) {
@@ -63,7 +73,7 @@ public class ErrorHandler {
         m.put("code", code);
         m.put("detail", detail);
         m.put("errors", errors);
-        m.put("correlationId", UUID.randomUUID().toString());
+        m.put("correlationId", cid());
         return ResponseEntity.status(status).contentType(MediaType.APPLICATION_PROBLEM_JSON).body(m);
     }
 }

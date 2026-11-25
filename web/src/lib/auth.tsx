@@ -2,6 +2,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { api, getToken, setToken } from "./api";
 import { setLocaleSettings } from "./format";
+import { applyModelLanguage } from "./registry";
 
 export interface User {
   id: string;
@@ -14,16 +15,30 @@ export interface User {
   tenantName: string;
   currency: string;
   timeZone: string;
+  mfaEnrolled: boolean;
+  mfaEnrollmentRequired: boolean;
+  emailNotifications: boolean;
+  /** Service-provider user limited by service grants. */
+  scoped: boolean;
+  /** OPES operator (administrator of the platform workspace): sees the operator console. */
+  platformOperator?: boolean;
+  /** Read-only support session opened by an OPES operator. */
+  supportSession?: boolean;
 }
 
 interface AuthState {
   user: User | null;
   writable: Set<string>;
   loading: boolean;
-  login: (email: string, password: string) => Promise<User>;
+  login: (email: string, password: string, code?: string) => Promise<User>;
+  refresh: () => Promise<void>;
   logout: () => void;
   setLanguage: (lang: string) => void;
   canWrite: (path: string) => boolean;
+  /** Need-to-know read rule from the server (same rule the API enforces). */
+  canRead: (path: string) => boolean;
+  /** Application pages (dashboard, analytics, stock…) this role may open. */
+  canOpen: (page: string) => boolean;
   hasRole: (...roles: string[]) => boolean;
 }
 
@@ -32,6 +47,8 @@ const Ctx = createContext<AuthState | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [writable, setWritable] = useState<Set<string>>(new Set());
+  const [readable, setReadable] = useState<Set<string>>(new Set());
+  const [pages, setPages] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
 
   const apply = useCallback((u: User) => {
@@ -43,13 +60,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     const nu = { ...u, language: lang };
     setLocaleSettings(nu.currency, nu.language);
+    applyModelLanguage(nu.language);
+    try { document.documentElement.lang = nu.language === "FR" ? "fr" : "en"; } catch { /* SSR */ }
     setUser(nu);
     return nu;
   }, []);
 
   const loadPermissions = useCallback(async () => {
-    const p = await api<{ writable: string[] }>("/me/permissions");
-    setWritable(new Set(p.writable));
+    try {
+      const p = await api<{ writable: string[]; readable?: string[]; pages?: string[] }>("/me/permissions");
+      setWritable(new Set(p.writable));
+      setReadable(new Set(p.readable ?? []));
+      setPages(new Set(p.pages ?? []));
+    } catch {
+      setWritable(new Set());
+      setReadable(new Set());
+      setPages(new Set());
+    }
   }, []);
 
   useEffect(() => {
@@ -64,14 +91,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [apply, loadPermissions]);
 
   const login = useCallback(
-    async (email: string, password: string) => {
-      const r = await api<{ token: string; user: User }>("/auth/login", { body: { email, password } });
+    async (email: string, password: string, code?: string) => {
+      const r = await api<{ token: string; user: User }>("/auth/login", { body: { email, password, ...(code ? { code } : {}) } });
       setToken(r.token);
       await loadPermissions();
       return apply(r.user);
     },
     [apply, loadPermissions],
   );
+
+  const refresh = useCallback(async () => {
+    apply(await api<User>("/me"));
+  }, [apply]);
 
   const logout = useCallback(() => {
     setToken(null);
@@ -87,6 +118,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         /* ignore */
       }
       if (user) apply({ ...user, language: lang });
+      api("/me:preferences", { body: { language: lang } }).catch(() => undefined);
     },
     [user, apply],
   );
@@ -97,12 +129,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       writable,
       loading,
       login,
+      refresh,
       logout,
       setLanguage,
       canWrite: (path) => writable.has(path),
+      canRead: (path) => readable.has(path),
+      canOpen: (page) => pages.has(page),
       hasRole: (...roles) => !!user && (user.role === "ADMIN" || roles.includes(user.role)),
     }),
-    [user, writable, loading, login, logout, setLanguage],
+    [user, writable, readable, pages, loading, login, refresh, logout, setLanguage],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

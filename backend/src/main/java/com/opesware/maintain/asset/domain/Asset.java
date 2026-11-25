@@ -60,4 +60,9 @@ public class Asset extends TenantEntity {
 
     @Column(length = 8000)
     public String notes;
+
+    public String assetClassId;
+
+    @Column(length = 8000)
+    public String specs;
 }

@@ -1,0 +1,137 @@
+# Kubernetes deployment (plan item F2). Apply after creating the opes-secrets Secret and opes-config ConfigMap.
+apiVersion: v1
+kind: Namespace
+metadata: { name: opes-maintain }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata: { name: opes-config, namespace: opes-maintain }
+data:
+  SPRING_PROFILES_ACTIVE: prod,postgres
+  OPES_DB_URL: jdbc:postgresql://opes-db.opes-maintain.svc:5432/opes_maintain
+  OPES_DB_USER: opes
+  OPES_STORAGE_TYPE: s3
+  OPES_SCAN_CLAMD_HOST: clamav.opes-maintain.svc
+  OPES_PUBLIC_URL: https://maintain.example.com
+  OPES_CORS_ORIGINS: https://maintain.example.com
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: opes-api, namespace: opes-maintain, labels: { app: opes-api } }
+spec:
+  replicas: 2
+  selector: { matchLabels: { app: opes-api } }
+  template:
+    metadata:
+      labels: { app: opes-api }
+      annotations: { prometheus.io/scrape: "true", prometheus.io/port: "9090", prometheus.io/path: /actuator/prometheus }
+    spec:
+      securityContext: { runAsNonRoot: true, runAsUser: 10001, fsGroup: 10001, seccompProfile: { type: RuntimeDefault } }
+      containers:
+        - name: api
+          image: ghcr.io/opeshealthsystems/opes-maintain-api:1.0.0
+          ports: [{ containerPort: 8080, name: http }, { containerPort: 9090, name: management }]
+          envFrom: [{ configMapRef: { name: opes-config } }, { secretRef: { name: opes-secrets } }]
+          resources:
+            requests: { cpu: 500m, memory: 768Mi }
+            limits: { cpu: "2", memory: 1536Mi }
+          readinessProbe: { httpGet: { path: /actuator/health/readiness, port: management }, periodSeconds: 10 }
+          livenessProbe: { httpGet: { path: /actuator/health/liveness, port: management }, initialDelaySeconds: 60, periodSeconds: 20 }
+          startupProbe: { httpGet: { path: /actuator/health/liveness, port: management }, failureThreshold: 30, periodSeconds: 5 }
+          securityContext: { allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: { drop: [ALL] } }
+          volumeMounts: [{ name: tmp, mountPath: /tmp }]
+      volumes: [{ name: tmp, emptyDir: {} }]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: opes-web, namespace: opes-maintain, labels: { app: opes-web } }
+spec:
+  replicas: 2
+  selector: { matchLabels: { app: opes-web } }
+  template:
+    metadata: { labels: { app: opes-web } }
+    spec:
+      securityContext: { runAsNonRoot: true, runAsUser: 1000, seccompProfile: { type: RuntimeDefault } }
+      containers:
+        - name: web
+          image: ghcr.io/opeshealthsystems/opes-maintain-web:1.0.0
+          env: [{ name: OPES_API_URL, value: "http://opes-api.opes-maintain.svc:8080" }]
+          ports: [{ containerPort: 3000, name: http }]
+          resources:
+            requests: { cpu: 200m, memory: 256Mi }
+            limits: { cpu: "1", memory: 512Mi }
+          readinessProbe: { httpGet: { path: /login, port: http }, periodSeconds: 10 }
+          livenessProbe: { httpGet: { path: /login, port: http }, periodSeconds: 20 }
+          securityContext: { allowPrivilegeEscalation: false, capabilities: { drop: [ALL] } }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: opes-api, namespace: opes-maintain }
+spec: { selector: { app: opes-api }, ports: [{ name: http, port: 8080, targetPort: http }] }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: opes-web, namespace: opes-maintain }
+spec: { selector: { app: opes-web }, ports: [{ name: http, port: 3000, targetPort: http }] }
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata: { name: opes-api, namespace: opes-maintain }
+spec:
+  scaleTargetRef: { apiVersion: apps/v1, kind: Deployment, name: opes-api }
+  minReplicas: 2
+  maxReplicas: 8
+  metrics: [{ type: Resource, resource: { name: cpu, target: { type: Utilization, averageUtilization: 70 } } }]
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata: { name: opes-web, namespace: opes-maintain }
+spec:
+  scaleTargetRef: { apiVersion: apps/v1, kind: Deployment, name: opes-web }
+  minReplicas: 2
+  maxReplicas: 6
+  metrics: [{ type: Resource, resource: { name: cpu, target: { type: Utilization, averageUtilization: 70 } } }]
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata: { name: opes-api, namespace: opes-maintain }
+spec: { minAvailable: 1, selector: { matchLabels: { app: opes-api } } }
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: opes-maintain
+  namespace: opes-maintain
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+    nginx.ingress.kubernetes.io/proxy-body-size: 30m
+spec:
+  ingressClassName: nginx
+  tls: [{ hosts: [maintain.example.com], secretName: opes-maintain-tls }]
+  rules:
+    - host: maintain.example.com
+      http:
+        paths:
+          - { path: /api, pathType: Prefix, backend: { service: { name: opes-api, port: { name: http } } } }
+          - { path: /, pathType: Prefix, backend: { service: { name: opes-web, port: { name: http } } } }
+---
+# Only the API may reach the database; actuator is reachable only from the monitoring namespace.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: { name: db-from-api-only, namespace: opes-maintain }
+spec:
+  podSelector: { matchLabels: { app: opes-db } }
+  policyTypes: [Ingress]
+  ingress: [{ from: [{ podSelector: { matchLabels: { app: opes-api } } }], ports: [{ port: 5432 }] }]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: { name: api-ingress, namespace: opes-maintain }
+spec:
+  podSelector: { matchLabels: { app: opes-api } }
+  policyTypes: [Ingress]
+  ingress:
+    - from: [{ namespaceSelector: { matchLabels: { kubernetes.io/metadata.name: ingress-nginx } } }, { podSelector: { matchLabels: { app: opes-web } } }]
+      ports: [{ port: 8080 }]
+    - from: [{ namespaceSelector: { matchLabels: { kubernetes.io/metadata.name: monitoring } } }]
+      ports: [{ port: 9090 }]

@@ -54,9 +54,13 @@ public class WorkOrderService {
     private final PmOccurrenceRepository occurrences;
     private final InventoryService inventory;
     private final PmService pm;
+    private final com.opesware.maintain.identity.application.DelegationService delegation;
+    private static final Map<String, String> DELEGABLE = Map.of("APPROVED", "APPROVE_WORK_ORDERS", "REVIEWED", "REVIEW_WORK");
 
     public WorkOrderService(CrudService crud, WorkTaskRepository tasks, TimeEntryRepository timeEntries,
-                            PmOccurrenceRepository occurrences, InventoryService inventory, PmService pm) {
+                            PmOccurrenceRepository occurrences, InventoryService inventory, PmService pm,
+                            com.opesware.maintain.identity.application.DelegationService delegation) {
+        this.delegation = delegation;
         this.crud = crud;
         this.tasks = tasks;
         this.timeEntries = timeEntries;
@@ -72,7 +76,7 @@ public class WorkOrderService {
         Principal p = CurrentUser.require();
         List<String> out = new java.util.ArrayList<>();
         for (Rule r : RULES.getOrDefault(wo.status, List.of())) {
-            if (p.is("ADMIN") || r.roles().contains(p.role())) out.add(r.to());
+            if (p.is("ADMIN") || r.roles().contains(p.role()) || (DELEGABLE.containsKey(r.to()) && delegation.has(DELEGABLE.get(r.to())))) out.add(r.to());
         }
         if (ACTIVE.contains(wo.status) && p.is("ADMIN", "MANAGER", "SAFETY_OFFICER")) out.add("ON_HOLD");
         if ("ON_HOLD".equals(wo.status) && p.is("ADMIN", "MANAGER", "SAFETY_OFFICER")) out.add("RESUME");
@@ -125,7 +129,8 @@ public class WorkOrderService {
         Rule rule = RULES.getOrDefault(from, List.of()).stream().filter(r -> r.to().equals(target)).findFirst()
                 .orElseThrow(() -> ApiException.guard("INVALID_TRANSITION", "Transition " + from + " → " + target + " is not allowed"));
         if (!p.is("ADMIN") && !rule.roles().contains(p.role())) {
-            throw ApiException.forbidden("Role " + p.role() + " cannot move a work order to " + target);
+            if (DELEGABLE.containsKey(target)) delegation.requireRoleOrDelegation(DELEGABLE.get(target), rule.roles().toArray(String[]::new));
+            else throw ApiException.forbidden("Role " + p.role() + " cannot move a work order to " + target);
         }
 
         switch (target) {

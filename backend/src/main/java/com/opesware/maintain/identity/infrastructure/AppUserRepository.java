@@ -15,4 +15,6 @@ public interface AppUserRepository extends TenantRepository<AppUser> {
     List<AppUser> findByCustomerId(UUID value);
 
     List<AppUser> findByTenantId(UUID tenantId);
+
+    java.util.Optional<AppUser> findFirstByEmailIgnoreCase(String value);
 }

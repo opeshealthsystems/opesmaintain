@@ -39,8 +39,10 @@ public class InsightService {
     private final CrudService crud;
     private final EntityManager em;
     private final InventoryService inventory;
+    private final PredictiveService predictive;
 
-    public InsightService(CrudService crud, EntityManager em, InventoryService inventory) {
+    public InsightService(CrudService crud, EntityManager em, InventoryService inventory, PredictiveService predictive) {
+        this.predictive = predictive;
         this.crud = crud;
         this.em = em;
         this.inventory = inventory;
@@ -103,6 +105,22 @@ public class InsightService {
             created += add(existing, s.assetId, "SENSOR_ALARM", "Condition alarm on " + (a == null ? "asset" : a.name),
                     "Reading " + s.value.stripTrailingZeros().toPlainString() + " breached alarm threshold " + s.threshold.stripTrailingZeros().toPlainString() + ".",
                     "Inspect the asset and convert the alert into a corrective work order if confirmed.", 0.75);
+        }
+        // Statistical meter anomalies (|z| ≥ 3 against the meter's own history)
+        for (PredictiveService.Anomaly an : predictive.meterAnomalies(tenant)) {
+            Asset a = assets.get(an.meter().assetId);
+            created += add(existing, an.meter().assetId, "METER_ANOMALY", "Unusual " + an.basis() + ": " + an.meter().name + (a == null ? "" : " on " + a.name),
+                    String.format("Latest %s %.2f %s is %.1fσ from its mean %.2f (σ %.2f) over %d prior values.", an.basis(), an.latest(), an.meter().unit, an.z(), an.mean(), an.sd(), an.n()),
+                    "Inspect the asset and verify the meter; record a meter reset if it was replaced.", Math.min(0.9, 0.5 + Math.abs(an.z()) / 20));
+        }
+        // Failure forecast within 14 days
+        for (Asset a : assets.values()) {
+            PredictiveService.Forecast f = predictive.forecast(a.id);
+            if (f.predictedNext() != null && f.predictedNext().isBefore(now.plus(Duration.ofDays(14)))) {
+                created += add(existing, a.id, "REPEAT_FAILURE", "Failure expected soon: " + a.name,
+                        String.format("%d unplanned failures, mean interval %.1f days; next expected around %s.", f.failures(), f.mtbfDays(), f.predictedNext().toString().substring(0, 10)),
+                        "Bring forward preventive work or stage critical spares for " + a.tag + ".", f.confidence());
+            }
         }
         // Long open downtime
         for (DowntimeEvent d : q("select d from DowntimeEvent d where d.tenantId = :t and d.endedAt is null", DowntimeEvent.class, tenant)) {

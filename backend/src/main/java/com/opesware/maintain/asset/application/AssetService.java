@@ -143,7 +143,7 @@ public class AssetService {
     /** Public scan: reveals only that a valid token exists, never protected data (OM-M05-001). */
     @Transactional(readOnly = true)
     public Map<String, Object> publicScan(String token) {
-        PassportToken t = tokens.findAll().stream().filter(x -> token.equals(x.token)).findFirst().orElse(null);
+        PassportToken t = tokens.findFirstByToken(token).orElse(null);
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("valid", t != null && "ACTIVE".equals(t.status));
         m.put("message", m.get("valid").equals(true) ? "Sign in to view this equipment passport." : "This QR code is not valid.");
@@ -154,7 +154,7 @@ public class AssetService {
     @Transactional
     public UUID resolveToken(String token) {
         UUID tenant = CurrentUser.requireTenant();
-        PassportToken t = tokens.findByTenantId(tenant).stream().filter(x -> token.equals(x.token)).findFirst().orElse(null);
+        PassportToken t = tokens.findFirstByToken(token).filter(x -> tenant.equals(x.tenantId)).orElse(null);
         if (t == null || !"ACTIVE".equals(t.status)) {
             throw ApiException.notFound("Passport");
         }

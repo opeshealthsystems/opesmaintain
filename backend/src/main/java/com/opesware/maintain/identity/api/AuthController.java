@@ -14,6 +14,8 @@ import com.opesware.maintain.platform.security.CurrentUser;
 import com.opesware.maintain.platform.security.PasswordHasher;
 import com.opesware.maintain.platform.security.Principal;
 import com.opesware.maintain.platform.security.TokenService;
+import com.opesware.maintain.platform.security.Totp;
+import com.opesware.maintain.platform.security.MfaPolicy;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -37,8 +39,19 @@ public class AuthController {
     private final TenantRepo tenants;
     private final AuditService audit;
     private final CrudService crud;
+    @jakarta.persistence.PersistenceContext
+    private jakarta.persistence.EntityManager em;
+    private final MfaPolicy mfaPolicy;
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.opesware.maintain.identity.application.PasswordResetService passwordReset;
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.opesware.maintain.platform.security.ScopeResolver scopes;
+    private final com.opesware.maintain.identity.application.PersonalDataService personalData;
 
-    public AuthController(AppUserRepository users, TokenService tokens, TenantRepo tenants, AuditService audit, CrudService crud) {
+    public AuthController(AppUserRepository users, TokenService tokens, TenantRepo tenants, AuditService audit, CrudService crud, MfaPolicy mfaPolicy,
+                          com.opesware.maintain.identity.application.PersonalDataService personalData) {
+        this.personalData = personalData;
+        this.mfaPolicy = mfaPolicy;
         this.users = users;
         this.tokens = tokens;
         this.tenants = tenants;
@@ -46,28 +59,165 @@ public class AuthController {
         this.crud = crud;
     }
 
+    private static final int MAX_FAILED = 5;
+    private static final java.time.Duration LOCK = java.time.Duration.ofMinutes(15);
+
     @PostMapping("/auth/login")
-    @Transactional
+    @Transactional(noRollbackFor = ApiException.class)
     public Map<String, Object> login(@RequestBody Map<String, String> body) {
         String email = body.getOrDefault("email", "").trim().toLowerCase();
-        AppUser u = users.findAll().stream().filter(x -> email.equalsIgnoreCase(x.email)).findFirst().orElse(null);
-        if (u == null || !PasswordHasher.verify(body.get("password"), u.passwordHash)) {
-            throw new ApiException(401, "INVALID_CREDENTIALS", "Email or password is incorrect");
+        AppUser u = em.createQuery("select u from AppUser u where lower(u.email) = :e", AppUser.class)
+                .setParameter("e", email).getResultStream().findFirst().orElse(null);
+        ApiException invalid = new ApiException(401, "INVALID_CREDENTIALS", "Email or password is incorrect");
+        if (u == null) {
+            PasswordHasher.verify(body.get("password"), PasswordHasher.hash("timing-equaliser"));
+            throw invalid;
+        }
+        Instant now = Instant.now();
+        if (u.lockedUntil != null && u.lockedUntil.isAfter(now)) {
+            auditAs(u, "LOGIN_BLOCKED_LOCKED", Map.of());
+            throw new ApiException(429, "TOO_MANY_ATTEMPTS", "Too many failed attempts. Try again later or contact your administrator.");
+        }
+        if (!PasswordHasher.verify(body.get("password"), u.passwordHash)) {
+            failed(u, now, "password");
+            throw invalid;
         }
         if (!"ACTIVE".equals(u.status)) throw new ApiException(403, "ACCOUNT_DISABLED", "This account is " + u.status.toLowerCase());
-        u.lastLoginAt = Instant.now();
-        users.save(u);
-        CurrentUser.set(new Principal(u.id, u.tenantId, u.email, u.fullName, u.role, u.customerId));
-        try {
-            audit.record("LOGIN", "User", u.id, Map.of("email", u.email));
-        } finally {
-            CurrentUser.clear();
+        if (tenants.findById(u.tenantId).map(t -> "SUSPENDED".equals(t.status)).orElse(false)) {
+            throw new ApiException(403, "TENANT_SUSPENDED", "This workspace is suspended. Contact OPES Maintain support.");
         }
+        if (u.mfaEnrolledAt != null) {
+            String code = body.get("code");
+            if (code == null || code.isBlank()) throw new ApiException(401, "MFA_REQUIRED", "Enter the 6-digit code from your authenticator app");
+            if (!Totp.verify(u.mfaSecret, code.trim(), now)) {
+                failed(u, now, "mfa");
+                throw new ApiException(401, "MFA_INVALID", "The code is not valid. Check your device time and try again.");
+            }
+        }
+        u.failedLogins = 0;
+        u.lockedUntil = null;
+        u.lastLoginAt = now;
+        users.save(u);
+        auditAs(u, "LOGIN", Map.of("email", u.email, "mfa", u.mfaEnrolledAt != null));
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("token", tokens.issue(u.id));
         m.put("expiresIn", tokens.ttlSeconds());
         m.put("user", profile(u));
         return m;
+    }
+
+    private void failed(AppUser u, Instant now, String factor) {
+        u.failedLogins = (u.failedLogins == null ? 0 : u.failedLogins) + 1;
+        if (u.failedLogins >= MAX_FAILED) {
+            u.lockedUntil = now.plus(LOCK);
+            u.failedLogins = 0;
+        }
+        users.save(u);
+        auditAs(u, u.lockedUntil != null && u.lockedUntil.isAfter(now) ? "ACCOUNT_LOCKED" : "LOGIN_FAILED", Map.of("factor", factor));
+    }
+
+    private void auditAs(AppUser u, String action, Map<String, ?> detail) {
+        Principal prev = CurrentUser.get();
+        CurrentUser.set(new Principal(u.id, u.tenantId, u.email, u.fullName, u.role, u.customerId));
+        try {
+            audit.record(action, "User", u.id, detail);
+        } finally {
+            if (prev == null) CurrentUser.clear(); else CurrentUser.set(prev);
+        }
+    }
+
+    // ---------------------------------------------------------------- self-service password reset
+    @PostMapping("/auth/forgot-password")
+    public Map<String, Object> forgotPassword(@RequestBody Map<String, String> body) {
+        passwordReset.request(body.get("email"));
+        return Map.of("ok", true, "message", "If an account exists for this address, a reset link has been sent.");
+    }
+
+    @PostMapping("/auth/reset-password")
+    public Map<String, Object> resetPassword(@RequestBody Map<String, String> body) {
+        passwordReset.reset(body.get("token"), body.get("password"));
+        return Map.of("ok", true);
+    }
+
+    // ---------------------------------------------------------------- MFA enrolment
+    @PostMapping("/me:preferences")
+    @Transactional
+    public Map<String, Object> preferences(@RequestBody Map<String, Object> body) {
+        AppUser u = users.findById(CurrentUser.require().userId()).orElseThrow();
+        if (body.containsKey("emailNotifications")) u.emailNotifications = Boolean.TRUE.equals(body.get("emailNotifications"));
+        if (body.get("language") instanceof String l && (l.equals("EN") || l.equals("FR"))) u.language = l;
+        users.save(u);
+        return profile(u);
+    }
+
+    @PostMapping("/me/mfa:start")
+    @Transactional
+    public Map<String, Object> mfaStart() {
+        AppUser u = users.findById(CurrentUser.require().userId()).orElseThrow();
+        if (u.mfaEnrolledAt != null) throw ApiException.guard("MFA_ALREADY_ENROLLED", "Two-step sign-in is already active");
+        u.mfaSecret = Totp.newSecret();
+        users.save(u);
+        Tenant t = tenants.findById(u.tenantId).orElse(null);
+        return Map.of("secret", u.mfaSecret, "otpauthUri", Totp.uri("OPES Maintain" + (t == null ? "" : " (" + t.code + ")"), u.email, u.mfaSecret));
+    }
+
+    @PostMapping("/me/mfa:confirm")
+    @Transactional
+    public Map<String, Object> mfaConfirm(@RequestBody Map<String, String> body) {
+        AppUser u = users.findById(CurrentUser.require().userId()).orElseThrow();
+        if (u.mfaSecret == null || u.mfaEnrolledAt != null) throw ApiException.guard("MFA_NOT_STARTED", "Start enrolment first");
+        if (!Totp.verify(u.mfaSecret, body.get("code"), Instant.now())) throw ApiException.invalid("The code is not valid. Check your device time and try again.");
+        u.mfaEnrolledAt = Instant.now();
+        u.mfaEnabled = true;
+        users.save(u);
+        audit.record("MFA_ENROLLED", "User", u.id, Map.of());
+        return profile(u);
+    }
+
+    @PostMapping("/users/{id}:reset-mfa")
+    @Transactional
+    public Map<String, Object> resetMfa(@PathVariable UUID id) {
+        Access.requireRole("ADMIN");
+        AppUser u = crud.load(AppUser.class, id);
+        u.mfaSecret = null;
+        u.mfaEnrolledAt = null;
+        u.tokensValidAfter = Instant.now();
+        users.save(u);
+        audit.record("MFA_RESET", "User", u.id, Map.of("by", CurrentUser.actorName()));
+        return Map.of("ok", true);
+    }
+
+    @PostMapping("/users/{id}:revoke-sessions")
+    @Transactional
+    public Map<String, Object> revokeSessions(@PathVariable UUID id) {
+        Access.requireRole("ADMIN");
+        AppUser u = crud.load(AppUser.class, id);
+        u.tokensValidAfter = Instant.now();
+        users.save(u);
+        audit.record("SESSIONS_REVOKED", "User", u.id, Map.of("by", CurrentUser.actorName()));
+        return Map.of("ok", true);
+    }
+
+    @GetMapping("/users/{id}/personal-data")
+    public Map<String, Object> exportPersonalData(@PathVariable UUID id) {
+        return personalData.export(id);
+    }
+
+    @PostMapping("/users/{id}:pseudonymise")
+    public Map<String, Object> pseudonymise(@PathVariable UUID id) {
+        return personalData.pseudonymise(id);
+    }
+
+    @PostMapping("/users/{id}:unlock")
+    @Transactional
+    public Map<String, Object> unlock(@PathVariable UUID id) {
+        Access.requireRole("ADMIN");
+        AppUser u = crud.load(AppUser.class, id);
+        u.lockedUntil = null;
+        u.failedLogins = 0;
+        users.save(u);
+        audit.record("ACCOUNT_UNLOCKED", "User", u.id, Map.of("by", CurrentUser.actorName()));
+        return Map.of("ok", true);
     }
 
     @GetMapping("/me")
@@ -86,7 +236,10 @@ public class AuthController {
         }
         if (p.is("CUSTOMER")) writable = List.of("maintenance-requests", "service-signoffs");
         if (p.is("AUDITOR")) writable = List.of();
-        return Map.of("role", p.role(), "writable", writable);
+        List<String> readable = new ArrayList<>();
+        for (ResourceDef d : ResourceCatalog.all()) if (Access.mayRead(p, d)) readable.add(d.path());
+        List<String> pages = p.is("ADMIN") ? List.copyOf(Access.PAGES.keySet()) : Access.pagesFor(p);
+        return Map.of("role", p.role(), "writable", writable, "readable", readable, "pages", pages);
     }
 
     @PostMapping("/me:change-password")
@@ -96,8 +249,11 @@ public class AuthController {
         AppUser u = users.findById(p.userId()).orElseThrow();
         if (!PasswordHasher.verify(body.get("currentPassword"), u.passwordHash)) throw ApiException.invalid("Current password is incorrect");
         setPassword(u, body.get("newPassword"));
+        u.tokensValidAfter = Instant.now();
+        users.save(u);
         audit.record("PASSWORD_CHANGED", "User", u.id, Map.of());
-        return Map.of("ok", true);
+        // other sessions end; this one continues with a fresh token
+        return Map.of("ok", true, "token", tokens.issue(u.id));
     }
 
     @PostMapping("/users/{id}:set-password")
@@ -106,6 +262,8 @@ public class AuthController {
         Access.requireRole("ADMIN");
         AppUser u = crud.load(AppUser.class, id);
         setPassword(u, body.get("password"));
+        u.tokensValidAfter = Instant.now();
+        users.save(u);
         audit.record("PASSWORD_RESET", "User", u.id, Map.of("by", CurrentUser.actorName()));
         return Map.of("ok", true);
     }
@@ -150,6 +308,16 @@ public class AuthController {
         m.put("tenantName", t == null ? "" : t.legalName);
         m.put("currency", t == null ? "XAF" : t.currency);
         m.put("timeZone", t == null ? "UTC" : t.timeZone);
+        m.put("mfaEnrolled", u.mfaEnrolledAt != null);
+        m.put("scoped", scopes.resolve(u) != null);
+        m.put("mfaEnrollmentRequired", mfaPolicy.enrollmentRequired(u));
+        m.put("emailNotifications", !Boolean.FALSE.equals(u.emailNotifications));
+        // OPES operators are administrators of the platform workspace; support sessions are read-only visitors.
+        m.put("platformOperator", t != null && platformTenantCode.equals(t.code) && "ADMIN".equals(u.role));
+        m.put("supportSession", u.email != null && u.email.endsWith(MfaPolicy.SUPPORT_EMAIL_DOMAIN));
         return m;
     }
+
+    @org.springframework.beans.factory.annotation.Value("${opes.platform.tenant-code:opes-platform}")
+    private String platformTenantCode = "opes-platform";
 }

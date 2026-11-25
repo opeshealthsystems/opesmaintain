@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { api, type Page } from "@/lib/api";
+import { api, download, type Page } from "@/lib/api";
 import { PRINTABLE, visibleActions } from "@/lib/actions";
 import { useAuth } from "@/lib/auth";
 import { useT } from "@/lib/i18n";
@@ -11,8 +11,8 @@ import { modules, relatedOf, resource, type ResourceDef } from "@/lib/registry";
 import { formatValue, humanize } from "@/lib/format";
 import { ActionRunner, type RunSpec } from "./ActionRunner";
 import { cellFor, RecordTable } from "./ResourceList";
-import { AssetTree, AuditTrail, DocumentFile, PartStockActions, PassportPanel, PmForecast, StockTable, WorkOrderExecution } from "./panels";
-import { Badge, Empty, ErrorState, Loading, PageHeader, useData, useToast } from "./ui";
+import { AssetReliability, AssetTree, AuditTrail, DocumentFile, PartStockActions, PassportPanel, PmForecast, StockTable, WorkOrderExecution } from "./panels";
+import { Badge, Empty, ErrorState, Loading, Modal, PageHeader, useData, useToast } from "./ui";
 
 const HEADER_BADGES = ["status", "priority", "criticality", "safetyState", "outcome", "severity", "eligibility", "availability"];
 const NEEDS_REASON = new Set(["ON_HOLD", "CANCELLED", "REOPEN"]);
@@ -25,10 +25,11 @@ export function ResourceDetail({ def, id }: { def: ResourceDef; id: string }) {
   const t = useT();
   const router = useRouter();
   const toast = useToast();
-  const { user, canWrite, hasRole } = useAuth();
+  const { user, canWrite, hasRole, canRead } = useAuth();
   const { data: row, error, loading, reload } = useData(() => api<Record<string, unknown>>(`/${def.path}/${id}`), [def.path, id]);
   const [tab, setTab] = useState("details");
-  const [run, setRun] = useState<(RunSpec & { navigate?: string }) | null>(null);
+  const [run, setRun] = useState<(RunSpec & { navigate?: string; showResult?: boolean }) | null>(null);
+  const [result, setResult] = useState<Record<string, unknown> | null>(null);
   const [transitions, setTransitions] = useState<string[]>([]);
 
   useEffect(() => {
@@ -38,23 +39,29 @@ export function ResourceDetail({ def, id }: { def: ResourceDef; id: string }) {
   const related = useMemo(() => relatedOf(def.path).filter(({ res }) => {
     if (res.path === "audit-events" || res.path === "outbox-events") return false;
     if (user?.role === "CUSTOMER") return ["work-orders", "maintenance-requests", "service-signoffs", "quotes", "assets"].includes(res.path);
-    if (["delegations", "devices"].includes(res.path)) return hasRole("MANAGER", "AUDITOR");
-    return true;
-  }), [def.path, user, hasRole]);
+    return canRead(res.path); // never show a tab the server would refuse
+  }), [def.path, user, canRead]);
 
   const tabs: Tab[] = useMemo(() => {
     const list: Tab[] = [{ key: "details", label: t("Details"), icon: "FileText" }];
-    if (def.path === "work-orders") list.push({ key: "execution", label: "Execution & cost", icon: "Wrench" });
-    if (def.path === "assets") list.push({ key: "passport", label: "QR passport", icon: "QrCode" }, { key: "tree", label: "Hierarchy", icon: "Network" });
-    if (def.path === "pm-plans") list.push({ key: "forecast", label: "Forecast", icon: "CalendarDays" });
-    if (def.path === "parts") list.push({ key: "stock", label: "Stock by warehouse", icon: "Package" });
-    if (def.path === "warehouses") list.push({ key: "stock", label: "Stock on hand", icon: "Package" });
-    if (def.path === "documents") list.push({ key: "file", label: "File", icon: "Paperclip" });
-    if (["assets", "customers", "sites", "work-orders"].includes(def.path)) list.push({ key: "docs", label: "Documents", icon: "FileText" });
-    for (const r of related) list.push({ key: `rel:${r.res.path}:${r.field.name}`, label: r.field.name === "parentId" || r.field.name === "parentWorkOrderId" ? `Child ${r.res.label.toLowerCase()}` : r.res.label, icon: r.res.icon });
+    const customer = user?.role === "CUSTOMER";
+    if (def.path === "work-orders" && !customer) list.push({ key: "execution", label: t("Execution & cost"), icon: "Wrench" });
+    if (def.path === "assets" && !customer) list.push({ key: "passport", label: t("QR passport"), icon: "QrCode" }, { key: "tree", label: t("Hierarchy"), icon: "Network" }, { key: "reliability", label: t("Reliability"), icon: "Activity" });
+    if (def.path === "pm-plans") list.push({ key: "forecast", label: t("Forecast"), icon: "CalendarDays" });
+    if (def.path === "parts") list.push({ key: "stock", label: t("Stock by warehouse"), icon: "Package" });
+    if (def.path === "warehouses") list.push({ key: "stock", label: t("Stock on hand"), icon: "Package" });
+    if (def.path === "documents") list.push({ key: "file", label: t("File"), icon: "Paperclip" });
+    if (["assets", "customers", "sites", "work-orders"].includes(def.path) && !customer) list.push({ key: "docs", label: t("Documents"), icon: "FileText" });
+    const counts = new Map<string, number>();
+    for (const r of related) counts.set(r.res.path, (counts.get(r.res.path) ?? 0) + 1);
+    for (const r of related) {
+      const child = r.field.name === "parentId" || r.field.name === "parentWorkOrderId";
+      const label = child ? `${r.res.label} (${t("children")})` : (counts.get(r.res.path) ?? 0) > 1 ? `${r.res.label} (${r.field.label.toLowerCase()})` : r.res.label;
+      list.push({ key: `rel:${r.res.path}:${r.field.name}`, label, icon: r.res.icon });
+    }
     if (hasRole(...AUDIT_ROLES)) list.push({ key: "history", label: t("History"), icon: "History" });
     return list;
-  }, [def.path, related, hasRole, t]);
+  }, [def.path, related, hasRole, t, user]);
 
   if (loading && !row) return <Loading />;
   if (error) return <ErrorState error={error} onRetry={reload} />;
@@ -90,7 +97,7 @@ export function ResourceDetail({ def, id }: { def: ResourceDef; id: string }) {
           <span className="row" style={{ gap: 6, marginTop: 4 }}>
             {HEADER_BADGES.filter((b) => def.fields.some((f) => f.name === b) && row[b]).map((b) => <Badge key={b} value={row[b]} />)}
             {row.slaBreached === true && <Badge value="BREACHED" tone="tone-danger" />}
-            <span className="small muted">{def.singular} · updated {formatValue({ name: "u", label: "", type: "datetime", ref: null, options: [], required: false, list: false, managed: false, computed: false, guarded: false }, { u: row.updatedAt })}</span>
+            <span className="small muted">{def.singular} · {t("updated")} {formatValue({ name: "u", label: "", type: "datetime", ref: null, options: [], required: false, list: false, managed: false, computed: false, guarded: false }, { u: row.updatedAt })}</span>
           </span>
         }
         actions={
@@ -98,14 +105,25 @@ export function ResourceDetail({ def, id }: { def: ResourceDef; id: string }) {
             {def.path === "work-orders" && transitions.map((to) => (
               <button key={to} className={`btn ${["CANCELLED"].includes(to) ? "btn-danger" : ["ON_HOLD", "REOPEN", "RESUME"].includes(to) ? "" : "btn-primary"}`} onClick={() => runTransition(to)}>
                 <Icon name={to === "CANCELLED" ? "Ban" : to === "ON_HOLD" ? "Pause" : to === "REOPEN" ? "RotateCcw" : to === "RESUME" ? "Play" : "ArrowRight"} size={16} />
-                {to === "REOPEN" ? "Reopen" : to === "RESUME" ? "Resume" : to === "ON_HOLD" ? "Hold" : to === "CANCELLED" ? "Cancel" : humanize(to)}
+                {to === "REOPEN" ? t("Reopen") : to === "RESUME" ? t("Resume") : to === "ON_HOLD" ? t("Hold") : to === "CANCELLED" ? t("Cancel") : humanize(to)}
               </button>
             ))}
             {actions.map((a) => (
-              <button key={a.key} className={`btn ${a.danger ? "btn-danger" : ""}`} onClick={() => setRun({ title: a.label, endpoint: a.endpoint(id), fields: a.fields, confirm: a.confirm, danger: a.danger, body: a.body, navigate: a.navigate })}>
+              <button key={a.key} className={`btn ${a.danger ? "btn-danger" : ""}`} onClick={() => setRun({ title: a.label, endpoint: a.endpoint(id), fields: a.fields, confirm: a.confirm, danger: a.danger, body: a.body, navigate: a.navigate, showResult: a.showResult })}>
                 <Icon name={a.icon} size={16} />{a.label}
               </button>
             ))}
+            {def.path === "users" && hasRole("ADMIN") && (
+              <button className="btn" onClick={() => download(`/users/${id}/personal-data`, `personal-data-${id}.json`).then(() => toast("Export downloaded")).catch((e) => toast((e as Error).message, "err"))}>
+                <Icon name="FileDown" size={16} />{t("Export personal data")}
+              </button>
+            )}
+            {def.path === "inspection-templates" && row.status === "PUBLISHED" && canWrite("inspection-results") && (
+              <Link className="btn btn-primary" href={`/inspect?templateId=${id}`}><Icon name="ClipboardCheck" size={16} />Perform inspection</Link>
+            )}
+            {def.path === "assets" && canWrite("inspection-results") && (
+              <Link className="btn" href={`/inspect?assetId=${id}`}><Icon name="ClipboardCheck" size={16} />Inspect</Link>
+            )}
             {printable && <Link className="btn" href={`/print/${printable}/${id}`}><Icon name="Printer" size={16} />{t("Print")}</Link>}
             {editable && <Link className="btn" href={`/m/${def.path}/${id}/edit`}><Icon name="Pencil" size={16} />{t("Edit")}</Link>}
           </>
@@ -131,13 +149,14 @@ export function ResourceDetail({ def, id }: { def: ResourceDef; id: string }) {
                   </dd>
                 </div>
               ))}
-              <div><dt>Created</dt><dd>{formatValue({ ...fields[0], type: "datetime" }, { [fields[0].name]: row.createdAt })} · {String(row.createdBy ?? "—")}</dd></div>
-              <div><dt>Record version</dt><dd className="mono">{String(row.version)}</dd></div>
+              <div><dt>{t("Created")}</dt><dd>{formatValue({ ...fields[0], type: "datetime" }, { [fields[0].name]: row.createdAt })} · {String(row.createdBy ?? "—")}</dd></div>
+              <div><dt>{t("Record version")}</dt><dd className="mono">{String(row.version)}</dd></div>
             </dl>
           )}
           {tab === "execution" && <WorkOrderExecution wo={row} onChanged={reload} />}
           {tab === "passport" && <PassportPanel id={id} />}
           {tab === "tree" && <AssetTree id={id} />}
+          {tab === "reliability" && <AssetReliability id={id} />}
           {tab === "forecast" && <PmForecast id={id} />}
           {tab === "stock" && def.path === "parts" && <><PartStockActions partId={id} onDone={reload} /><StockTable key={String(row.version)} url={`/parts/${id}/stock`} showWarehouse /></>}
           {tab === "stock" && def.path === "warehouses" && <StockTable url={`/warehouses/${id}/stock`} showWarehouse={false} />}
@@ -147,11 +166,20 @@ export function ResourceDetail({ def, id }: { def: ResourceDef; id: string }) {
           {tab.startsWith("rel:") && <RelatedTab tabKey={tab} parentId={id} />}
         </div>
       </div>
+      {result && (
+        <Modal title="Result" onClose={() => setResult(null)} footer={<button className="btn btn-primary" onClick={() => setResult(null)}>Close</button>}>
+          <dl className="stack" style={{ gap: 10 }}>
+            {Object.entries(result).map(([k, v]) => <div key={k}><dt className="small muted">{humanize(k)}</dt><dd className="mono" style={{ margin: 0, overflowWrap: "anywhere" }}>{String(v)}</dd></div>)}
+          </dl>
+        </Modal>
+      )}
       {run && (
         <ActionRunner spec={run} onClose={() => setRun(null)} onDone={(r) => {
           const nav = run.navigate;
+          const show = run.showResult;
           setRun(null);
-          toast("Action completed");
+          if (show) { setResult(r); return; }
+          toast(t("Action completed"));
           if (nav && r?.id && r.id !== id) router.push(`/m/${nav}/${r.id}`);
           else reload();
         }} />
@@ -161,6 +189,7 @@ export function ResourceDetail({ def, id }: { def: ResourceDef; id: string }) {
 }
 
 function RelatedTab({ tabKey, parentId }: { tabKey: string; parentId: string }) {
+  const t = useT();
   const [, path, fieldName] = tabKey.split(":");
   const def = resource(path)!;
   const router = useRouter();
@@ -174,7 +203,7 @@ function RelatedTab({ tabKey, parentId }: { tabKey: string; parentId: string }) 
       <div className="row between" style={{ padding: "12px 16px", borderBottom: "1px solid var(--border)" }}>
         <span className="small muted">{data!.total} record{data!.total === 1 ? "" : "s"}</span>
         <div className="row">
-          <Link className="btn btn-sm" href={`/m/${path}?${fieldName}=${parentId}`}><Icon name="ExternalLink" size={14} />Open list</Link>
+          <Link className="btn btn-sm" href={`/m/${path}?${fieldName}=${parentId}`}><Icon name="ExternalLink" size={14} />{t("Open list")}</Link>
           {canWrite(path) && !def.readonly && <Link className="btn btn-sm btn-primary" href={`/m/${path}/new?${fieldName}=${parentId}`}><Icon name="Plus" size={14} />Add {def.singular.toLowerCase()}</Link>}
         </div>
       </div>

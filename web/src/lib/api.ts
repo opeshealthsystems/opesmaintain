@@ -20,16 +20,35 @@ export class ApiError extends Error {
 }
 
 const TOKEN_KEY = "opes.token";
+let memToken: string | null = null;
+
+const SUPPORT_KEY = "opes.supportToken";
+
+/** A support session lives only in its own browser tab, so it never replaces the operator's own sign-in. */
+export function startSupportSession(token: string) {
+  try { window.sessionStorage.setItem(SUPPORT_KEY, token); } catch { /* blocked */ }
+}
+export function endSupportSession() {
+  try { window.sessionStorage.removeItem(SUPPORT_KEY); } catch { /* blocked */ }
+}
 
 export function getToken(): string | null {
+  if (typeof window !== "undefined") {
+    try { const s = window.sessionStorage.getItem(SUPPORT_KEY); if (s) return s; } catch { /* blocked */ }
+  }
   try {
-    return window.localStorage.getItem(TOKEN_KEY);
+    return window.localStorage.getItem(TOKEN_KEY) ?? memToken;
   } catch {
-    return null;
+    return memToken;
   }
 }
 
 export function setToken(token: string | null) {
+  // Ending a support session (expired or signed out) must not sign the operator out of their own account.
+  try {
+    if (!token && window.sessionStorage.getItem(SUPPORT_KEY)) { endSupportSession(); return; }
+  } catch { /* blocked */ }
+  memToken = token;
   try {
     if (token) window.localStorage.setItem(TOKEN_KEY, token);
     else window.localStorage.removeItem(TOKEN_KEY);
@@ -39,6 +58,14 @@ export function setToken(token: string | null) {
 }
 
 type Json = Record<string, unknown>;
+
+const PUBLIC_PAGES = ["/features", "/pricing", "/licensing", "/industries", "/about", "/contact", "/privacy", "/terms",
+  "/signup", "/login", "/forgot-password", "/reset-password", "/fr"];
+
+/** Pages anyone may view signed out: the website, sign-up and sign-in flows. */
+export function isPublicPath(path: string): boolean {
+  return path === "/" || PUBLIC_PAGES.some((p) => path === p || path.startsWith(p + "/"));
+}
 
 export async function api<T = Json>(
   path: string,
@@ -61,9 +88,17 @@ export async function api<T = Json>(
   }
   if (res.status === 401 && !path.startsWith("/auth/")) {
     setToken(null);
-    if (typeof window !== "undefined" && !window.location.pathname.startsWith("/login")) {
+    // An expired session must never bounce a visitor off the public website — only off app pages.
+    if (typeof window !== "undefined" && !isPublicPath(window.location.pathname)) {
       window.location.href = `/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`;
     }
+  }
+  if (res.status === 403 && typeof window !== "undefined" && !window.location.pathname.startsWith("/settings") && !isPublicPath(window.location.pathname)) {
+    const peek = res.clone();
+    try {
+      const b = await peek.json();
+      if (b.code === "MFA_ENROLLMENT_REQUIRED") window.location.href = "/settings?mfa=1";
+    } catch { /* not JSON */ }
   }
   if (!res.ok) {
     let parsed: ApiErrorBody;

@@ -1,0 +1,84 @@
+# Production single-host deployment: Caddy (automatic HTTPS) → web and API; PostgreSQL with WAL
+# archiving; ClamAV; Prometheus. Secrets come from infra/.env.prod (never committed).
+# Usage: docker compose -f infra/docker-compose.prod.yml --env-file infra/.env.prod up -d
+services:
+  caddy:
+    image: caddy:2.8
+    ports: ["80:80", "443:443"]
+    environment:
+      OPES_DOMAIN: ${OPES_DOMAIN}
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    depends_on: [web, api]
+    restart: unless-stopped
+  web:
+    image: ${REGISTRY}/opes-maintain-web:${VERSION}
+    environment:
+      OPES_API_URL: http://api:8080
+    restart: unless-stopped
+  api:
+    image: ${REGISTRY}/opes-maintain-api:${VERSION}
+    environment:
+      SPRING_PROFILES_ACTIVE: prod,postgres
+      OPES_DB_URL: jdbc:postgresql://db:5432/opes_maintain
+      OPES_DB_USER: opes
+      OPES_DB_PASSWORD: ${DB_PASSWORD}
+      OPES_TOKEN_SECRET: ${OPES_TOKEN_SECRET}
+      OPES_PUBLIC_URL: https://${OPES_DOMAIN}
+      OPES_CORS_ORIGINS: https://${OPES_DOMAIN}
+      OPES_STORAGE_TYPE: ${STORAGE_TYPE:-s3}
+      OPES_STORAGE_S3_ENDPOINT: ${S3_ENDPOINT}
+      OPES_STORAGE_S3_BUCKET: ${S3_BUCKET}
+      OPES_STORAGE_S3_REGION: ${S3_REGION}
+      OPES_STORAGE_S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+      OPES_STORAGE_S3_SECRET_KEY: ${S3_SECRET_KEY}
+      OPES_SCAN_CLAMD_HOST: clamav
+      SPRING_MAIL_HOST: ${SMTP_HOST}
+      SPRING_MAIL_PORT: ${SMTP_PORT:-587}
+      SPRING_MAIL_USERNAME: ${SMTP_USER}
+      SPRING_MAIL_PASSWORD: ${SMTP_PASSWORD}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "true"
+      OPES_MAIL_FROM: ${MAIL_FROM}
+    depends_on:
+      db: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9090/actuator/health/readiness || exit 1"]
+      interval: 15s
+      retries: 10
+    restart: unless-stopped
+  db:
+    build: ./postgres
+    environment:
+      POSTGRES_DB: opes_maintain
+      POSTGRES_USER: opes
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      BACKUP_S3_ENDPOINT: ${BACKUP_S3_ENDPOINT}
+      BACKUP_S3_BUCKET: ${BACKUP_S3_BUCKET}
+      BACKUP_S3_REGION: ${BACKUP_S3_REGION}
+      BACKUP_S3_KEY: ${BACKUP_S3_KEY}
+      BACKUP_S3_SECRET: ${BACKUP_S3_SECRET}
+      BACKUP_CIPHER_PASS: ${BACKUP_CIPHER_PASS}
+    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+      - ./backup/postgresql-archiving.conf:/etc/postgresql/conf.d/archiving.conf:ro
+      - ./postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+      - ./backup/pgbackrest.conf:/etc/pgbackrest/pgbackrest.conf:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U opes"]
+      interval: 5s
+      retries: 20
+    restart: unless-stopped
+  clamav:
+    image: clamav/clamav:1.4
+    restart: unless-stopped
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/alerts.yml:/etc/prometheus/alerts.yml:ro
+    restart: unless-stopped
+volumes:
+  dbdata: {}
+  caddy_data: {}

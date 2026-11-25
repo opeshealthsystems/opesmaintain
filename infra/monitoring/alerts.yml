@@ -1,0 +1,79 @@
+# Prometheus alert rules for OPES Maintain. Each alert links to its runbook in docs/runbooks.
+groups:
+  - name: opes-maintain
+    rules:
+      - alert: OpesApiLatencyHigh
+        expr: histogram_quantile(0.95, sum by (le) (rate(http_server_requests_seconds_bucket{uri=~"/api/.*",uri!~".*(export|download|file).*"}[5m]))) > 0.5
+        for: 10m
+        labels: { severity: warning }
+        annotations:
+          summary: "API p95 latency above 500 ms (spec §15.1)"
+          runbook: docs/runbooks/api-latency.md
+      - alert: OpesApiErrorRate
+        expr: sum(rate(http_server_requests_seconds_count{status=~"5.."}[5m])) / sum(rate(http_server_requests_seconds_count[5m])) > 0.02
+        for: 5m
+        labels: { severity: critical }
+        annotations:
+          summary: "More than 2% of API requests fail with 5xx"
+          runbook: docs/runbooks/incident.md
+      - alert: OpesDown
+        expr: up{job="opes-maintain-api"} == 0
+        for: 2m
+        labels: { severity: critical }
+        annotations:
+          summary: "API instance not scraping"
+          runbook: docs/runbooks/incident.md
+      - alert: OpesOutboxBacklog
+        expr: opes_outbox_events{status="pending"} > 5000
+        for: 15m
+        labels: { severity: warning }
+        annotations:
+          summary: "Outbox backlog is growing; integrations and notifications are delayed"
+          runbook: docs/runbooks/webhook-dead-letters.md
+      - alert: OpesDeadLetters
+        expr: increase(opes_outbox_events{status="dead_letter"}[30m]) > 0 or opes_outbox_events{status="dead_letter"} > 0
+        for: 5m
+        labels: { severity: warning }
+        annotations:
+          summary: "Events reached DEAD_LETTER after 8 delivery attempts"
+          runbook: docs/runbooks/webhook-dead-letters.md
+      - alert: OpesEmailFailures
+        expr: opes_notifications_email{status="failed"} > 0
+        for: 10m
+        labels: { severity: warning }
+        annotations:
+          summary: "Notification e-mails failed after 5 attempts"
+          runbook: docs/runbooks/email.md
+      - alert: OpesDocumentsAwaitingScan
+        expr: opes_documents{status="scanning"} > 0
+        for: 30m
+        labels: { severity: warning }
+        annotations:
+          summary: "Uploads held because the malware scanner is unavailable"
+          runbook: docs/runbooks/scanner.md
+      - alert: OpesJobFailures
+        expr: increase(opes_job_failures_total[15m]) > 0
+        labels: { severity: warning }
+        annotations:
+          summary: "A background job failed (PM generation, SLA, expiry, outbox, e-mail or re-scan)"
+          runbook: docs/runbooks/incident.md
+      - alert: OpesSyncRejections
+        expr: sum(increase(opes_sync_operations_total{outcome!="ACCEPTED"}[1h])) > 50
+        labels: { severity: info }
+        annotations:
+          summary: "Unusual number of rejected or conflicting mobile sync operations"
+          runbook: docs/runbooks/mobile-sync.md
+      - alert: OpesAccountLockouts
+        expr: opes_users_locked > 5
+        for: 5m
+        labels: { severity: warning }
+        annotations:
+          summary: "Several accounts locked; possible password-guessing attack"
+          runbook: docs/runbooks/user-lockout.md
+      - alert: OpesDbConnectionsSaturated
+        expr: hikaricp_connections_active / hikaricp_connections_max > 0.9
+        for: 10m
+        labels: { severity: warning }
+        annotations:
+          summary: "Database connection pool above 90%"
+          runbook: docs/runbooks/api-latency.md

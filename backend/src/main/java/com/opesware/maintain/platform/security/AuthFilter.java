@@ -18,8 +18,16 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class AuthFilter extends OncePerRequestFilter {
     private final TokenService tokens;
     private final AppUserRepository users;
+    private final OidcVerifier oidc;
+    private final MfaPolicy mfaPolicy;
+    @org.springframework.beans.factory.annotation.Autowired
+    private ScopeResolver scopes;
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.opesware.maintain.platform.infrastructure.TenantRepo tenants;
 
-    public AuthFilter(TokenService tokens, AppUserRepository users) {
+    public AuthFilter(TokenService tokens, AppUserRepository users, OidcVerifier oidc, MfaPolicy mfaPolicy) {
+        this.mfaPolicy = mfaPolicy;
+        this.oidc = oidc;
         this.tokens = tokens;
         this.users = users;
     }
@@ -33,15 +41,33 @@ public class AuthFilter extends OncePerRequestFilter {
             return;
         }
         String header = req.getHeader("Authorization");
-        UUID userId = header != null && header.startsWith("Bearer ") ? tokens.verify(header.substring(7)) : null;
-        AppUser user = userId == null ? null : users.findById(userId).orElse(null);
+        TokenService.Verified v = header != null && header.startsWith("Bearer ") ? tokens.verifyFull(header.substring(7)) : null;
+        AppUser user = v == null ? null : users.findById(v.userId()).orElse(null);
+        if (user != null && user.tokensValidAfter != null && v.issuedAt().isBefore(user.tokensValidAfter.minusSeconds(1))) user = null;
+        if (user == null && header != null && header.startsWith("Bearer ") && oidc.enabled()) {
+            String email = oidc.verify(header.substring(7));
+            if (email != null) user = users.findFirstByEmailIgnoreCase(email).orElse(null);
+        }
         if (user == null || !"ACTIVE".equals(user.status)) {
             res.setStatus(401);
             res.setContentType("application/problem+json");
             res.getWriter().write("{\"status\":401,\"code\":\"UNAUTHENTICATED\",\"title\":\"Authentication required\"}");
             return;
         }
+        if (tenants != null && tenants.findById(user.tenantId).map(t -> "SUSPENDED".equals(t.status)).orElse(false)) {
+            res.setStatus(403);
+            res.setContentType("application/problem+json");
+            res.getWriter().write("{\"status\":403,\"code\":\"TENANT_SUSPENDED\",\"title\":\"This workspace is suspended\",\"detail\":\"Contact OPES Maintain support to reactivate your workspace.\"}");
+            return;
+        }
+        if (mfaPolicy.enrollmentRequired(user) && !path.startsWith("/api/v1/me")) {
+            res.setStatus(403);
+            res.setContentType("application/problem+json");
+            res.getWriter().write("{\"status\":403,\"code\":\"MFA_ENROLLMENT_REQUIRED\",\"title\":\"Set up two-step sign-in to continue\",\"detail\":\"Your role requires two-step sign-in. Enrol an authenticator app in Settings.\"}");
+            return;
+        }
         CurrentUser.set(new Principal(user.id, user.tenantId, user.email, user.fullName, user.role, user.customerId));
+        CurrentUser.setScope(scopes.resolve(user));
         try {
             chain.doFilter(req, res);
         } finally {
@@ -50,6 +76,7 @@ public class AuthFilter extends OncePerRequestFilter {
     }
 
     private boolean isPublic(String path) {
-        return path.equals("/api/v1/auth/login") || path.startsWith("/api/v1/public/");
+        return path.equals("/api/v1/auth/login") || path.equals("/api/v1/auth/forgot-password")
+                || path.equals("/api/v1/auth/reset-password") || path.startsWith("/api/v1/public/");
     }
 }
