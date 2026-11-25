@@ -375,3 +375,9 @@ a.stat:hover { background: var(--surface-2); text-decoration: none; }
 /* OPES read-only support session */
 .support-banner { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 20px; background: var(--warn-soft); color: var(--warn); border-bottom: 1px solid var(--border); font-size: 14px; }
 .support-banner span { flex: 1; min-width: 200px; color: var(--text); }
+
+/* Announcements from OPES (operator console) */
+.announce { display: flex; align-items: center; gap: 10px; padding: 9px 20px; font-size: 14px; border-bottom: 1px solid var(--border); background: var(--info-soft); color: var(--info); }
+.announce span { flex: 1; color: var(--text); }
+.announce-warning { background: var(--warn-soft); color: var(--warn); }
+.announce-maintenance { background: var(--violet-soft); color: var(--violet); }
