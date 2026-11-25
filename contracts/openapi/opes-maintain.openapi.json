@@ -13526,6 +13526,14 @@
      "notes": {
       "type": "string",
       "title": "Notes"
+     },
+     "assetClassId": {
+      "type": "string",
+      "title": "Asset Class"
+     },
+     "specs": {
+      "type": "string",
+      "title": "Specs"
      }
     },
     "required": [

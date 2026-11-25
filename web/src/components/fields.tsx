@@ -1,4 +1,5 @@
 "use client";
+import { AssetClassPicker } from "./AssetClassPicker";
 import { useEffect, useRef, useState } from "react";
 import { api, ApiError } from "@/lib/api";
 import type { FieldDef, ResourceDef } from "@/lib/registry";
@@ -122,7 +123,9 @@ export function RecordForm({ def, initial, onSaved, onCancel, defaults }: {
 }) {
   const t = useT();
   const creating = !initial;
-  const fields = editableFields(def, creating);
+  // Asset class and its specifications have their own catalog-driven editor.
+  const fields = editableFields(def, creating).filter((f) => !(def.path === "assets" && (f.name === "assetClassId" || f.name === "specs")));
+  const catalogFields = def.path === "assets" ? ["assetClassId", "specs"] : [];
   const [values, setValues] = useState<Record<string, unknown>>(() => ({ ...(defaults ?? {}), ...(initial ?? {}) }));
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
@@ -144,6 +147,7 @@ export function RecordForm({ def, initial, onSaved, onCancel, defaults }: {
     setFormError(null);
     const body: Record<string, unknown> = {};
     for (const f of fields) if (values[f.name] !== undefined) body[f.name] = values[f.name];
+    for (const n of catalogFields) if (values[n] !== undefined) body[n] = values[n];
     try {
       const row = creating
         ? await api<Record<string, unknown>>(`/${def.path}`, { body, headers: { "Idempotency-Key": idemKey.current } })
@@ -164,6 +168,7 @@ export function RecordForm({ def, initial, onSaved, onCancel, defaults }: {
     <form onSubmit={submit} noValidate>
       <div className="card-body stack">
         {formError && <Alert tone="danger">{formError}</Alert>}
+        {def.path === "assets" && <AssetClassPicker values={values} creating={creating} set={(n, v) => set(n, v)} />}
         <div className="form-grid">
           {fields.map((f) => (
             <FieldInput key={f.name} f={f} value={values[f.name]} label={values[`${f.name}Label`] as string | null} error={errors[f.name]} onChange={(v, l) => set(f.name, v, l)} />

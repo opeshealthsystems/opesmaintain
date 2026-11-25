@@ -1,5 +1,6 @@
 package com.opesware.maintain.onboarding.api;
 
+import com.opesware.maintain.onboarding.application.CatalogService;
 import com.opesware.maintain.onboarding.application.Plans;
 import com.opesware.maintain.onboarding.application.SignupService;
 import java.util.LinkedHashMap;
@@ -16,9 +17,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/public")
 public class PublicSignupController {
     private final SignupService signup;
+    private final CatalogService catalog;
 
-    public PublicSignupController(SignupService signup) {
+    public PublicSignupController(SignupService signup, CatalogService catalog) {
         this.signup = signup;
+        this.catalog = catalog;
+    }
+
+    /** Sectors of the master catalog, so sign-up uses the same vocabulary as onboarding. */
+    @GetMapping("/catalog/sectors")
+    public List<Map<String, Object>> sectors(@org.springframework.web.bind.annotation.RequestParam(defaultValue = "EN") String lang) {
+        return catalog.sectorList(lang);
     }
 
     @GetMapping("/plans")

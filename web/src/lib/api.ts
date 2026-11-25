@@ -22,7 +22,20 @@ export class ApiError extends Error {
 const TOKEN_KEY = "opes.token";
 let memToken: string | null = null;
 
+const SUPPORT_KEY = "opes.supportToken";
+
+/** A support session lives only in its own browser tab, so it never replaces the operator's own sign-in. */
+export function startSupportSession(token: string) {
+  try { window.sessionStorage.setItem(SUPPORT_KEY, token); } catch { /* blocked */ }
+}
+export function endSupportSession() {
+  try { window.sessionStorage.removeItem(SUPPORT_KEY); } catch { /* blocked */ }
+}
+
 export function getToken(): string | null {
+  if (typeof window !== "undefined") {
+    try { const s = window.sessionStorage.getItem(SUPPORT_KEY); if (s) return s; } catch { /* blocked */ }
+  }
   try {
     return window.localStorage.getItem(TOKEN_KEY) ?? memToken;
   } catch {
@@ -31,6 +44,10 @@ export function getToken(): string | null {
 }
 
 export function setToken(token: string | null) {
+  // Ending a support session (expired or signed out) must not sign the operator out of their own account.
+  try {
+    if (!token && window.sessionStorage.getItem(SUPPORT_KEY)) { endSupportSession(); return; }
+  } catch { /* blocked */ }
   memToken = token;
   try {
     if (token) window.localStorage.setItem(TOKEN_KEY, token);

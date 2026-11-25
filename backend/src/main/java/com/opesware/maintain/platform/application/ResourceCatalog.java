@@ -141,7 +141,9 @@ public final class ResourceCatalog {
                 new FieldDef("warrantyEnd", "Warranty End", "date", null, List.of(), false, false, false, false, false, false),
                 new FieldDef("expectedLifeYears", "Expected Life Years", "int", null, List.of(), false, false, false, false, false, false),
                 new FieldDef("externalRef", "External Ref", "str", null, List.of(), false, false, false, false, false, false),
-                new FieldDef("notes", "Notes", "text", null, List.of(), false, false, false, false, false, false))));
+                new FieldDef("notes", "Notes", "text", null, List.of(), false, false, false, false, false, false),
+                new FieldDef("assetClassId", "Asset Class", "str", null, List.of(), false, false, false, false, false, false),
+                new FieldDef("specs", "Specs", "text", null, List.of(), false, false, false, false, false, false))));
         add(new ResourceDef("asset-events", com.opesware.maintain.asset.domain.AssetEvent.class, "asset", "M03", "Asset History", "Asset Event", null, "eventType", true, Set.of("ADMIN", "MANAGER", "PLANNER"), List.of(
                 new FieldDef("assetId", "Asset", "ref", "assets", List.of(), true, true, false, false, false, false),
                 new FieldDef("eventType", "Event Type", "enum", null, List.of("REGISTERED", "STATUS_CHANGED", "SAFETY_CHANGED", "TRANSFERRED", "COMMISSIONED", "OVERHAULED", "RETIRED", "DISPOSED"), false, true, false, false, false, false),

@@ -22,6 +22,8 @@ public class AuthFilter extends OncePerRequestFilter {
     private final MfaPolicy mfaPolicy;
     @org.springframework.beans.factory.annotation.Autowired
     private ScopeResolver scopes;
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.opesware.maintain.platform.infrastructure.TenantRepo tenants;
 
     public AuthFilter(TokenService tokens, AppUserRepository users, OidcVerifier oidc, MfaPolicy mfaPolicy) {
         this.mfaPolicy = mfaPolicy;
@@ -50,6 +52,12 @@ public class AuthFilter extends OncePerRequestFilter {
             res.setStatus(401);
             res.setContentType("application/problem+json");
             res.getWriter().write("{\"status\":401,\"code\":\"UNAUTHENTICATED\",\"title\":\"Authentication required\"}");
+            return;
+        }
+        if (tenants != null && tenants.findById(user.tenantId).map(t -> "SUSPENDED".equals(t.status)).orElse(false)) {
+            res.setStatus(403);
+            res.setContentType("application/problem+json");
+            res.getWriter().write("{\"status\":403,\"code\":\"TENANT_SUSPENDED\",\"title\":\"This workspace is suspended\",\"detail\":\"Contact OPES Maintain support to reactivate your workspace.\"}");
             return;
         }
         if (mfaPolicy.enrollmentRequired(user) && !path.startsWith("/api/v1/me")) {

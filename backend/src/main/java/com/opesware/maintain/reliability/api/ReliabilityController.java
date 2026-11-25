@@ -1,5 +1,6 @@
 package com.opesware.maintain.reliability.api;
 
+import com.opesware.maintain.platform.application.ApiException;
 import com.opesware.maintain.platform.application.Access;
 import com.opesware.maintain.platform.application.CrudService;
 import com.opesware.maintain.platform.security.CurrentUser;
@@ -32,6 +33,8 @@ public class ReliabilityController {
 
     @GetMapping("/kpis")
     public Map<String, Object> kpis(@RequestParam(defaultValue = "90") int days, @RequestParam(required = false) UUID siteId) {
+        // KPIs feed every staff dashboard; customers use their portal summary instead.
+        if (CurrentUser.require().is("CUSTOMER")) throw ApiException.forbidden("Not available in the customer portal");
         return kpis.kpis(Math.max(1, Math.min(days, 730)), siteId);
     }
 

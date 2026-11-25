@@ -11,6 +11,7 @@ import { date, humanize, money, num } from "@/lib/format";
 import { useT } from "@/lib/i18n";
 import { Icon } from "@/lib/icons";
 import { resource } from "@/lib/registry";
+import { SetupBanner } from "@/components/SetupBanner";
 
 type K = Record<string, unknown> & { [k: string]: never | unknown };
 const kv = (k: K, key: string) => (k[key] as { value: number | null })?.value ?? null;
@@ -32,6 +33,7 @@ export default function Dashboard() {
 
   return (
     <>
+      <SetupBanner />
       <PageHeader icon="LayoutDashboard" title={`${t("Dashboard")}`} subtitle={`${user?.tenantName} · ${t("last 90 days")}`}
         actions={<>
           {canWrite("maintenance-requests") && <Link className="btn" href="/m/maintenance-requests/new"><Icon name="TriangleAlert" size={16} />{t("Report a fault")}</Link>}

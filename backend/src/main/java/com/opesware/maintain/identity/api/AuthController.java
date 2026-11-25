@@ -83,6 +83,9 @@ public class AuthController {
             throw invalid;
         }
         if (!"ACTIVE".equals(u.status)) throw new ApiException(403, "ACCOUNT_DISABLED", "This account is " + u.status.toLowerCase());
+        if (tenants.findById(u.tenantId).map(t -> "SUSPENDED".equals(t.status)).orElse(false)) {
+            throw new ApiException(403, "TENANT_SUSPENDED", "This workspace is suspended. Contact OPES Maintain support.");
+        }
         if (u.mfaEnrolledAt != null) {
             String code = body.get("code");
             if (code == null || code.isBlank()) throw new ApiException(401, "MFA_REQUIRED", "Enter the 6-digit code from your authenticator app");
@@ -233,7 +236,10 @@ public class AuthController {
         }
         if (p.is("CUSTOMER")) writable = List.of("maintenance-requests", "service-signoffs");
         if (p.is("AUDITOR")) writable = List.of();
-        return Map.of("role", p.role(), "writable", writable);
+        List<String> readable = new ArrayList<>();
+        for (ResourceDef d : ResourceCatalog.all()) if (Access.mayRead(p, d)) readable.add(d.path());
+        List<String> pages = p.is("ADMIN") ? List.copyOf(Access.PAGES.keySet()) : Access.pagesFor(p);
+        return Map.of("role", p.role(), "writable", writable, "readable", readable, "pages", pages);
     }
 
     @PostMapping("/me:change-password")
@@ -306,6 +312,12 @@ public class AuthController {
         m.put("scoped", scopes.resolve(u) != null);
         m.put("mfaEnrollmentRequired", mfaPolicy.enrollmentRequired(u));
         m.put("emailNotifications", !Boolean.FALSE.equals(u.emailNotifications));
+        // OPES operators are administrators of the platform workspace; support sessions are read-only visitors.
+        m.put("platformOperator", t != null && platformTenantCode.equals(t.code) && "ADMIN".equals(u.role));
+        m.put("supportSession", u.email != null && u.email.endsWith(MfaPolicy.SUPPORT_EMAIL_DOMAIN));
         return m;
     }
+
+    @org.springframework.beans.factory.annotation.Value("${opes.platform.tenant-code:opes-platform}")
+    private String platformTenantCode = "opes-platform";
 }

@@ -44,7 +44,7 @@ public class WorkspaceController {
         List<Map<String, Object>> out = new ArrayList<>();
         if (q == null || q.trim().length() < 2) return out;
         for (String path : SEARCHABLE) {
-            if (p.is("CUSTOMER") && !Access.CUSTOMER_READABLE.contains(path)) continue;
+            if (!Access.mayRead(p, crud.def(path))) continue; // search never reaches modules the user may not open
             Map<String, String> params = new HashMap<>();
             params.put("q", q.trim());
             params.put("size", "5");

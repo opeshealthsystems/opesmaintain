@@ -134,7 +134,10 @@ public class CrudService {
     /** Loads an entity enforcing tenant and customer scope; missing and foreign ids both yield 404. */
     @Transactional(readOnly = true)
     public Object load(ResourceDef def, UUID id) {
-        Principal p = Access.canRead(def);
+        return load(def, id, Access.canRead(def));
+    }
+
+    private Object load(ResourceDef def, UUID id, Principal p) {
         Object e = repo(def).findById(id).orElse(null);
         if (e == null || !Objects.equals(((TenantEntity) e).tenantId, p.tenantId())) throw ApiException.notFound(def.singular());
         if (p.is("CUSTOMER") && def.has("customerId") && !Objects.equals(Fields.get(e, "customerId"), p.customerId())) {
@@ -150,7 +153,9 @@ public class CrudService {
     @SuppressWarnings("unchecked")
     public <T> T load(Class<T> type, UUID id) {
         if (id == null) throw ApiException.invalid("Identifier required");
-        return (T) load(ResourceCatalog.of(type), id);
+        // Loads made by commands and hooks keep tenant, customer and site scope but not the need-to-know reader list.
+        ResourceDef def = ResourceCatalog.of(type);
+        return (T) load(def, id, Access.canReadForCommand(def));
     }
 
     // ------------------------------------------------------------------ writes

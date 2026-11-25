@@ -1,5 +1,6 @@
 package com.opesware.maintain.documents.api;
 
+import com.opesware.maintain.platform.application.Access;
 import com.opesware.maintain.documents.application.DocumentService;
 import com.opesware.maintain.documents.application.ReportService;
 import com.opesware.maintain.documents.domain.Document;
@@ -53,6 +54,7 @@ public class DocumentCommandController {
     @GetMapping("/reports/{type}")
     public Map<String, Object> report(@PathVariable String type, @RequestParam(required = false) LocalDate from,
                                       @RequestParam(required = false) LocalDate to) {
+        Access.requirePage("/reports");
         LocalDate t = to == null ? LocalDate.now() : to;
         LocalDate f = from == null ? t.minusDays(90) : from;
         return reports.run(type, f, t);

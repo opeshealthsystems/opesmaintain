@@ -36,8 +36,13 @@ public class TokenService {
     public record Verified(UUID userId, Instant issuedAt) {}
 
     public String issue(UUID userId) {
+        return issue(userId, ttlSeconds);
+    }
+
+    /** Token with a custom lifetime (e.g. short support sessions). */
+    public String issue(UUID userId, long lifetimeSeconds) {
         long now = Instant.now().getEpochSecond();
-        long exp = now + ttlSeconds;
+        long exp = now + Math.min(lifetimeSeconds, ttlSeconds);
         String payload = userId + "." + exp + "." + now;
         return b64(payload.getBytes(StandardCharsets.UTF_8)) + "." + b64(sign(payload));
     }

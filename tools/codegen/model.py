@@ -138,6 +138,7 @@ res("assets", "Asset", "asset", "M03", "Assets", "Asset", "Boxes", [
     "siteId:ref(sites)!*", "locationId:ref(locations)", "parentId:ref(assets)", "customerId:ref(customers)",
     "ownerOrgId:ref(organizations)", "custodian:str", "purchaseDate:date", "purchaseCost:money",
     "commissionedOn:date", "warrantyEnd:date", "expectedLifeYears:int", "externalRef:str", "notes:text",
+    "assetClassId:str@8", "specs:text@8",
 ], display="name", guarded=["status", "safetyState", "siteId"],
     desc="Typed equipment records with hierarchy, ownership and lifecycle.")
 

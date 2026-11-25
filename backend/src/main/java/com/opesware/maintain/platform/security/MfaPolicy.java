@@ -15,7 +15,11 @@ public class MfaPolicy {
         this.required = required;
     }
 
+    /** Read-only support accounts used by OPES operators: no password, short-lived tokens issued by the platform. */
+    public static final String SUPPORT_EMAIL_DOMAIN = "@support.opesmaintain.invalid";
+
     public boolean requiredFor(AppUser u) {
+        if (u.email != null && u.email.endsWith(SUPPORT_EMAIL_DOMAIN)) return false;
         return required && (PRIVILEGED.contains(u.role) || Boolean.TRUE.equals(u.mfaEnabled));
     }
 

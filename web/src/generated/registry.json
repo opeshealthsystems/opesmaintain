@@ -1573,6 +1573,30 @@
      "managed": false,
      "computed": false,
      "guarded": false
+    },
+    {
+     "name": "assetClassId",
+     "label": "Asset Class",
+     "type": "str",
+     "ref": null,
+     "options": [],
+     "required": false,
+     "list": false,
+     "managed": false,
+     "computed": false,
+     "guarded": false
+    },
+    {
+     "name": "specs",
+     "label": "Specs",
+     "type": "text",
+     "ref": null,
+     "options": [],
+     "required": false,
+     "list": false,
+     "managed": false,
+     "computed": false,
+     "guarded": false
     }
    ]
   },
