@@ -67,9 +67,10 @@ export function AssetClassPicker({ values, set, creating }: {
             : `${current.pmTemplates} preventive maintenance plan(s) will be created as drafts for this asset.`}</span>
         )}
       </div>
-      {current && current.specs.length > 0 && (
+      {current && current.specs.some((s) => !NATIVE[s.key]) && (
         <div className="form-grid">
-          {current.specs.map((s) => {
+          {/* Manufacturer, model and serial number are regular asset fields below; only class-specific specs here. */}
+          {current.specs.filter((s) => !NATIVE[s.key]).map((s) => {
             const id = `spec-${s.key}`;
             const v = NATIVE[s.key] ? values[NATIVE[s.key]] : specs[s.key];
             return (

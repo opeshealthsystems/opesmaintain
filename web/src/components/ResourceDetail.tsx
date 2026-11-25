@@ -7,7 +7,7 @@ import { PRINTABLE, visibleActions } from "@/lib/actions";
 import { useAuth } from "@/lib/auth";
 import { useT } from "@/lib/i18n";
 import { Icon } from "@/lib/icons";
-import { modules, relatedOf, resource, RESTRICTED_RESOURCES, type ResourceDef } from "@/lib/registry";
+import { modules, relatedOf, resource, type ResourceDef } from "@/lib/registry";
 import { formatValue, humanize } from "@/lib/format";
 import { ActionRunner, type RunSpec } from "./ActionRunner";
 import { cellFor, RecordTable } from "./ResourceList";
@@ -25,7 +25,7 @@ export function ResourceDetail({ def, id }: { def: ResourceDef; id: string }) {
   const t = useT();
   const router = useRouter();
   const toast = useToast();
-  const { user, canWrite, hasRole } = useAuth();
+  const { user, canWrite, hasRole, canRead } = useAuth();
   const { data: row, error, loading, reload } = useData(() => api<Record<string, unknown>>(`/${def.path}/${id}`), [def.path, id]);
   const [tab, setTab] = useState("details");
   const [run, setRun] = useState<(RunSpec & { navigate?: string; showResult?: boolean }) | null>(null);
@@ -39,9 +39,8 @@ export function ResourceDetail({ def, id }: { def: ResourceDef; id: string }) {
   const related = useMemo(() => relatedOf(def.path).filter(({ res }) => {
     if (res.path === "audit-events" || res.path === "outbox-events") return false;
     if (user?.role === "CUSTOMER") return ["work-orders", "maintenance-requests", "service-signoffs", "quotes", "assets"].includes(res.path);
-    if (RESTRICTED_RESOURCES.has(res.path)) return hasRole("MANAGER", "AUDITOR");
-    return true;
-  }), [def.path, user, hasRole]);
+    return canRead(res.path); // never show a tab the server would refuse
+  }), [def.path, user, canRead]);
 
   const tabs: Tab[] = useMemo(() => {
     const list: Tab[] = [{ key: "details", label: t("Details"), icon: "FileText" }];

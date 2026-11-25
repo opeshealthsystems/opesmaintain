@@ -6,7 +6,7 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { useT } from "@/lib/i18n";
 import { Icon } from "@/lib/icons";
-import { GROUP_ORDER, modules, resources, RESTRICTED_RESOURCES } from "@/lib/registry";
+import { GROUP_ORDER, modules, resources } from "@/lib/registry";
 import { humanize, relative } from "@/lib/format";
 import { Badge, Loading } from "./ui";
 
@@ -33,10 +33,32 @@ const CUSTOMER_NAV = [
   { href: "/m/billing-exports", label: "Billing", icon: "FileOutput" },
 ];
 
-const RESTRICTED = RESTRICTED_RESOURCES;
+const APP_PAGES = ["/dashboard", "/work-board", "/dispatch", "/pm-board", "/stock", "/analytics", "/reports", "/technician", "/portal"];
+
+/** True when the current URL is a page or module this role may not open (e.g. typed or bookmarked). */
+function blocked(path: string, canRead: (p: string) => boolean, canOpen: (p: string) => boolean): boolean {
+  const page = APP_PAGES.find((p) => path === p || path.startsWith(p + "/"));
+  if (page) return !canOpen(page);
+  const m = /^\/m\/([a-z-]+)/.exec(path);
+  if (m) return !canRead(m[1]);
+  if (path.startsWith("/reports")) return !canOpen("/reports");
+  return false;
+}
+
+function NotAvailable({ label, back, home }: { label: string; back: string; home: string }) {
+  return (
+    <div className="card" style={{ maxWidth: 560, margin: "48px auto" }}>
+      <div className="card-body stack" style={{ alignItems: "flex-start" }}>
+        <Icon name="Lock" size={28} style={{ color: "var(--text-3)" }} />
+        <h1 style={{ margin: 0 }}>{label}</h1>
+        <Link href={home} className="btn btn-primary">{back}</Link>
+      </div>
+    </div>
+  );
+}
 
 export function Shell({ children }: { children: React.ReactNode }) {
-  const { user, loading, logout, setLanguage, hasRole } = useAuth();
+  const { user, loading, logout, setLanguage, canRead, canOpen } = useAuth();
   const t = useT();
   const path = usePathname();
   const router = useRouter();
@@ -62,14 +84,14 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const groups = useMemo(() => {
     const m = new Map<string, typeof resources>();
     for (const r of resources) {
-      if (RESTRICTED.has(r.path) && !hasRole("MANAGER", "AUDITOR")) continue;
+      if (!canRead(r.path)) continue; // same need-to-know rule the server enforces
       const g = modules[r.module].group;
       if (!m.has(g)) m.set(g, []);
       m.get(g)!.push(r);
     }
     for (const list of m.values()) list.sort((a, b) => a.module.localeCompare(b.module));
     return GROUP_ORDER.filter((g) => m.has(g)).map((g) => ({ group: g, items: m.get(g)! }));
-  }, [hasRole]);
+  }, [canRead]);
 
   if (loading || !user) return <div className="content"><Loading /></div>;
   const isCustomer = user.role === "CUSTOMER";
@@ -92,7 +114,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           ) : (
             <>
               <div className="nav-group-title" style={{ cursor: "default" }}>{t("Operations")}</div>
-              {OPS.filter((n) => !(user.scoped && ["/analytics", "/reports", "/portal"].includes(n.href))).map((n) => <NavLink key={n.href} {...n} label={t(n.label)} active={active(n.href)} />)}
+              {OPS.filter((n) => canOpen(n.href) && !(user.scoped && ["/analytics", "/reports", "/portal"].includes(n.href))).map((n) => <NavLink key={n.href} {...n} label={t(n.label)} active={active(n.href)} />)}
               {groups.map(({ group, items }) => (
                 <div className="nav-group" key={group}>
                   <button className="nav-group-title" onClick={() => toggle(group)} aria-expanded={!collapsed[group]}>
@@ -124,7 +146,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <NotificationBell />
           <UserMenu name={user.fullName} role={user.role} onLogout={logout} />
         </header>
-        <main className="content" id="main">{children}</main>
+        <main className="content" id="main">{blocked(path, canRead, canOpen) ? <NotAvailable label={t("This page is not available for your role.")} back={t("Back to dashboard")} home={user.role === "CUSTOMER" ? "/portal" : "/dashboard"} /> : children}</main>
       </div>
     </div>
   );

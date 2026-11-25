@@ -233,7 +233,10 @@ public class AuthController {
         }
         if (p.is("CUSTOMER")) writable = List.of("maintenance-requests", "service-signoffs");
         if (p.is("AUDITOR")) writable = List.of();
-        return Map.of("role", p.role(), "writable", writable);
+        List<String> readable = new ArrayList<>();
+        for (ResourceDef d : ResourceCatalog.all()) if (Access.mayRead(p, d)) readable.add(d.path());
+        List<String> pages = p.is("ADMIN") ? List.copyOf(Access.PAGES.keySet()) : Access.pagesFor(p);
+        return Map.of("role", p.role(), "writable", writable, "readable", readable, "pages", pages);
     }
 
     @PostMapping("/me:change-password")

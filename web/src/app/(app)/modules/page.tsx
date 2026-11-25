@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { PageHeader } from "@/components/ui";
+import { useAuth } from "@/lib/auth";
 import { useT } from "@/lib/i18n";
 import { Icon } from "@/lib/icons";
 import { GROUP_ORDER, modules, resourcesOfModule } from "@/lib/registry";
@@ -19,10 +20,16 @@ const EXTRA: Record<string, { href: string; label: string }[]> = {
 
 export default function ModulesPage() {
   const t = useT();
-  const groups = GROUP_ORDER.map((g) => ({ g, mods: Object.values(modules).filter((m) => m.group === g) })).filter((x) => x.mods.length);
+  const { canRead, canOpen } = useAuth();
+  // Only what this role may open: pages it can see and modules it can read.
+  const links = (code: string) => [
+    ...(EXTRA[code] ?? []).filter((x) => x.href === "/settings" || canOpen(x.href)).map((x) => ({ href: x.href, label: x.label, icon: "ArrowRight" })),
+    ...resourcesOfModule(code).filter((r) => canRead(r.path)).map((r) => ({ href: `/m/${r.path}`, label: r.label, icon: r.icon })),
+  ];
+  const groups = GROUP_ORDER.map((g) => ({ g, mods: Object.values(modules).filter((m) => m.group === g && links(m.code).length > 0) })).filter((x) => x.mods.length);
   return (
     <>
-      <PageHeader icon="LayoutGrid" title={t("All modules")} subtitle="28 functional modules of OPES Maintain, grouped by operational area." />
+      <PageHeader icon="LayoutGrid" title={t("All modules")} subtitle={t("The modules available for your role, grouped by operational area.")} />
       <div className="stack">
         {groups.map(({ g, mods }) => (
           <section key={g} className="stack" style={{ gap: 10 }}>
@@ -36,8 +43,7 @@ export default function ModulesPage() {
                       <div><div style={{ fontWeight: 600 }}>{m.title}</div><div className="small muted">{m.code}</div></div>
                     </div>
                     <div className="row" style={{ gap: 6 }}>
-                      {(EXTRA[m.code] ?? []).map((x) => <Link key={x.href} href={x.href} className="btn btn-sm"><Icon name="ArrowRight" size={13} />{x.label}</Link>)}
-                      {resourcesOfModule(m.code).map((r) => <Link key={r.path} href={`/m/${r.path}`} className="btn btn-sm"><Icon name={r.icon} size={13} />{r.label}</Link>)}
+                      {links(m.code).map((x) => <Link key={x.href} href={x.href} className="btn btn-sm"><Icon name={x.icon} size={13} />{x.label}</Link>)}
                     </div>
                   </div>
                 </div>
