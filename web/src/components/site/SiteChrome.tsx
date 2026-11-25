@@ -3,7 +3,7 @@ import { Icon } from "@/lib/icons";
 import { C, SITE, href, type Lang, type Page } from "@/lib/site/content";
 import { siteJsonLd } from "@/lib/site/seo";
 import { MoneyProvider } from "./Money";
-import { AccountButtons } from "./AccountButtons";
+import { AccountButtons, LangLink, LanguageRedirect } from "./AccountButtons";
 
 const NAV: Page[] = ["features", "industries", "pricing", "licensing", "about", "contact"];
 
@@ -34,7 +34,7 @@ export function SiteHeader({ lang, page }: { lang: Lang; page: Page | "signup" }
           ))}
         </nav>
         <div className="site-actions">
-          <Link href={otherHref} hrefLang={other} className="site-lang" aria-label={other === "fr" ? "Version française" : "English version"}>{other.toUpperCase()}</Link>
+          <LangLink href={otherHref} lang={other} className="site-lang" label={other === "fr" ? "Version française" : "English version"}>{other.toUpperCase()}</LangLink>
           <AccountButtons signIn={t.signIn} startTrial={t.startTrial} openApp={t.openApp} lang={lang} />
           <details className="site-menu">
             <summary aria-label={t.menu}><Icon name="Menu" size={22} /></summary>
@@ -50,7 +50,7 @@ export function SiteHeader({ lang, page }: { lang: Lang; page: Page | "signup" }
   );
 }
 
-export function SiteFooter({ lang }: { lang: Lang }) {
+export function SiteFooter({ lang, page = "" }: { lang: Lang; page?: Page }) {
   const t = C[lang];
   return (
     <footer className="site-foot">
@@ -78,10 +78,13 @@ export function SiteFooter({ lang }: { lang: Lang }) {
           <h2>{t.footer.legal}</h2>
           <Link href={href(lang, "privacy")}>{t.footer.privacy}</Link>
           <Link href={href(lang, "terms")}>{t.footer.terms}</Link>
-          <Link href={href(lang === "fr" ? "en" : "fr", "")} hrefLang={lang === "fr" ? "en" : "fr"}>{lang === "fr" ? "English" : "Français"}</Link>
+          <LangLink href={href(lang === "fr" ? "en" : "fr", page)} lang={lang === "fr" ? "en" : "fr"} label={lang === "fr" ? "English" : "Français"}>{lang === "fr" ? "English" : "Français"}</LangLink>
         </div>
       </div>
-      <div className="site-wrap site-foot-base">© {new Date().getFullYear()} {SITE.company}. {t.footer.rights}</div>
+      <div className="site-wrap site-foot-base">
+        <span>© {new Date().getFullYear()} {SITE.company}. {t.footer.rights}</span>
+        <span>{lang === "fr" ? "Développé par" : "Developed by"} <a href={SITE.companyUrl} rel="author">Opesware Technologies</a> · <a href={SITE.companyUrl}>opesware.com</a></span>
+      </div>
     </footer>
   );
 }
@@ -91,10 +94,11 @@ export function SiteShell({ lang, page, children }: { lang: Lang; page: Page; ch
   return (
     <MoneyProvider>
       <div className="site" lang={lang}>
+        <LanguageRedirect lang={lang} page={page} />
         <JsonLd data={siteJsonLd(lang)} />
         <SiteHeader lang={lang} page={page} />
         <main id="main">{children}</main>
-        <SiteFooter lang={lang} />
+        <SiteFooter lang={lang} page={page} />
       </div>
     </MoneyProvider>
   );
