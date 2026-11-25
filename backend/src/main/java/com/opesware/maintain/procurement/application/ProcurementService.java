@@ -92,6 +92,11 @@ public class ProcurementService {
             case "receive" -> {
                 Access.requireRole("STOREKEEPER", "PROCUREMENT", "MANAGER");
                 if (!"ISSUED".equals(from) && !"PARTIALLY_RECEIVED".equals(from)) throw bad(from);
+                // The storekeeper may choose the receiving warehouse at the door when the order does not name one.
+                if (po.warehouseId == null && body != null && body.get("warehouseId") != null) {
+                    po.warehouseId = UUID.fromString(body.get("warehouseId").toString());
+                    crud.load(com.opesware.maintain.inventory.domain.Warehouse.class, po.warehouseId); // same tenant, or 404
+                }
                 if (po.partId == null || po.warehouseId == null) throw ApiException.guard("RECEIPT_TARGET", "Part and receiving warehouse are required to receive");
                 Object q = body == null ? null : body.get("quantity");
                 BigDecimal qty = q == null ? po.quantity.subtract(Clock.nz(po.receivedQty)) : new BigDecimal(q.toString());

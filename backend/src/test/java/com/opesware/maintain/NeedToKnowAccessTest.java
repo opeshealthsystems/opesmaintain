@@ -44,11 +44,12 @@ class NeedToKnowAccessTest {
     UUID contract;
     String quoteTitle;
     String vendorName;
+    String quoteCurrency;
 
     @BeforeEach
     void seed() {
         Tenant t = new Tenant();
-        t.id = UUID.randomUUID(); t.code = "ntk-" + t.id; t.legalName = "NTK"; t.status = "ACTIVE";
+        t.id = UUID.randomUUID(); t.code = "ntk-" + t.id; t.legalName = "NTK"; t.status = "ACTIVE"; t.currency = "XAF";
         tenant = tenants.save(t).id;
         as("ADMIN");
         Site s = new Site(); s.code = "S1"; s.name = "Main"; s.timeZone = "UTC";
@@ -60,7 +61,7 @@ class NeedToKnowAccessTest {
         contract = crud.persistNew(sc).id;
         quoteTitle = "Ventilator overhaul " + UUID.randomUUID();
         Quote q = new Quote(); q.customerId = customer; q.title = quoteTitle;
-        crud.persistNew(q);
+        quoteCurrency = crud.persistNew(q).currency;
         vendorName = "Biomedical Supplies " + UUID.randomUUID();
         Vendor v = new Vendor(); v.code = "V1"; v.name = vendorName;
         crud.persistNew(v);
@@ -82,6 +83,11 @@ class NeedToKnowAccessTest {
         } catch (ApiException e) {
             return e.status();
         }
+    }
+
+    @Test
+    void commercialDocumentsDefaultToTheWorkspaceCurrency() {
+        assertThat(quoteCurrency).isEqualTo("XAF");
     }
 
     @Test
