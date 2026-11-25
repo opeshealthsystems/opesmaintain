@@ -6,14 +6,14 @@ import { Alert } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { Icon } from "@/lib/icons";
-import { COUNTRIES, INDUSTRIES, dict, usePublicLang, type Lang } from "@/lib/public-i18n";
+import { COUNTRIES, dict, usePublicLang, type Lang } from "@/lib/public-i18n";
 import { SiteHeader } from "./site/SiteChrome";
 
 const S = {
   en: {
     title: "Create your company account", sub: "Free for 30 days. No card required.",
     fullName: "Your full name", email: "Work e-mail", company: "Company name", country: "Country", phone: "Phone (optional)",
-    industry: "Industry", choose: "Choose…", plan: "Plan", password: "Password", passwordHint: "At least 10 characters, with letters and digits.",
+    industry: "Sector", choose: "Choose…", plan: "Plan", password: "Password", passwordHint: "At least 10 characters, with letters and digits.",
     confirm: "Confirm password", mismatch: "The two passwords are different.",
     terms: "By creating an account you agree to use OPES Maintain for your company's legitimate maintenance activities.",
     create: "Create account", creating: "Creating…", have: "Already have an account?",
@@ -82,6 +82,11 @@ export function SignupFlow() {
   const { login } = useAuth();
 
   const [stage, setStage] = useState<"form" | "code" | "review">("form");
+  // Sectors come from the OPES master catalog so sign-up and onboarding share one vocabulary.
+  const [sectors, setSectors] = useState<{ code: string; name: string }[]>([]);
+  useEffect(() => {
+    fetch(`/api/v1/public/catalog/sectors?lang=${lang.toUpperCase()}`).then((r) => (r.ok ? r.json() : [])).then(setSectors).catch(() => setSectors([]));
+  }, [lang]);
   const [f, setF] = useState({ fullName: "", email: "", companyName: "", country: "CM", phone: "", industry: "", plan: "TRIAL", password: "", confirm: "", website: "" });
   const [code, setCode] = useState("");
   const [devCode, setDevCode] = useState<string | null>(null);
@@ -116,7 +121,7 @@ export function SignupFlow() {
       await api("/public/signup/verify", { body: { email: f.email, code } });
       try {
         const u = await login(f.email.trim().toLowerCase(), f.password);
-        router.replace(u.mfaEnrollmentRequired ? "/settings?mfa=1" : "/dashboard");
+        router.replace(u.mfaEnrollmentRequired ? "/settings?mfa=1" : "/onboarding");
       } catch {
         router.replace(`/login?email=${encodeURIComponent(f.email.trim().toLowerCase())}`);
       }
@@ -187,7 +192,8 @@ export function SignupFlow() {
                     <div className="field"><label htmlFor="industry">{s.industry}</label>
                       <select id="industry" className="input" required value={f.industry} onChange={set("industry")}>
                         <option value="">{s.choose}</option>
-                        {INDUSTRIES.map((i) => <option key={i.code} value={i.code}>{i[lang]}</option>)}
+                        {sectors.map((x) => <option key={x.code} value={x.code}>{x.name}</option>)}
+                        <option value="OTHER">{lang === "fr" ? "Autre secteur" : "Another sector"}</option>
                       </select></div>
                     <div className="field"><label htmlFor="password">{s.password}</label>
                       <input id="password" className="input" type="password" required minLength={10} autoComplete="new-password" value={f.password} onChange={set("password")} /></div>

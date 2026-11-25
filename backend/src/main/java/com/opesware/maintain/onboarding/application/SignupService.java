@@ -39,7 +39,9 @@ public class SignupService {
     private static final Pattern EMAIL = Pattern.compile("^[^@\\s]{1,64}@[^@\\s]+\\.[A-Za-z]{2,}$");
     private static final Set<String> INDUSTRIES = Set.of(
             "HEALTHCARE", "PHARMA", "MANUFACTURING", "FOOD_BEVERAGE", "ENERGY", "OIL_GAS", "MINING", "TRANSPORT",
-            "FACILITIES", "HOSPITALITY", "EDUCATION", "TELECOM", "PUBLIC_SECTOR", "MAINTENANCE_CONTRACTOR", "OTHER");
+            "FACILITIES", "HOSPITALITY", "EDUCATION", "TELECOM", "PUBLIC_SECTOR", "MAINTENANCE_CONTRACTOR", "OTHER",
+            // Master-catalog sectors (preferred vocabulary).
+            "HEALTHCARE_BIOMEDICAL", "TELECOM_TOWERS", "MANUFACTURING_AGRO", "FLEET_LOGISTICS", "FACILITIES_PUBLIC");
 
     private final SignupRequestRepository requests;
     private final AppUserRepository users;
