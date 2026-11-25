@@ -56,6 +56,8 @@ public class ProcurementService {
     @Transactional
     public PurchaseRequisition decide(UUID id, String action) {
         if ("approve".equals(action)) delegation.requireRoleOrDelegation("APPROVE_PURCHASES", "PROCUREMENT", "MANAGER");
+        // Whoever may raise a requisition may send it for approval; approving and rejecting stay with purchasing.
+        else if ("submit".equals(action)) Access.canWrite(crud.def("purchase-requisitions"));
         else Access.requireRole("PROCUREMENT", "MANAGER");
         PurchaseRequisition r = crud.load(PurchaseRequisition.class, id);
         String from = r.status;
