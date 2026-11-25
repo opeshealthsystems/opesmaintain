@@ -4,7 +4,8 @@ export type Lang = "en" | "fr";
 export const SITE = {
   url: "https://opesmaintain.com",
   name: "OPES Maintain",
-  company: "OPES Health Systems",
+  company: "Opesware Technologies",
+  companyUrl: "https://opesware.com",
   city: "Douala",
   country: "CM",
   countryName: { en: "Cameroon", fr: "Cameroun" },
@@ -42,7 +43,7 @@ const en = {
     industries: { title: "Industries — hospitals, factories, fuel stations, facilities, contractors",
       desc: "How hospitals, pharmaceutical plants, factories, fuel and gas stations, hotels, facilities and maintenance contractors in Africa use OPES Maintain." },
     about: { title: "About OPES Maintain — built in Douala, Cameroon",
-      desc: "OPES Maintain is developed by OPES Health Systems in Douala, Cameroon, for maintenance teams across Central, West and East Africa." },
+      desc: "OPES Maintain is developed by Opesware Technologies in Douala, Cameroon, for maintenance teams across Central, West and East Africa." },
     contact: { title: "Contact — demo, quote or support",
       desc: "Ask for a demo, a quote for an on-premise license or source code, or help getting started. We answer in English and French." },
     privacy: { title: "Privacy policy", desc: "How OPES Maintain collects, uses and protects personal data." },
@@ -209,7 +210,7 @@ const en = {
 
   about: {
     title: "About OPES Maintain",
-    lead: "OPES Maintain is a maintenance management platform (CMMS) developed by OPES Health Systems in Douala, Cameroon.",
+    lead: "OPES Maintain is a maintenance management platform (CMMS) developed by Opesware Technologies in Douala, Cameroon.",
     body: [
       "We started with hospitals, where a broken ventilator or a failed cold room is not just a cost but a risk to patients. We saw biomedical and facility teams running maintenance on paper, spreadsheets and WhatsApp messages, with no history and no way to plan ahead.",
       "OPES Maintain brings that work into one place: every asset with its history, every request turned into a tracked work order, and preventive maintenance that happens on time. The same platform now serves factories, fuel stations, facilities and maintenance contractors.",
@@ -236,7 +237,7 @@ const en = {
   legal: {
     updated: "Last updated: 25 November 2026",
     privacy: [
-      ["Who we are", "OPES Maintain is operated by OPES Health Systems, Douala, Cameroon (\"we\"). This policy explains how we handle personal data on opesmaintain.com and in the OPES Maintain platform."],
+      ["Who we are", "OPES Maintain is operated by Opesware Technologies, Douala, Cameroon (\"we\"). This policy explains how we handle personal data on opesmaintain.com and in the OPES Maintain platform."],
       ["What we collect", "Account data (name, work e-mail, phone, company, country), data your organisation enters in the platform (assets, work orders, users), technical data needed to run the service (sign-in times, IP address, device information) and messages you send us."],
       ["Why we use it", "To provide and secure the service, to create and manage your account, to answer your requests, to send service e-mails (such as verification codes and password resets), and to meet legal obligations. We do not sell personal data."],
       ["Your organisation's data", "Data entered in a workspace belongs to the organisation that owns that workspace. Each organisation's data is isolated from every other organisation's. We process it only to provide the service."],
@@ -288,7 +289,7 @@ const fr: Content = {
     industries: { title: "Secteurs — hôpitaux, usines, stations-service, bâtiments, prestataires",
       desc: "Comment hôpitaux, sites pharmaceutiques, usines, stations-service, hôtels, gestionnaires de bâtiments et sociétés de maintenance en Afrique utilisent OPES Maintain." },
     about: { title: "À propos d'OPES Maintain — conçu à Douala, Cameroun",
-      desc: "OPES Maintain est développé par OPES Health Systems à Douala, Cameroun, pour les équipes de maintenance d'Afrique centrale, de l'Ouest et de l'Est." },
+      desc: "OPES Maintain est développé par Opesware Technologies à Douala, Cameroun, pour les équipes de maintenance d'Afrique centrale, de l'Ouest et de l'Est." },
     contact: { title: "Contact — démo, devis ou assistance",
       desc: "Demandez une démo, un devis de licence sur site ou de code source, ou de l'aide pour démarrer. Nous répondons en français et en anglais." },
     privacy: { title: "Politique de confidentialité", desc: "Comment OPES Maintain collecte, utilise et protège les données personnelles." },
@@ -455,7 +456,7 @@ const fr: Content = {
 
   about: {
     title: "À propos d'OPES Maintain",
-    lead: "OPES Maintain est une plateforme de gestion de la maintenance (GMAO) développée par OPES Health Systems à Douala, Cameroun.",
+    lead: "OPES Maintain est une plateforme de gestion de la maintenance (GMAO) développée par Opesware Technologies à Douala, Cameroun.",
     body: [
       "Nous avons commencé par les hôpitaux, où un respirateur en panne ou une chambre froide défaillante n'est pas seulement un coût mais un risque pour les patients. Nous y avons vu des équipes biomédicales et techniques gérer la maintenance sur papier, sur tableur et par WhatsApp, sans historique ni anticipation.",
       "OPES Maintain réunit ce travail en un seul endroit : chaque équipement avec son historique, chaque demande transformée en ordre de travail suivi, et une maintenance préventive réalisée à temps. La même plateforme sert aujourd'hui usines, stations-service, gestionnaires de bâtiments et sociétés de maintenance.",
@@ -482,7 +483,7 @@ const fr: Content = {
   legal: {
     updated: "Dernière mise à jour : 25 novembre 2026",
     privacy: [
-      ["Qui sommes-nous", "OPES Maintain est exploité par OPES Health Systems, Douala, Cameroun (« nous »). Cette politique explique comment nous traitons les données personnelles sur opesmaintain.com et dans la plateforme OPES Maintain."],
+      ["Qui sommes-nous", "OPES Maintain est exploité par Opesware Technologies, Douala, Cameroun (« nous »). Cette politique explique comment nous traitons les données personnelles sur opesmaintain.com et dans la plateforme OPES Maintain."],
       ["Ce que nous collectons", "Les données de compte (nom, e-mail professionnel, téléphone, entreprise, pays), les données saisies par votre organisation dans la plateforme (équipements, ordres de travail, utilisateurs), les données techniques nécessaires au service (heures de connexion, adresse IP, informations sur l'appareil) et les messages que vous nous envoyez."],
       ["Pourquoi nous les utilisons", "Pour fournir et sécuriser le service, créer et gérer votre compte, répondre à vos demandes, envoyer les e-mails de service (codes de vérification, réinitialisation de mot de passe) et respecter nos obligations légales. Nous ne vendons pas de données personnelles."],
       ["Les données de votre organisation", "Les données saisies dans un espace appartiennent à l'organisation propriétaire de cet espace. Elles sont isolées de celles de toute autre organisation. Nous les traitons uniquement pour fournir le service."],

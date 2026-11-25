@@ -133,9 +133,9 @@ export function HomePage({ lang }: { lang: Lang }) {
 function ProductPreview({ lang }: { lang: Lang }) {
   const fr = lang === "fr";
   const rows: [string, string, string, string][] = [
-    ["OT-2041", fr ? "Respirateur — alarme pression" : "Ventilator — pressure alarm", fr ? "En cours" : "In progress", "info"],
-    ["OT-2038", fr ? "Groupe 250 kVA — révision 500 h" : "250 kVA generator — 500 h service", fr ? "Planifié" : "Scheduled", "ok"],
-    ["OT-2035", fr ? "Pompe 3 — fuite au pistolet" : "Pump 3 — nozzle leak", fr ? "Attente pièces" : "Awaiting parts", "warn"],
+    [fr ? "OT-2041" : "WO-2041", fr ? "Respirateur — alarme pression" : "Ventilator — pressure alarm", fr ? "En cours" : "In progress", "info"],
+    [fr ? "OT-2038" : "WO-2038", fr ? "Groupe 250 kVA — révision 500 h" : "250 kVA generator — 500 h service", fr ? "Planifié" : "Scheduled", "ok"],
+    [fr ? "OT-2035" : "WO-2035", fr ? "Pompe 3 — fuite au pistolet" : "Pump 3 — nozzle leak", fr ? "Attente pièces" : "Awaiting parts", "warn"],
   ];
   return (
     <figure className="preview" aria-label={fr ? "Aperçu du tableau de bord" : "Dashboard preview"}>

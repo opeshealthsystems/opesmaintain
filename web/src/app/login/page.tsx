@@ -52,7 +52,7 @@ function LoginForm() {
   return (
     <div className="auth">
       <section className="auth-side">
-        <Link href="/" className="row" style={{ color: "inherit", textDecoration: "none" }}><div className="brand-mark">OM</div><div><div className="brand-name">OPES Maintain</div><div className="brand-sub">by OPES Health Systems</div></div></Link>
+        <Link href="/" className="row" style={{ color: "inherit", textDecoration: "none" }}><div className="brand-mark">OM</div><div><div className="brand-name">OPES Maintain</div><div className="brand-sub">by Opesware Technologies</div></div></Link>
         <div className="stack" style={{ maxWidth: 460 }}>
           <h1 style={{ fontSize: 26 }}>Maintenance operations, from request to sign-off.</h1>
           <p className="muted">Asset registry, work orders, preventive maintenance, spare parts, permits, calibration and reliability analytics — in one auditable platform.</p>
@@ -62,7 +62,7 @@ function LoginForm() {
             ))}
           </div>
         </div>
-        <div className="small muted">© {new Date().getFullYear()} OPES Health Systems</div>
+        <div className="small muted">© {new Date().getFullYear()} Opesware Technologies</div>
       </section>
       <section className="auth-form">
         <div className="auth-card stack">
