@@ -16,7 +16,9 @@ import com.opesware.maintain.platform.security.CurrentUser;
 import com.opesware.maintain.platform.security.Principal;
 import com.opesware.maintain.platform.security.TokenService;
 import com.opesware.maintain.platformadmin.application.OperatorProvisioning;
+import com.opesware.maintain.platformadmin.application.ConsoleService;
 import com.opesware.maintain.platformadmin.application.PlatformService;
+import com.opesware.maintain.onboarding.api.PublicContactController;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +41,8 @@ class PlatformConsoleTest {
     @Autowired TenantRepo tenants;
     @Autowired TokenService tokens;
     @Autowired CrudService crud;
+    @Autowired ConsoleService console;
+    @Autowired PublicContactController contact;
 
     @AfterEach
     void clear() {
@@ -132,5 +136,70 @@ class PlatformConsoleTest {
         CurrentUser.set(new Principal(c.adminId(), c.tenantId(), c.email(), "Owner", "ADMIN", null));
         List<?> events = (List<?>) crud.list("audit-events", Map.of("size", "200")).get("items");
         assertThat(events.toString()).contains("SUPPORT_SESSION_OPENED").contains("importing assets");
+    }
+
+    @Test
+    void websiteMessagesBecomeTicketsThatOperatorsWork() {
+        String email = "lead-" + UUID.randomUUID() + "@example.com";
+        contact.send(new HashMap<>(Map.of("name", "Paul Ndi", "email", email, "topic", "PERPETUAL", "company", "Clinique Ndi",
+                "country", "CM", "message", "We want an on-premise license for 30 users.")));
+        Company c = company();
+        asOperator();
+        Map<String, Object> t = console.tickets("ACTIVE", null).stream().filter(x -> email.equals(x.get("requesterEmail"))).findFirst().orElseThrow();
+        assertThat(t.get("priority")).isEqualTo("HIGH");
+        UUID id = UUID.fromString((String) t.get("id"));
+        Map<String, Object> d = console.updateTicket(id, Map.of("status", "PENDING", "tenantId", c.tenantId().toString(), "reply", "Quote sent by e-mail"));
+        assertThat(d.get("status")).isEqualTo("PENDING");
+        assertThat(d.get("company")).isEqualTo("Garage Akwa");
+        assertThat((List<?>) d.get("conversation")).hasSizeGreaterThanOrEqualTo(3);
+        assertThat(console.updateTicket(id, Map.of("status", "RESOLVED")).get("resolvedAt")).isNotNull();
+        assertThatThrownBy(() -> console.updateTicket(id, Map.of("status", "LOST"))).isInstanceOf(ApiException.class);
+    }
+
+    @Test
+    void invoicesMoveFromDraftToPaidAndPaidIsFinal() {
+        Company c = company();
+        asOperator();
+        Map<String, Object> i = console.createInvoice(Map.of("tenantId", c.tenantId().toString(), "description", "Subscription Jan 2027", "amount", "250000"));
+        assertThat(i.get("currency")).isEqualTo("XAF");
+        assertThat(i.get("status")).isEqualTo("DRAFT");
+        UUID id = UUID.fromString((String) i.get("id"));
+        assertThat(console.setInvoiceStatus(id, "SENT", null).get("issuedOn")).isNotNull();
+        Map<String, Object> paid = console.setInvoiceStatus(id, "PAID", "MTN-MoMo-12345");
+        assertThat(paid.get("paymentReference")).isEqualTo("MTN-MoMo-12345");
+        assertThatThrownBy(() -> console.setInvoiceStatus(id, "VOID", null)).isInstanceOf(ApiException.class);
+        assertThatThrownBy(() -> console.createInvoice(Map.of("tenantId", c.tenantId().toString(), "description", "x", "amount", "-5"))).isInstanceOf(ApiException.class);
+        assertThat(console.revenue()).containsKeys("mrrUsd", "outstanding", "overdue");
+    }
+
+    @Test
+    void announcementsReachTheRightAudienceAndNotesStayPrivate() {
+        Company c = company();
+        asOperator();
+        String title = "Maintenance " + UUID.randomUUID();
+        console.createAnnouncement(Map.of("title", title, "body", "Saturday 22:00–23:00 UTC", "level", "MAINTENANCE", "audience", "TRIAL"));
+        String paying = "Paying only " + UUID.randomUUID();
+        console.createAnnouncement(Map.of("title", paying, "body", "x", "audience", "PAYING"));
+        assertThat(console.activeFor(c.tenantId())).anyMatch(a -> title.equals(a.get("title"))).noneMatch(a -> paying.equals(a.get("title")));
+        console.addNote(c.tenantId(), "Called the owner; wants training in January.");
+        assertThat(console.notes(c.tenantId())).hasSize(1);
+        assertThat(console.health()).containsKeys("uptime", "schemaVersion", "catalogVersion");
+        assertThat(console.companyUsage(c.tenantId()).get("AppUser")).isEqualTo(1L);
+
+        CurrentUser.set(new Principal(c.adminId(), c.tenantId(), c.email(), "Owner", "ADMIN", null));
+        assertThatThrownBy(() -> console.notes(c.tenantId())).isInstanceOf(ApiException.class);
+        assertThatThrownBy(() -> console.tickets(null, null)).isInstanceOf(ApiException.class);
+    }
+
+    @Test
+    void operatorsCannotDisableThemselves() {
+        asOperator();
+        UUID me = CurrentUser.require().userId();
+        assertThatThrownBy(() -> console.setOperatorStatus(me, false)).isInstanceOf(ApiException.class);
+        String other = "op2-" + UUID.randomUUID() + "@opesware.com";
+        List<Map<String, Object>> ops = console.addOperator(other, "Second Operator");
+        UUID otherId = UUID.fromString((String) ops.stream().filter(o -> other.equals(o.get("email"))).findFirst().orElseThrow().get("id"));
+        assertThat(console.setOperatorStatus(otherId, false)).anyMatch(o -> other.equals(o.get("email")) && "SUSPENDED".equals(o.get("status")));
+        assertThat(console.operatorAudit()).isNotNull();
     }
 }

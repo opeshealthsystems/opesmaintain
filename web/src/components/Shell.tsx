@@ -10,6 +10,7 @@ import { GROUP_ORDER, modules, resources } from "@/lib/registry";
 import { humanize, relative } from "@/lib/format";
 import { Badge, Loading } from "./ui";
 import { SupportBanner } from "./SupportBanner";
+import { AnnouncementBanner } from "./AnnouncementBanner";
 
 const OPS = [
   { href: "/dashboard", label: "Dashboard", icon: "LayoutDashboard" },
@@ -148,6 +149,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <UserMenu name={user.fullName} role={user.role} onLogout={logout} />
         </header>
         <SupportBanner />
+        <AnnouncementBanner />
         <main className="content" id="main">{blocked(path, canRead, canOpen) ? <NotAvailable label={t("This page is not available for your role.")} back={t("Back to dashboard")} home={user.role === "CUSTOMER" ? "/portal" : "/dashboard"} /> : children}</main>
       </div>
     </div>

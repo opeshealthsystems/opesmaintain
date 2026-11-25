@@ -22,9 +22,12 @@ public class ContactService {
     private static final Pattern EMAIL = Pattern.compile("^[^@\\s]{1,64}@[^@\\s]+\\.[A-Za-z]{2,}$");
     private static final Set<String> TOPICS = Set.of("DEMO", "SAAS", "PERPETUAL", "SOURCE", "SUPPORT", "OTHER");
     private final ContactMessageRepository messages;
+    private final org.springframework.beans.factory.ObjectProvider<com.opesware.maintain.platformadmin.application.TicketService> tickets;
 
-    public ContactService(ContactMessageRepository messages) {
+    public ContactService(ContactMessageRepository messages,
+                          org.springframework.beans.factory.ObjectProvider<com.opesware.maintain.platformadmin.application.TicketService> tickets) {
         this.messages = messages;
+        this.tickets = tickets;
     }
 
     @Transactional
@@ -49,6 +52,8 @@ public class ContactService {
         m.status = "NEW";
         m.createdAt = Instant.now();
         messages.save(m);
+        // Every website message also opens a support ticket in the operator console.
+        tickets.ifAvailable(t -> t.openFromWebsite(m.name, m.email, m.phone, m.company, m.topic, m.message));
         log.warn("New website message ({}) from {} <{}> — read with: opes-inbox", m.topic, m.name, m.email);
         return m;
     }

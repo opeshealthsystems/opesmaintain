@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import { PlatformConsole } from "@/components/PlatformConsole";
-import "./platform.css";
+import { DashboardPage } from "@/components/platform/CustomerPages";
 
-export const metadata: Metadata = { title: "Operator console", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Dashboard" };
 
-export default function PlatformPage() {
-  return <PlatformConsole />;
+export default function Page() {
+  return <DashboardPage />;
 }
