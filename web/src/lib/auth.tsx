@@ -20,6 +20,10 @@ export interface User {
   emailNotifications: boolean;
   /** Service-provider user limited by service grants. */
   scoped: boolean;
+  /** OPES operator (administrator of the platform workspace): sees the operator console. */
+  platformOperator?: boolean;
+  /** Read-only support session opened by an OPES operator. */
+  supportSession?: boolean;
 }
 
 interface AuthState {

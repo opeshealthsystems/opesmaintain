@@ -371,3 +371,7 @@ a.stat:hover { background: var(--surface-2); text-decoration: none; }
 .asset-class-box .hint { display: inline-flex; gap: 6px; align-items: center; }
 
 .setup-banner { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+
+/* OPES read-only support session */
+.support-banner { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 20px; background: var(--warn-soft); color: var(--warn); border-bottom: 1px solid var(--border); font-size: 14px; }
+.support-banner span { flex: 1; min-width: 200px; color: var(--text); }

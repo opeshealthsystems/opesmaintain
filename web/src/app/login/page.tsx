@@ -41,7 +41,7 @@ function LoginForm() {
       if (u.mfaEnrollmentRequired) { router.replace("/settings?mfa=1"); return; }
       const next = sp.get("next");
       if (next && next.startsWith("/") && !next.startsWith("//")) { router.replace(next); return; }
-      router.replace(u.role === "CUSTOMER" ? "/portal" : u.role === "TECHNICIAN" ? "/technician" : await landingFor(u.role, "/dashboard"));
+      router.replace(u.role === "CUSTOMER" ? "/portal" : u.role === "TECHNICIAN" ? "/technician" : await landingFor(u.role, "/dashboard", u.platformOperator));
     } catch (err) {
       const e2 = err as { code?: string; message: string };
       if (e2.code === "MFA_REQUIRED") { setNeedCode(true); setError(null); }

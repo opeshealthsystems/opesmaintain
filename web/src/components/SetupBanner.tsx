@@ -30,7 +30,8 @@ export function SetupBanner() {
 }
 
 /** After sign-in: where an administrator or manager should land (the wizard while set-up is unfinished). */
-export async function landingFor(role: string, fallback: string): Promise<string> {
+export async function landingFor(role: string, fallback: string, platformOperator = false): Promise<string> {
+  if (platformOperator) return "/platform";
   if (role !== "ADMIN" && role !== "MANAGER") return fallback;
   try {
     const s = await api<{ completed: boolean }>("/onboarding");

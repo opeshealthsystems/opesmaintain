@@ -1,0 +1,34 @@
+/* OPES operator console — uses the application's design tokens. */
+.pc { min-height: 100vh; background: var(--bg); color: var(--text); }
+.pc-wrap { width: 100%; max-width: 1280px; margin: 0 auto; padding: 0 20px; }
+.pc-head { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
+.pc-head-row { min-height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-top: 8px; padding-bottom: 8px; }
+.pc-tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+.pc-tabs button { display: inline-flex; gap: 6px; align-items: center; border: 0; background: transparent; color: var(--text-2); font: inherit; font-size: 14.5px; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
+.pc-tabs button:hover { background: var(--surface-2); color: var(--text); }
+.pc-tabs button[aria-current="page"] { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.pc-main { padding-top: 24px; padding-bottom: 64px; display: flex; flex-direction: column; gap: 16px; }
+.pc-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+.pc-tile { display: flex; flex-direction: column; gap: 4px; padding: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); text-align: left; font: inherit; color: var(--text); }
+.pc-tile svg { color: var(--accent); }
+.pc-tile b { font-size: 28px; }
+.pc-tile span { color: var(--text-3); font-size: 14px; }
+.pc-tile-link { cursor: pointer; }
+.pc-tile-link:hover { border-color: var(--accent); }
+.pc-toolbar { display: flex; gap: 10px; flex-wrap: wrap; }
+.pc-toolbar .input { flex: 1 1 280px; max-width: 460px; }
+.pc-toolbar .select { width: auto; }
+.table-wrap { overflow-x: auto; }
+.table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.table tr.clickable { cursor: pointer; }
+.table tr.clickable:hover td { background: var(--surface-2); }
+.link-btn { border: 0; background: none; padding: 0; font: inherit; font-weight: 600; color: var(--accent); cursor: pointer; text-align: left; }
+.pc-panel { width: min(860px, calc(100vw - 32px)); max-height: calc(100vh - 48px); overflow: auto; }
+.pc-facts { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.pc-facts > div { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; }
+.pc-facts span { font-size: 13px; color: var(--text-3); }
+.pc-admins { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 4px; font-size: 14.5px; }
+.pc-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.pc-actions h3 { margin: 0 0 8px; font-size: 13.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--text-3); }
+.pc-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+@media (max-width: 640px) { .pc-wrap { padding: 0 14px; } }
