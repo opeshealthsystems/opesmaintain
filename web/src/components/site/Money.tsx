@@ -1,6 +1,6 @@
 "use client";
 import { createContext, useContext, useEffect, useState } from "react";
-import { CURRENCIES, FALLBACK_RATES, detectCurrency, formatMoney, type Currency } from "@/lib/site/pricing";
+import { CURRENCIES, FALLBACK_RATES, detectCurrency, formatLocal, formatMoney, localPrice, type Currency } from "@/lib/site/pricing";
 
 type Lang = "en" | "fr";
 const KEY = "opes.currency";
@@ -23,6 +23,16 @@ export function MoneyProvider({ children }: { children: React.ReactNode }) {
     try { window.localStorage.setItem(KEY, c); } catch { /* blocked */ }
   };
   return <Ctx.Provider value={{ currency, rates, setCurrency }}>{children}</Ctx.Provider>;
+}
+
+/** Prices in the visitor's currency: `unit(usd)` gives the quotable local list price, `fmt(local)` formats a local amount. */
+export function useMoney(lang: Lang) {
+  const { currency, rates } = useContext(Ctx);
+  return {
+    currency,
+    unit: (usd: number) => localPrice(usd, currency, rates),
+    fmt: (local: number) => formatLocal(local, currency, lang),
+  };
 }
 
 export function Price({ usd, lang, to }: { usd: number; lang: Lang; to?: number }) {

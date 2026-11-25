@@ -1,7 +1,8 @@
 import { CURRENCIES, FALLBACK_RATES } from "@/lib/site/pricing";
 
-// Daily exchange rates (units per 1 USD) for indicative local prices. Cached for 24 h; falls back to built-in rates.
-export const revalidate = 86400;
+// Daily exchange rates (units per 1 USD) for indicative local prices. Fetched at request time (never frozen at build),
+// cached for 24 h by the data cache; falls back to built-in rates if the provider is unreachable.
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   let rates: Record<string, number> = { ...FALLBACK_RATES };

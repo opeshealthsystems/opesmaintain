@@ -18,7 +18,7 @@ export default function OgImage() {
           <div style={{ fontSize: 32, color: "#a9b8c9" }}>Assets · Work orders · Preventive maintenance · Offline mobile app · EN / FR</div>
         </div>
         <div style={{ display: "flex", gap: 14, fontSize: 26, color: "#a9b8c9" }}>
-          <span style={{ color: "#e9a23b" }}>■</span> opesmaintain.com · Douala, Cameroon
+          <div style={{ width: 18, height: 18, background: "#e9a23b", borderRadius: 3, marginTop: 6 }} /> opesmaintain.com · Opesware Technologies · Douala, Cameroon
         </div>
       </div>
     ),

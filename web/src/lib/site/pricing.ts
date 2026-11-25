@@ -48,9 +48,9 @@ export const CURRENCIES: { code: Currency; symbol: string; en: string; fr: strin
   { code: "CAD", symbol: "CA$", en: "Canadian dollar", fr: "Dollar canadien" },
 ];
 
-/** Units of each currency per 1 USD. Fallback only; the site refreshes these daily from /rates.json. */
+/** Units of each currency per 1 USD (market rates of 25 Nov 2026). Fallback only; /rates.json serves live daily rates. */
 export const FALLBACK_RATES: Record<Currency, number> = {
-  USD: 1, XAF: 565, XOF: 565, NGN: 1530, GHS: 10.5, KES: 129, RWF: 1430, CDF: 2850, ZAR: 17.8, EUR: 0.861, GBP: 0.74, CAD: 1.37,
+  USD: 1, XAF: 598.5, XOF: 598.5, NGN: 1366.8, GHS: 11.9, KES: 130, RWF: 1481.8, CDF: 2299.6, ZAR: 17.5, EUR: 0.9124, GBP: 0.7633, CAD: 1.4291,
 };
 
 const TZ_CURRENCY: Record<string, Currency> = {
@@ -96,10 +96,19 @@ export function niceAmount(value: number, currency: Currency): number {
   return Math.round(value / step) * step;
 }
 
-export function formatMoney(usd: number, currency: Currency, rates: Record<string, number>, lang: "en" | "fr"): string {
+/** Formats an amount already expressed in `currency` (no conversion, no rounding beyond whole units). */
+export function formatLocal(amount: number, currency: Currency, lang: "en" | "fr"): string {
   const c = CURRENCIES.find((x) => x.code === currency) ?? CURRENCIES[0];
-  const rate = rates[currency] ?? FALLBACK_RATES[currency] ?? 1;
-  const amount = niceAmount(usd * rate, currency);
-  const n = new Intl.NumberFormat(lang === "fr" ? "fr-FR" : "en-US", { maximumFractionDigits: 0 }).format(amount).replace(/ | /g, " ");
+  const n = new Intl.NumberFormat(lang === "fr" ? "fr-FR" : "en-US", { maximumFractionDigits: 0 }).format(Math.round(amount)).replace(/ | /g, " ");
   return c.after ? `${n} ${c.symbol}` : `${c.symbol}${n}`;
+}
+
+/** Converts a USD list price into the visitor's currency as a clean, quotable figure. */
+export function localPrice(usd: number, currency: Currency, rates: Record<string, number>): number {
+  const rate = rates[currency] ?? FALLBACK_RATES[currency] ?? 1;
+  return niceAmount(usd * rate, currency);
+}
+
+export function formatMoney(usd: number, currency: Currency, rates: Record<string, number>, lang: "en" | "fr"): string {
+  return formatLocal(localPrice(usd, currency, rates), currency, lang);
 }
